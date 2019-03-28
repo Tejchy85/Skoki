@@ -105,3 +105,4 @@ venv.bak/
 auth.py
 auth.R
 Thumbs.db
+.idea
