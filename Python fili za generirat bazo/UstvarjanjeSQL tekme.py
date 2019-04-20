@@ -38,7 +38,7 @@ for mes in listMesecevZS:
     stran = html.fromstring(requests.get(link).content)
 '''
 
-link = "https://www.fis-ski.com/DB/ski-jumping/calendar-results.html?eventselection=&place=&sectorcode=JP&seasoncode=2016&categorycode=&disciplinecode=&gendercode=M&racedate=&racecodex=&nationcode=&seasonmonth=12-2015&saveselection=-1&seasonselection="
+link = "https://www.fis-ski.com/DB/ski-jumping/calendar-results.html?eventselection=&place=&sectorcode=JP&seasoncode=2018&categorycode=&disciplinecode=&gendercode=M&racedate=&racecodex=&nationcode=&seasonmonth=07-2017&saveselection=-1&seasonselection="
 stran = html.fromstring(requests.get(link).content)
 
 kraj1 = [text(r).replace('*', '').strip() for r in  stran.xpath("//div[@class='container pr-xs-0']")[0]
@@ -102,12 +102,13 @@ for str in eventLink:
 #print(len(datum))
 #print(len(id))
 
-#raw_data = {'ID' : id, 'KRAJ' : kraj, 'DATUM' : datum, 'DRZAVA' : drzava}
+raw_data = {'ID' : id, 'KRAJ' : kraj, 'DATUM' : datum, 'DRZAVA' : drzava}
 
-#df = pd.DataFrame(raw_data, columns = ['ID', 'KRAJ', 'DATUM', 'DRZAVA'])
+df = pd.DataFrame(raw_data, columns = ['ID', 'KRAJ', 'DATUM', 'DRZAVA'])
 
-#df.to_sql('TEKMA', sqlite3.Connection('Skoki.db'))
+df.to_sql('TEKMA', sqlite3.Connection('Skoki.db'))
 
+idR = []
 rankiR = []
 startnaStevilkaR = []
 fisCodeR = []
@@ -120,6 +121,15 @@ mesto_v_ekipiR = []
 for i in id:
     link = "https://www.fis-ski.com/DB/general/results.html?sectorcode=JP&raceid=" + i
     stran = html.fromstring(requests.get(link).content)
+
+    ranki = []
+    startnaStevilka = []
+    fisCode = []
+    drzava = []
+    skoki = []
+    rezultati = []
+    serija = []
+    mesto_v_ekipi = []
 
     if 'Team' in [text(r).replace('*', '').strip() for r in stran.xpath("//div[@class='event-header__kind']")][0]:
         ranki = [text(r).replace('*', '').strip() for r in
@@ -166,51 +176,71 @@ for i in id:
         fisCode = fisCodeReal
 
     else:
-        ranki = [text(r).replace('*', '').strip() for r in
-                 stran.xpath("//div[@class='g-lg-1 g-md-1 g-sm-1 g-xs-2 justify-right pr-1 gray bold']")]
-        startnaStevilka = [text(r).replace('*', '').strip() for r in
-                           stran.xpath("//div[@class='g-lg-1 g-md-1 g-sm-1 justify-right hidden-xs pr-1 gray']")]
-        fisCode = [text(r).replace('*', '').strip() for r in
-                   stran.xpath("//div[@class='g-lg-2 g-md-2 g-sm-2 hidden-xs justify-right gray pr-1']")]
-        skokiInRezultati = [text(r).replace('*', '').strip() for r in
-                            stran.xpath("//div[@class='g-lg-2 g-md-2 g-sm-2 justify-right bold hidden-xs']")]
-        drzava = [text(r).replace('*', '').strip() for r in stran.xpath("//span[@class='country__name-short']")]
+        if len([text(r).replace('*', '').strip() for r in
+                stran.xpath("//div[@class='g-lg-2 g-md-2 g-sm-2 justify-right hidden-xs pale']")]) > 2:
 
-        skoki = skokiInRezultati[0:][::2]
-        rezultati = skokiInRezultati[1:][::2]
+            ranki = [text(r).replace('*', '').strip() for r in
+                     stran.xpath("//div[@class='g-lg-1 g-md-1 g-sm-1 g-xs-2 justify-right pr-1 gray bold']")]
+            startnaStevilka = [text(r).replace('*', '').strip() for r in
+                               stran.xpath("//div[@class='g-lg-1 g-md-1 g-sm-1 justify-right hidden-xs pr-1 gray']")]
+            fisCode = [text(r).replace('*', '').strip() for r in
+                       stran.xpath("//div[@class='g-lg-2 g-md-2 g-sm-2 hidden-xs justify-right gray pr-1']")]
+            skokiInRezultati = [text(r).replace('*', '').strip() for r in
+                                stran.xpath("//div[@class='g-lg-2 g-md-2 g-sm-2 justify-right bold hidden-xs']")]
+            drzava = [text(r).replace('*', '').strip() for r in stran.xpath("//span[@class='country__name-short']")]
 
-        ranki = list(itertools.chain(*zip(ranki, ranki)))
-        startnaStevilka = list(itertools.chain(*zip(startnaStevilka, startnaStevilka)))
-        fisCode = list(itertools.chain(*zip(fisCode, fisCode)))
+            skoki = skokiInRezultati[0:][::2]
+            rezultati = skokiInRezultati[1:][::2]
 
-        serija = list(itertools.chain(*zip(['1'] * (len(ranki) // 2), ['2'] * (len(ranki) // 2))))
-        mesto_v_ekipi = [''] * len(serija)
+            ranki = list(itertools.chain(*zip(ranki, ranki)))
+            startnaStevilka = list(itertools.chain(*zip(startnaStevilka, startnaStevilka)))
+            fisCode = list(itertools.chain(*zip(fisCode, fisCode)))
 
-        drzava = drzava[2:]
+            serija = list(itertools.chain(*zip(['1'] * (len(ranki) // 2), ['2'] * (len(ranki) // 2))))
+            mesto_v_ekipi = [''] * len(serija)
 
-    print(len(ranki))
-    print(len(startnaStevilka))
-    print(len(fisCode))
-    print(len(drzava))
-    print(len(skoki))
-    print(len(rezultati))
-    print(len(serija))
-    print(len(mesto_v_ekipi))
+            drzava = drzava[2:]
 
-    rankiR += ranki
-    startnaStevilkaR += startnaStevilka
-    fisCodeR += fisCode
-    drzavaR += drzava
-    skokiR += skoki
-    tockeR += rezultati
-    serijaR += serija
-    mesto_v_ekipiR += mesto_v_ekipi
+            drzava = list(itertools.chain(*zip(drzava, drzava)))
+
+        else:
+
+            ranki = [text(r).replace('*', '').strip() for r in
+                     stran.xpath("//div[@class='g-lg-1 g-md-1 g-sm-1 g-xs-2 justify-right pr-1 gray bold']")]
+            startnaStevilka = [text(r).replace('*', '').strip() for r in
+                               stran.xpath("//div[@class='g-lg-1 g-md-1 g-sm-1 justify-right hidden-xs pr-1 gray']")]
+            fisCode = [text(r).replace('*', '').strip() for r in
+                       stran.xpath("//div[@class='g-lg-2 g-md-2 g-sm-2 hidden-xs justify-right gray pr-1']")]
+            skokiInRezultati = [text(r).replace('*', '').strip() for r in
+                                stran.xpath("//div[@class='g-lg-2 g-md-2 g-sm-2 justify-right bold hidden-xs']")]
+            drzava = [text(r).replace('*', '').strip() for r in stran.xpath("//span[@class='country__name-short']")]
+
+            skoki = skokiInRezultati[0:][::2]
+            rezultati = skokiInRezultati[1:][::2]
+
+            serija = ['1'] * len(ranki)
+            mesto_v_ekipi = [''] * len(serija)
+
+            drzava = drzava[2:]
+
+    if (len(skoki) != 0) or (len(rezultati) != 0):
+        print([len(ranki), len(startnaStevilka), len(fisCode), len(drzava), len(skoki), len(rezultati), len(serija), len(mesto_v_ekipi)])
+
+        idR += [i]*len(ranki)
+        rankiR += ranki
+        startnaStevilkaR += startnaStevilka
+        fisCodeR += fisCode
+        drzavaR += drzava
+        skokiR += skoki
+        tockeR += rezultati
+        serijaR += serija
+        mesto_v_ekipiR += mesto_v_ekipi
 
 
-raw_dataR = {'RANKI' : rankiR, 'STARTNA STEVILKA' : startnaStevilkaR, 'FIS CODE' : fisCodeR, 'DRZAVA' : drzavaR, 'SKOKI' : skokiR,
+raw_dataR = {'ID' : idR, 'RANKI' : rankiR, 'STARTNA STEVILKA' : startnaStevilkaR, 'FIS CODE' : fisCodeR, 'DRZAVA' : drzavaR, 'SKOKI' : skokiR,
              'TOCKE' : tockeR, 'SERIJA' : serijaR, 'MESTO V EKIPI' : mesto_v_ekipiR}
 
-dfR = pd.DataFrame(raw_dataR, columns = ['RANKI', 'STARTNA STEVILKA', 'FIS CODE', 'DRZAVA', 'SKOKI',
+dfR = pd.DataFrame(raw_dataR, columns = ['ID', 'RANKI', 'STARTNA STEVILKA', 'FIS CODE', 'DRZAVA', 'SKOKI',
              'TOCKE', 'SERIJA', 'MESTO V EKIPI'])
 
 dfR.to_sql('REZULTAT', sqlite3.Connection('Skoki.db'))
