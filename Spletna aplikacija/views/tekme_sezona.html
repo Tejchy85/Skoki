@@ -6,13 +6,15 @@
      <th>Kraj</th>
      <th>Datum</th>
      <th>Država</th> 
+     <th>Tip tekme</th> 
   </tr>
-  %for (id,kraj,datum,drzava) in tekma:
+  %for (id,kraj,datum,drzava,tip_tekme) in tekma:
     <tr>
        <td>{{id}}</td>
        <td>{{kraj}}</td>
        <td>{{datum}}</td>
        <td>{{drzava}}</td>
+       <td>{{tip_tekme}}</td>
     </tr>
   %end
   </table>
