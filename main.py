@@ -21,12 +21,13 @@ def static(filename):
 @get('/')
 def index():
     cur.execute("SELECT * FROM tekmovalec ORDER BY priimek, ime")
-    return template('tekmovalci.html', osebe=cur)
+    return template('tekmovalci.html', tekmovalci=cur)
 
 @get('/tekma/:x/')
 def tekma(x):
-    cur.execute("SELECT * FROM tekma AS s WHERE DATE(s.datum) BETWEEN '%s-11%' AND '%s-03%'", [int(x-1),int(x)])
-    return template('tekme_sezona.html', x=x, tekme_sezona=cur)
+    stavek = "SELECT * FROM tekma AS d WHERE DATE(d.datum) BETWEEN '{}-11%' AND '{}-03%'".format(int(x) - 1, int(x))
+    cur.execute(stavek)
+    return template('tekme_sezona.html', x=x, tekme=cur)
 
 @get('/dodaj_tekmovalca')
 def dodaj_tekmovalca():
