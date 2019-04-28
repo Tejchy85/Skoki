@@ -7,6 +7,9 @@ from bottle import *
 # uvozimo ustrezne podatke za povezavo
 import auth_public as auth
 
+#uvozimo paket, za datume
+import datetime
+
 # uvozimo psycopg2
 import psycopg2, psycopg2.extensions, psycopg2.extras
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE) # se znebimo problemov s šumniki
@@ -25,8 +28,8 @@ def index():
 
 @get('/tekma/:x/')
 def tekma(x):
-    stavek = "SELECT * FROM tekma AS d WHERE DATE(d.datum) BETWEEN '{}-11%' AND '{}-03%'".format(int(x) - 1, int(x))
-    cur.execute(stavek)
+    cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s",
+            [datetime.date(int(x)-1, 11, 1), datetime.date(int(x), 3, 31)])
     return template('tekme_sezona.html', x=x, tekme=cur)
 
 @get('/dodaj_tekmovalca')
