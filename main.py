@@ -26,6 +26,10 @@ def index():
     cur.execute("SELECT * FROM tekmovalec ORDER BY priimek, ime")
     return template('tekmovalci.html', tekmovalci=cur)
 
+@get('/sezone')
+def sezone():
+    return template('sezone.html')
+
 @get('/tekma/:x/')
 def tekma(x):
     cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s",
