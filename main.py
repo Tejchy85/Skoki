@@ -26,6 +26,14 @@ def index():
     cur.execute("SELECT * FROM tekmovalec ORDER BY priimek, ime")
     return template('tekmovalci.html', tekmovalci=cur)
 
+@get('/Login')
+def login():
+    return template('Login.html')
+
+@get('/Video')
+def video():
+    return template('Video.html')
+
 @get('/sezone')
 def sezone():
     return template('sezone.html')

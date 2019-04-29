@@ -1,10 +1,26 @@
 <html>
 <head>
   <title>{{naslov}}</title>
-  <link href="/static/style.css" rel="stylesheet">
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script src="/static/js/bootstrap.js"></script>
 </head>
 <body>
-  <h2>{{naslov}}</h2>
+
+<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
+      <h5 class="my-0 mr-md-auto font-weight-normal">Skoki</h5>
+      <nav class="my-2 my-md-0 mr-md-3">
+        <a class="p-2 text-dark" href="#">Tekme</a>
+        <a class="p-2 text-dark" href="#">Tekmovalci</a>
+        <a class="p-2 text-dark" href="#">Zanimivosti</a>
+      </nav>
+      <a class="btn btn-outline-primary" href="/Login">Sign up</a>
+    </div>
+
+  <h2 align="center">{{naslov}}</h2>
 
 {{!base}}
 
