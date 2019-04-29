@@ -23,8 +23,7 @@ def static(filename):
 
 @get('/')
 def index():
-    cur.execute("SELECT * FROM tekmovalec ORDER BY priimek, ime")
-    return template('tekmovalci.html', tekmovalci=cur)
+    return template('zacetna_stran.html')
 
 @get('/Login')
 def login():
@@ -33,6 +32,11 @@ def login():
 @get('/Video')
 def video():
     return template('Video.html')
+
+@get('/tekmovalci')
+def tekmovalci():
+    cur.execute("SELECT * FROM tekmovalec ORDER BY priimek, ime")
+    return template('tekmovalci.html', tekmovalci=cur)
 
 @get('/sezone')
 def sezone():
