@@ -29,6 +29,10 @@ def index():
 def login():
     return template('Login.html')
 
+@get('/Register')
+def register():
+    return template('Register.html')
+
 @get('/Video')
 def video():
     return template('Video.html')
