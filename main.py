@@ -46,8 +46,8 @@ def tekmovalci():
 def sezone():
     return template('sezone.html')
 
-@get('/tekma/:x/')
-def tekma(x):
+@get('/tekme/:x/')
+def tekme(x):
     cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s",
             [datetime.date(int(x)-1, 11, 1), datetime.date(int(x), 3, 31)])
     return template('tekme_sezona.html', x=x, tekme=cur)

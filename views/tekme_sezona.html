@@ -1,6 +1,11 @@
 %rebase('osnova.html', naslov='Tekme v sezoni {}'.format(x))
 
-  <table cellpadding="0" cellspacing="0" border="1">
+<p>
+	<a href="#" class="btn btn-dark btn-md active" role="button" aria-pressed="true">Dodaj tekmo</a>
+</p>
+
+ <table class="table table-bordered table-hover">
+ <thead class="thead-light">
   <tr>
      <th>ID</th>
      <th>Kraj</th>
@@ -8,6 +13,8 @@
      <th>Država</th> 
      <th>Tip tekme</th> 
   </tr>
+ </thead>
+     <tbody>
   %for (id,kraj,datum,drzava,tip_tekme) in tekme:
     <tr>
        <td>{{id}}</td>
@@ -17,8 +24,5 @@
        <td>{{tip_tekme}}</td>
     </tr>
   %end
+     </tbody>
   </table>
-
-  <p>
-    <a href="/">Tekmovalci</a>
-  </p>
