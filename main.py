@@ -14,8 +14,24 @@ import datetime
 import psycopg2, psycopg2.extensions, psycopg2.extras
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE) # se znebimo problemov s šumniki
 
+import hashlib # računanje MD5 kriptografski hash za gesla
+
 # odkomentiraj, če želiš sporočila o napakah
 debug(True)
+
+secret = "to skrivnost je zelo tezko uganiti 1094107c907cw982982c42"
+
+######################################################################
+# Pomožne funkcije
+
+def password_md5(s):
+    """Vrni MD5 hash danega UTF-8 niza. Gesla vedno spravimo v bazo
+       kodirana s to funkcijo."""
+    h = hashlib.md5()
+    h.update(s.encode('utf-8'))
+    return h.hexdigest()
+
+######################################################################
 
 @get('/static/<filename:path>')
 def static(filename):
@@ -27,11 +43,63 @@ def index():
 
 @get('/Login')
 def login():
-    return template('Login.html')
+    return template('Login.html', napaka=None)
+
+@post('/Login')
+def login_post():
+    print('login in')
+    """Obdelaj izpolnjeno formo za prijavo"""
+    # Uporabniško ime, ki ga je uporabnik vpisal v formo
+    username = request.forms.username
+    # Izračunamo MD5 has gesla, ki ga bomo spravili
+    password = password_md5(request.forms.password)
+    # Preverimo, ali se je uporabnik pravilno prijavil
+    print(username)
+    print(password)
+    cur.execute("SELECT * FROM uporabnik WHERE username=%s AND password=%s", [username, password])
+    if cur.fetchone() is None:
+        print('ne obstaja')
+        # Username in geslo se ne ujemata
+        return template("login.html",
+                               napaka="Uporabnik ne obstaja",
+                               username=username)
+    else:
+        # Vse je v redu, nastavimo cookie in preusmerimo na glavno stran
+        response.set_cookie('username', username, path='/', secret=secret)
+        redirect("/")
 
 @get('/Register')
 def register():
     return template('Register.html')
+
+@post("/Register")
+def register_post():
+    print('trying to register')
+    """Registriraj novega uporabnika."""
+    username = request.forms.username
+    ime = request.forms.ime
+    password1 = request.forms.password1
+    password2 = request.forms.password2
+    # Ali uporabnik že obstaja?
+    cur.execute("SELECT 1 FROM uporabnik WHERE username=?", [username])
+    if cur.fetchone():
+        # Uporabnik že obstaja
+        return template("Register.html",
+                               username=username,
+                               napaka='To uporabniško ime je že zavzeto')
+    elif not password1 == password2:
+        # Geslo se ne ujemata
+        return template("Register.html",
+                               username=username,
+                               napaka='Gesli se ne ujemata')
+    else:
+        # Vse je v redu, vstavi novega uporabnika v bazo
+        password = password_md5(password1)
+        cur.execute("INSERT INTO uporabnik (username, password) VALUES (?, ?)",
+                  (username, password))
+        # Daj uporabniku cookie
+        response.set_cookie('username', username, path='/', secret=secret)
+        redirect("/")
 
 @get('/Video')
 def video():
