@@ -20,6 +20,7 @@ import hashlib # računanje MD5 kriptografski hash za gesla
 debug(True)
 
 secret = "to skrivnost je zelo tezko uganiti 1094107c907cw982982c42"
+adminGeslo = "1111"
 
 ######################################################################
 # Pomožne funkcije
@@ -60,7 +61,7 @@ def login_post():
     if cur.fetchone() is None:
         print('ne obstaja')
         # Username in geslo se ne ujemata
-        return template("login.html",
+        return template("Login.html",
                                napaka="Uporabnik ne obstaja",
                                username=username)
     else:
@@ -70,36 +71,56 @@ def login_post():
 
 @get('/Register')
 def register():
-    return template('Register.html')
+    return template('Register.html', username=None, napaka=None)
 
 @post("/Register")
 def register_post():
     print('trying to register')
     """Registriraj novega uporabnika."""
     username = request.forms.username
-    ime = request.forms.ime
     password1 = request.forms.password1
     password2 = request.forms.password2
+    adminPassword = request.forms.adminPassword
     # Ali uporabnik že obstaja?
-    cur.execute("SELECT 1 FROM uporabnik WHERE username=?", [username])
+    cur.execute("SELECT * FROM uporabnik WHERE username=%s", [username])
     if cur.fetchone():
+        print('ime že zasedeno')
         # Uporabnik že obstaja
         return template("Register.html",
                                username=username,
                                napaka='To uporabniško ime je že zavzeto')
     elif not password1 == password2:
+        print('gesli se ne ujemata')
         # Geslo se ne ujemata
         return template("Register.html",
                                username=username,
                                napaka='Gesli se ne ujemata')
     else:
         # Vse je v redu, vstavi novega uporabnika v bazo
-        password = password_md5(password1)
-        cur.execute("INSERT INTO uporabnik (username, password) VALUES (?, ?)",
-                  (username, password))
-        # Daj uporabniku cookie
-        response.set_cookie('username', username, path='/', secret=secret)
-        redirect("/")
+        print('ustvarjamo novega uporabnika')
+
+        if adminPassword == adminGeslo:
+            print('dodaj admina')
+
+            password = password_md5(password1)
+            cur.execute("INSERT INTO uporabnik (username, password, isadmin) VALUES (%s, %s, %s)",
+                        (username, password, True))
+            # Daj uporabniku cookie
+            response.set_cookie('username', username, path='/', secret=secret)
+            redirect("/")
+        elif adminPassword == "":
+            print('ustvarimo navadnega uporabnika')
+
+            password = password_md5(password1)
+            cur.execute("INSERT INTO uporabnik (username, password, isadmin) VALUES (%s, %s, %s)",
+                        (username, password, False))
+            # Daj uporabniku cookie
+            response.set_cookie('username', username, path='/', secret=secret)
+            redirect("/")
+        else:
+            return template("Register.html",
+                               username=username,
+                               napaka='Admin geslo ni pravilno')
 
 @get('/Video')
 def video():
