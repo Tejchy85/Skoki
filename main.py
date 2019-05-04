@@ -81,6 +81,7 @@ def register_post():
     password1 = request.forms.password1
     password2 = request.forms.password2
     adminPassword = request.forms.adminPassword
+    adminCheck = request.forms.adminCheckbox
     # Ali uporabnik že obstaja?
     cur.execute("SELECT * FROM uporabnik WHERE username=%s", [username])
     if cur.fetchone():
@@ -99,16 +100,21 @@ def register_post():
         # Vse je v redu, vstavi novega uporabnika v bazo
         print('ustvarjamo novega uporabnika')
 
-        if adminPassword == adminGeslo:
-            print('dodaj admina')
+        if adminCheck == "kot admin":
+            if adminPassword == adminGeslo:
+                print('dodaj admina')
 
-            password = password_md5(password1)
-            cur.execute("INSERT INTO uporabnik (username, password, isadmin) VALUES (%s, %s, %s)",
-                        (username, password, True))
-            # Daj uporabniku cookie
-            response.set_cookie('username', username, path='/', secret=secret)
-            redirect("/")
-        elif adminPassword == "":
+                password = password_md5(password1)
+                cur.execute("INSERT INTO uporabnik (username, password, isadmin) VALUES (%s, %s, %s)",
+                            (username, password, True))
+                # Daj uporabniku cookie
+                response.set_cookie('username', username, path='/', secret=secret)
+                redirect("/")
+            else:
+                return template("Register.html",
+                                username=username,
+                                napaka='Admin geslo ni pravilno')
+        else:
             print('ustvarimo navadnega uporabnika')
 
             password = password_md5(password1)
@@ -117,10 +123,7 @@ def register_post():
             # Daj uporabniku cookie
             response.set_cookie('username', username, path='/', secret=secret)
             redirect("/")
-        else:
-            return template("Register.html",
-                               username=username,
-                               napaka='Admin geslo ni pravilno')
+
 
 @get('/Video')
 def video():
