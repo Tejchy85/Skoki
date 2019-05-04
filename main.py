@@ -32,6 +32,25 @@ def password_md5(s):
     h.update(s.encode('utf-8'))
     return h.hexdigest()
 
+def get_user():
+    """Poglej cookie in ugotovi, kdo je prijavljeni uporabnik,
+       vrni njegov username in ime. Če ni prijavljen, presumeri
+       na stran za prijavo ali vrni None (advisno od auto_login).
+    """
+    # Dobimo username iz piškotka
+    username = request.get_cookie('username', secret=secret)
+    print(username)
+    # Preverimo, ali ta uporabnik obstaja
+    if username is not None:
+        cur.execute("SELECT username FROM uporabnik WHERE username=%s", [username])
+        r = cur.fetchone()
+        if r is not None:
+            # uporabnik obstaja, vrnemo njegove podatke
+            return username
+    # Če pridemo do sem, uporabnik ni prijavljen, naredimo redirect
+    else:
+        return None
+
 ######################################################################
 
 @get('/static/<filename:path>')
@@ -40,7 +59,7 @@ def static(filename):
 
 @get('/')
 def index():
-    return template('zacetna_stran.html')
+    return template('zacetna_stran.html', username = get_user())
 
 @get('/Login')
 def login():
@@ -68,6 +87,12 @@ def login_post():
         # Vse je v redu, nastavimo cookie in preusmerimo na glavno stran
         response.set_cookie('username', username, path='/', secret=secret)
         redirect("/")
+
+@get("/Logout")
+def logout():
+    """Pobriši cookie in preusmeri na login."""
+    response.delete_cookie('username')
+    redirect('/')
 
 @get('/Register')
 def register():
