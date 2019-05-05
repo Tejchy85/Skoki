@@ -67,18 +67,14 @@ def login():
 
 @post('/Login')
 def login_post():
-    print('login in')
     """Obdelaj izpolnjeno formo za prijavo"""
     # Uporabniško ime, ki ga je uporabnik vpisal v formo
     username = request.forms.username
     # Izračunamo MD5 has gesla, ki ga bomo spravili
     password = password_md5(request.forms.password)
     # Preverimo, ali se je uporabnik pravilno prijavil
-    print(username)
-    print(password)
     cur.execute("SELECT * FROM uporabnik WHERE username=%s AND password=%s", [username, password])
     if cur.fetchone() is None:
-        print('ne obstaja')
         # Username in geslo se ne ujemata
         return template("Login.html",
                                napaka="Uporabnik ne obstaja",
@@ -156,35 +152,42 @@ def video():
 
 @get('/tekmovalci')
 def tekmovalci():
+    username = get_user()
     cur.execute("SELECT * FROM tekmovalec ORDER BY priimek, ime")
-    return template('tekmovalci.html', tekmovalci=cur, username = get_user())
+    return template('tekmovalci.html', tekmovalci=cur, username = username)
 
 @get('/sezone')
 def sezone():
-    return template('sezone.html', username = get_user())
+    username = get_user()
+    return template('sezone.html', username = username)
 
 @get('/tekme/:x/')
 def tekme(x):
+    username = get_user()
     cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY datum",
             [datetime.date(int(x)-1, 11, 1), datetime.date(int(x), 3, 31)])
-    return template('tekme_sezona.html', x=x, tekme=cur, username = get_user())
+    return template('tekme_sezona.html', x=x, tekme=cur, username = username)
 
 @get('/tekma/:x/')
 def tekma(x):
+    username = get_user()
     cur.execute("SELECT r.ranki, r.startna_stevilka, r.fis_code, t.ime, t.priimek, r.drzava, r.skoki, r.tocke, r.serija, r.mesto_v_ekipi FROM rezultat r LEFT JOIN tekmovalec t ON r.fis_code = t.fis_code WHERE id=%s ORDER BY ranki ASC",[int(x)])
-    return template('tekma.html',x = x, tekma = cur, username = get_user())
+    return template('tekma.html',x = x, tekma = cur, username = username)
 
 @get('/zadnja_tekma')
 def zadnja_tekma():
+    username = get_user()
     cur.execute("WITH zadnja AS (SELECT id FROM tekma WHERE datum <= date('now') ORDER BY datum DESC LIMIT 1) SELECT r.ranki, r.startna_stevilka, r.fis_code, t.ime, t.priimek, r.drzava, r.skoki, r.tocke, r.serija, r.mesto_v_ekipi FROM rezultat r LEFT JOIN tekmovalec t ON r.fis_code = t.fis_code WHERE r.id IN (SELECT id FROM zadnja) ORDER BY ranki ASC")
-    return template('zadnja_tekma.html', tekma=cur, username=get_user())
+    return template('zadnja_tekma.html', tekma=cur, username = username)
 
 @get('/dodaj_tekmovalca')
 def dodaj_tekmovalca():
-    return template('dodaj_tekmovalca.html', fis_code='', ime='', priimek='', drzava='', rojstvo='', klub='', smucke='', status='', napaka=None, username = get_user())
+    username = get_user()
+    return template('dodaj_tekmovalca.html', fis_code='', ime='', priimek='', drzava='', rojstvo='', klub='', smucke='', status='', napaka=None, username = username)
 
 @post('/dodaj_tekmovalca')
 def dodaj_tekmovalca_post():
+    username = get_user()
     fis_code = request.forms.fis_code
     ime = request.forms.ime
     priimek = request.forms.priimek
@@ -199,15 +202,17 @@ def dodaj_tekmovalca_post():
         conn.commit()
     except Exception as ex:
         return template('dodaj_tekmovalca.html', fis_code=fis_code, ime=ime, priimek=priimek, drzava=drzava, rojstvo=rojstvo, klub=klub, smucke=smucke, status=status,
-                        napaka = 'Zgodila se je napaka: %s' % ex, username = get_user())
+                        napaka = 'Zgodila se je napaka: %s' % ex, username = username)
     redirect("/")
 
 @get('/dodaj_tekmo')
 def dodaj_tekmo():
-    return template('dodaj_tekmo.html', id='', kraj='', drzava='', datum='', tip_tekme='', napaka=None, username = get_user())
+    username = get_user()
+    return template('dodaj_tekmo.html', id='', kraj='', drzava='', datum='', tip_tekme='', napaka=None, username = username)
 
 @post('/dodaj_tekmo')
 def dodaj_tekmo_post():
+    username = get_user()
     id = request.forms.id
     kraj = request.forms.kraj
     drzava = request.forms.drzava
@@ -219,7 +224,7 @@ def dodaj_tekmo_post():
         conn.commit()
     except Exception as ex:
         return template('dodaj_tekmo.html', id=id, kraj=kraj, datum=datum, drzava=drzava, tip_tekme=tip_tekme,
-                        napaka = 'Zgodila se je napaka: %s' % ex, username = get_user())
+                        napaka = 'Zgodila se je napaka: %s' % ex, username = username)
     redirect("/")
 
 ######################################################################
