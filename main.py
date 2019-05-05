@@ -157,26 +157,26 @@ def video():
 @get('/tekmovalci')
 def tekmovalci():
     cur.execute("SELECT * FROM tekmovalec ORDER BY priimek, ime")
-    return template('tekmovalci.html', tekmovalci=cur)
+    return template('tekmovalci.html', tekmovalci=cur, username = get_user())
 
 @get('/sezone')
 def sezone():
-    return template('sezone.html')
+    return template('sezone.html', username = get_user())
 
 @get('/tekme/:x/')
 def tekme(x):
     cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s",
             [datetime.date(int(x)-1, 11, 1), datetime.date(int(x), 3, 31)])
-    return template('tekme_sezona.html', x=x, tekme=cur)
+    return template('tekme_sezona.html', x=x, tekme=cur, username = get_user())
 
 @get('/tekma/:x')
 def tekma(x):
     cur.execute("SELECT id,ranki,startna_stevilka,fis_code,drzava,skoki,tocke,serija,mesto_v_ekipi FROM rezultat WHERE id=%s ORDER BY ranki",[int(x)])
-    return template('tekma.html',x = x, tekma = cur)
+    return template('tekma.html',x = x, tekma = cur, username = get_user())
 
 @get('/dodaj_tekmovalca')
 def dodaj_tekmovalca():
-    return template('dodaj_tekmovalca.html', fis_code='', ime='', priimek='', drzava='', rojstvo='', klub='', smucke='', status='', napaka=None)
+    return template('dodaj_tekmovalca.html', fis_code='', ime='', priimek='', drzava='', rojstvo='', klub='', smucke='', status='', napaka=None, username = get_user())
 
 @post('/dodaj_tekmovalca')
 def dodaj_tekmovalca_post():
@@ -194,7 +194,7 @@ def dodaj_tekmovalca_post():
         conn.commit()
     except Exception as ex:
         return template('dodaj_tekmovalca.html', fis_code=fis_code, ime=ime, priimek=priimek, drzava=drzava, rojstvo=rojstvo, klub=klub, smucke=smucke, status=status,
-                        napaka = 'Zgodila se je napaka: %s' % ex)
+                        napaka = 'Zgodila se je napaka: %s' % ex, username = get_user())
     redirect("/")
 
 ######################################################################
