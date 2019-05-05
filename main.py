@@ -169,9 +169,9 @@ def tekme(x):
             [datetime.date(int(x)-1, 11, 1), datetime.date(int(x), 3, 31)])
     return template('tekme_sezona.html', x=x, tekme=cur, username = get_user())
 
-@get('/tekma/:x')
+@get('/tekma/:x/')
 def tekma(x):
-    cur.execute("SELECT id,ranki,startna_stevilka,fis_code,drzava,skoki,tocke,serija,mesto_v_ekipi FROM rezultat WHERE id=%s ORDER BY ranki",[int(x)])
+    cur.execute("SELECT r.ranki, r.startna_stevilka, r.fis_code, t.ime, t.priimek, r.drzava, r.skoki, r.tocke, r.serija, r.mesto_v_ekipi FROM rezultat r LEFT JOIN tekmovalec t ON r.fis_code = t.fis_code WHERE id=%s ORDER BY ranki ASC",[int(x)])
     return template('tekma.html',x = x, tekma = cur, username = get_user())
 
 @get('/zadnja_tekma')
