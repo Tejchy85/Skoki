@@ -169,6 +169,11 @@ def tekme(x):
             [datetime.date(int(x)-1, 11, 1), datetime.date(int(x), 3, 31)])
     return template('tekme_sezona.html', x=x, tekme=cur)
 
+@get('/tekma/:x')
+def tekma(x):
+    cur.execute("SELECT id,ranki,startna_stevilka,fis_code,drzava,skoki,tocke,serija,mesto_v_ekipi FROM rezultat WHERE id=%s ORDER BY ranki",[int(x)])
+    return template('tekma.html',x = x, tekma = cur)
+
 @get('/dodaj_tekmovalca')
 def dodaj_tekmovalca():
     return template('dodaj_tekmovalca.html', fis_code='', ime='', priimek='', drzava='', rojstvo='', klub='', smucke='', status='', napaka=None)
