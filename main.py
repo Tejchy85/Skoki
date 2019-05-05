@@ -165,7 +165,7 @@ def sezone():
 
 @get('/tekme/:x/')
 def tekme(x):
-    cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s",
+    cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY datum",
             [datetime.date(int(x)-1, 11, 1), datetime.date(int(x), 3, 31)])
     return template('tekme_sezona.html', x=x, tekme=cur, username = get_user())
 
@@ -199,6 +199,26 @@ def dodaj_tekmovalca_post():
         conn.commit()
     except Exception as ex:
         return template('dodaj_tekmovalca.html', fis_code=fis_code, ime=ime, priimek=priimek, drzava=drzava, rojstvo=rojstvo, klub=klub, smucke=smucke, status=status,
+                        napaka = 'Zgodila se je napaka: %s' % ex, username = get_user())
+    redirect("/")
+
+@get('/dodaj_tekmo')
+def dodaj_tekmo():
+    return template('dodaj_tekmo.html', id='', kraj='', drzava='', datum='', tip_tekme='', napaka=None, username = get_user())
+
+@post('/dodaj_tekmo')
+def dodaj_tekmo_post():
+    id = request.forms.id
+    kraj = request.forms.kraj
+    drzava = request.forms.drzava
+    datum = request.forms.datum
+    tip_tekme = request.forms.tip_tekme
+    try:
+        cur.execute("INSERT INTO tekma (id, kraj, datum, drzava, tip_tekme) VALUES (%s, %s, %s, %s, %s)",
+                    (id, kraj, datum, drzava, tip_tekme))
+        conn.commit()
+    except Exception as ex:
+        return template('dodaj_tekmo.html', id=id, kraj=kraj, datum=datum, drzava=drzava, tip_tekme=tip_tekme,
                         napaka = 'Zgodila se je napaka: %s' % ex, username = get_user())
     redirect("/")
 
