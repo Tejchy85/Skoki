@@ -176,8 +176,8 @@ def tekma(x):
 
 @get('/zadnja_tekma')
 def zadnja_tekma():
-    cur.execute("WITH zadnja AS (SELECT id FROM tekma WHERE datum <= date('now') ORDER BY datum DESC LIMIT 1) SELECT * FROM rezultat WHERE rezultat.id IN (SELECT id FROM zadnja) ORDER BY ranki ASC")
-    return template('tekma.html', x=0, tekma=cur, username=get_user())
+    cur.execute("WITH zadnja AS (SELECT id FROM tekma WHERE datum <= date('now') ORDER BY datum DESC LIMIT 1) SELECT r.ranki, r.startna_stevilka, r.fis_code, t.ime, t.priimek, r.drzava, r.skoki, r.tocke, r.serija, r.mesto_v_ekipi FROM rezultat r LEFT JOIN tekmovalec t ON r.fis_code = t.fis_code WHERE r.id IN (SELECT id FROM zadnja) ORDER BY ranki ASC")
+    return template('zadnja_tekma.html', tekma=cur, username=get_user())
 
 @get('/dodaj_tekmovalca')
 def dodaj_tekmovalca():
