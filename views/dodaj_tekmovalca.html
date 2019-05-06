@@ -7,25 +7,25 @@
   <form action="/dodaj_tekmovalca" method="POST">
       <div class="form-group">
         <label>FIS code</label>
-        <input type="integer" name="fis_code" value="{{fis_code}}" class="form-control" placeholder="FIS code">
+        <input type="integer" name="fis_code" value="{{fis_code}}" class="form-control" placeholder="FIS code" required="true">
       </div>
       <div class="form-row">
         <div class="form-group col-md-6">
             <label>Ime</label>
-            <input type="text" name="ime" value="{{ime}}" class="form-control" placeholder="Ime">
+            <input type="text" name="ime" value="{{ime}}" class="form-control" placeholder="Ime" required="true">
         </div>
         <div class="form-group col-md-6">
             <label>Priimek</label>
-            <input type="text" name="priimek" value="{{priimek}}" class="form-control" placeholder="Priimek">
+            <input type="text" name="priimek" value="{{priimek}}" class="form-control" placeholder="Priimek" required="true">
         </div>
       </div>
       <div class="form-group">
         <label>Država</label>
-        <input type="text" name="drzava" value="{{drzava}}" class="form-control" placeholder="Država">
+        <input type="text" name="drzava" value="{{drzava}}" class="form-control" placeholder="Država" required="true">
       </div>
       <div class="form-group">
         <label>Rojstvo</label>
-        <input type="text" name="rojstvo" value="{{rojstvo}}" class="form-control" placeholder="Rojstvo">
+        <input type="text" name="rojstvo" value="{{rojstvo}}" class="form-control" placeholder="DD-MM-YYYY ali YYYY" required="true">
       </div>
       <div class="form-group">
         <label>Klub</label>
@@ -37,7 +37,7 @@
       </div>
       <div class="form-group">
         <label>Status</label>
-        <select type="text" name="status" value="{{status}}" class="form-control">
+        <select type="text" name="status" value="{{status}}" class="form-control" required="true">
             <option>Active</option>
             <option>Not active</option>
         </select>

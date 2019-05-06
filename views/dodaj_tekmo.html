@@ -7,25 +7,25 @@
   <form action="/dodaj_tekmo" method="POST">
       <div class="form-group">
         <label>ID</label>
-        <input type="integer" name="id" value="{{id}}" class="form-control" placeholder="ID">
+        <input type="integer" name="id" value="{{id}}" class="form-control" placeholder="ID" required="true">
       </div>
       <div class="form-row">
         <div class="form-group col-md-6">
             <label>Kraj</label>
-            <input type="text" name="kraj" value="{{kraj}}" class="form-control" placeholder="Kraj">
+            <input type="text" name="kraj" value="{{kraj}}" class="form-control" placeholder="Kraj" required="true">
         </div>
         <div class="form-group col-md-6">
             <label>Država</label>
-            <input type="text" name="drzava" value="{{drzava}}" class="form-control" placeholder="Država">
+            <input type="text" name="drzava" value="{{drzava}}" class="form-control" placeholder="Država" required="true">
         </div>
       </div>
       <div class="form-group">
         <label>Datum</label>
-        <input type="date" name="datum" value="{{datum}}" class="form-control" placeholder="Datum">
+        <input type="date" name="datum" value="{{datum}}" class="form-control" placeholder="Datum" required="true">
       </div>
       <div class="form-group">
         <label>Tip tekme</label>
-        <select type="text" name="tip_tekme" value="{{tip_tekme}}" class="form-control">
+        <select type="text" name="tip_tekme" value="{{tip_tekme}}" class="form-control" required="true">
             <option>posamicna</option>
             <option>ekipna</option>
         </select>
