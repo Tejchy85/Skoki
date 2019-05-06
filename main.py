@@ -171,14 +171,26 @@ def tekme(x):
 @get('/tekma/:x/')
 def tekma(x):
     username = get_user()
+    cur.execute("SELECT kraj FROM tekma WHERE id = %s", [int(x)])
+    kraj = cur.fetchone()[0]
+    cur.execute("SELECT datum FROM tekma WHERE id = %s", [int(x)])
+    datum = cur.fetchone()[0]
+    datumi = str(datum).split('-')
+    datum = datumi[2] + '.' + datumi[1] + '.' + datumi[0]
     cur.execute("SELECT r.ranki, r.startna_stevilka, r.fis_code, t.ime, t.priimek, r.drzava, r.skoki, r.tocke, r.serija, r.mesto_v_ekipi FROM rezultat r LEFT JOIN tekmovalec t ON r.fis_code = t.fis_code WHERE id=%s ORDER BY ranki ASC",[int(x)])
-    return template('tekma.html',x = x, tekma = cur, username = username)
+    return template('tekma.html',x = x, tekma = cur, kraj=kraj, datum=datum, username = username)
 
 @get('/zadnja_tekma')
 def zadnja_tekma():
     username = get_user()
+    cur.execute("WITH zadnja AS (SELECT id FROM tekma WHERE datum <= date('now') ORDER BY datum DESC LIMIT 1) SELECT kraj FROM tekma WHERE tekma.id IN (SELECT id FROM zadnja)")
+    kraj = cur.fetchone()[0]
+    cur.execute("WITH zadnja AS (SELECT id FROM tekma WHERE datum <= date('now') ORDER BY datum DESC LIMIT 1) SELECT datum FROM tekma WHERE tekma.id IN (SELECT id FROM zadnja)")
+    datum = cur.fetchone()[0]
+    datumi = str(datum).split('-')
+    datum = datumi[2] + '.' + datumi[1] + '.' + datumi[0]
     cur.execute("WITH zadnja AS (SELECT id FROM tekma WHERE datum <= date('now') ORDER BY datum DESC LIMIT 1) SELECT r.ranki, r.startna_stevilka, r.fis_code, t.ime, t.priimek, r.drzava, r.skoki, r.tocke, r.serija, r.mesto_v_ekipi FROM rezultat r LEFT JOIN tekmovalec t ON r.fis_code = t.fis_code WHERE r.id IN (SELECT id FROM zadnja) ORDER BY ranki ASC")
-    return template('zadnja_tekma.html', tekma=cur, username = username)
+    return template('zadnja_tekma.html', tekma=cur, kraj = kraj, datum = datum, username = username)
 
 @get('/dodaj_tekmovalca')
 def dodaj_tekmovalca():
