@@ -154,7 +154,7 @@ def video():
 def tekmovalci():
     username = get_user()
     cur.execute("SELECT * FROM tekmovalec ORDER BY priimek, ime")
-    return template('tekmovalci.html', tekmovalci=cur, username = username)
+    return template('tekmovalci.html', tekmovalci=cur, napaka=None, username = username)
 
 @get('/sezone')
 def sezone():
@@ -183,7 +183,17 @@ def zadnja_tekma():
 @get('/dodaj_tekmovalca')
 def dodaj_tekmovalca():
     username = get_user()
-    return template('dodaj_tekmovalca.html', fis_code='', ime='', priimek='', drzava='', rojstvo='', klub='', smucke='', status='', napaka=None, username = username)
+    cur.execute("SELECT isadmin FROM uporabnik WHERE username=%s", [username])
+    if username is None:
+        cur.execute("SELECT * FROM tekmovalec ORDER BY priimek, ime")
+        return template("tekmovalci.html", tekmovalci=cur, napaka="Niste prijavljeni", username=username)
+    elif not cur.fetchone()[0]:
+        # Ni admin
+        cur.execute("SELECT * FROM tekmovalec ORDER BY priimek, ime")
+        return template("tekmovalci.html", tekmovalci=cur, napaka="Uporabnik ni admin", username=username)
+    else:
+        return template('dodaj_tekmovalca.html', fis_code='', ime='', priimek='', drzava='', rojstvo='', klub='',
+                        smucke='', status='', napaka=None, username=username)
 
 @post('/dodaj_tekmovalca')
 def dodaj_tekmovalca_post():
