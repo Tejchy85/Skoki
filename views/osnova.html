@@ -63,7 +63,14 @@
                   </div>
                 </a>
             % else:
-                <a class="col-4 text-center text-dark">{{username}}</a>
+                <a class="nav-item dropdown">
+                  <a class="dropdown-toggle col-4 text-center text-dark" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  {{username}}
+                  </a>
+                  <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="#">Postani admin</a>
+                  </div>
+                </a>
             % end
 			<a class="btn btn-sm btn-outline-secondary" href="/Logout">Odjava</a>
 		% else:
