@@ -204,7 +204,7 @@ def tekma(x):
         cur.execute("SELECT r1.ranki, r1.startna_stevilka, t.fis_code, t.ime, t.priimek, t.drzava, r1.skoki AS skoki1, r1.tocke AS tocke1, r2.skoki AS skoki2, r2.tocke AS tocke2, r1.mesto_v_ekipi FROM rezultat r1 JOIN rezultat r2 ON r1.id = r2.id AND r1.fis_code = r2.fis_code AND r1.serija < r2.serija JOIN tekmovalec t ON r1.fis_code = t.fis_code WHERE r1.id = %s ORDER BY r1.ranki, r1.mesto_v_ekipi ASC",[int(x)])
         return template('tekma.html',x = x, tekma = cur, kraj=kraj, datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija)
     else:
-        cur.execute("SELECT r.ranki, r.startna_stevilka, r.fis_code, t.ime, t.priimek, r.drzava, r.skoki, r.tocke, r.serija, r.mesto_v_ekipi FROM rezultat r LEFT JOIN tekmovalec t ON r.fis_code = t.fis_code WHERE id=%s ORDER BY ranki ASC",[int(x)])
+        cur.execute("SELECT r.ranki, r.startna_stevilka, r.fis_code, t.ime, t.priimek, r.drzava, r.tocke, r.mesto_v_ekipi FROM rezultat r LEFT JOIN tekmovalec t ON r.fis_code = t.fis_code WHERE id=%s ORDER BY ranki ASC",[int(x)])
         return template('tekma.html',x = x, tekma = cur, kraj=kraj, datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija)
 
 @get('/zadnja_tekma')

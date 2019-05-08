@@ -24,7 +24,6 @@
             <th>Skupne točke</th>
         %end
      % else:
-        <th>Skoki</th>
         <th>Točke</th>
         % if ekipna:
             <th>Mesto v ekipi</th>
@@ -53,6 +52,22 @@
             % if not ekipna:
                 <td>{{tocke1 + tocke2}}</td>
             % end
+        </tr>
+    %end
+  % else:
+    %for (ranki,startna_stevilka,fis_code,ime,priimek,drzava,tocke,mesto_v_ekipi) in tekma:
+        <tr>
+            <td>{{ranki}}</td>
+            % if ekipna:
+                <td>{{mesto_v_ekipi}}</td>
+            % else:
+                <td>{{startna_stevilka}}</td>
+            % end
+            <td>{{fis_code}}</td>
+            <td>{{ime}}</td>
+            <td>{{priimek}}</td>
+            <td>{{drzava}}</td>
+            <td>{{tocke}}</td>
         </tr>
     %end
   %end
