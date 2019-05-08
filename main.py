@@ -51,6 +51,13 @@ def get_user():
     else:
         return None
 
+def is_admin(username):
+    if username is not None:
+        cur.execute("SELECT isadmin FROM uporabnik WHERE username=%s", [username])
+        return cur.fetchone()[0]
+    else:
+        return False
+
 ######################################################################
 
 @get('/static/<filename:path>')
@@ -59,7 +66,8 @@ def static(filename):
 
 @get('/')
 def index():
-    return template('zacetna_stran.html', username = get_user())
+    username = get_user()
+    return template('zacetna_stran.html', username=username, admin=is_admin(username))
 
 @get('/Login')
 def login():
@@ -78,7 +86,7 @@ def login_post():
         # Username in geslo se ne ujemata
         return template("Login.html",
                                napaka="Uporabnik ne obstaja",
-                               username=username)
+                               username=username, admin=is_admin(username))
     else:
         # Vse je v redu, nastavimo cookie in preusmerimo na glavno stran
         response.set_cookie('username', username, path='/', secret=secret)
@@ -154,19 +162,19 @@ def video():
 def tekmovalci():
     username = get_user()
     cur.execute("SELECT * FROM tekmovalec ORDER BY priimek, ime")
-    return template('tekmovalci.html', tekmovalci=cur, napaka=None, username = username)
+    return template('tekmovalci.html', tekmovalci=cur, napaka=None, username = username, admin=is_admin(username))
 
 @get('/sezone')
 def sezone():
     username = get_user()
-    return template('sezone.html', username = username)
+    return template('sezone.html', username = username, admin=is_admin(username))
 
 @get('/tekme/:x/')
 def tekme(x):
     username = get_user()
     cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY datum",
             [datetime.date(int(x)-1, 11, 1), datetime.date(int(x), 3, 31)])
-    return template('tekme_sezona.html', x=x, tekme=cur, username = username)
+    return template('tekme_sezona.html', x=x, tekme=cur, username = username, admin=is_admin(username))
 
 @get('/tekma/:x/')
 def tekma(x):
@@ -178,7 +186,7 @@ def tekma(x):
     datumi = str(datum).split('-')
     datum = datumi[2] + '.' + datumi[1] + '.' + datumi[0]
     cur.execute("SELECT r.ranki, r.startna_stevilka, r.fis_code, t.ime, t.priimek, r.drzava, r.skoki, r.tocke, r.serija, r.mesto_v_ekipi FROM rezultat r LEFT JOIN tekmovalec t ON r.fis_code = t.fis_code WHERE id=%s ORDER BY ranki ASC",[int(x)])
-    return template('tekma.html',x = x, tekma = cur, kraj=kraj, datum=datum, username = username)
+    return template('tekma.html',x = x, tekma = cur, kraj=kraj, datum=datum, username = username, admin=is_admin(username))
 
 @get('/zadnja_tekma')
 def zadnja_tekma():
@@ -190,22 +198,13 @@ def zadnja_tekma():
     datumi = str(datum).split('-')
     datum = datumi[2] + '.' + datumi[1] + '.' + datumi[0]
     cur.execute("WITH zadnja AS (SELECT id FROM tekma WHERE datum <= date('now') ORDER BY datum DESC LIMIT 1) SELECT r.ranki, r.startna_stevilka, r.fis_code, t.ime, t.priimek, r.drzava, r.skoki, r.tocke, r.serija, r.mesto_v_ekipi FROM rezultat r LEFT JOIN tekmovalec t ON r.fis_code = t.fis_code WHERE r.id IN (SELECT id FROM zadnja) ORDER BY ranki ASC")
-    return template('zadnja_tekma.html', tekma=cur, kraj = kraj, datum = datum, username = username)
+    return template('zadnja_tekma.html', tekma=cur, kraj = kraj, datum = datum, username = username, admin=is_admin(username))
 
 @get('/dodaj_tekmovalca')
 def dodaj_tekmovalca():
     username = get_user()
-    cur.execute("SELECT isadmin FROM uporabnik WHERE username=%s", [username])
-    if username is None:
-        cur.execute("SELECT * FROM tekmovalec ORDER BY priimek, ime")
-        return template("tekmovalci.html", tekmovalci=cur, napaka="Niste prijavljeni.", username=username)
-    elif not cur.fetchone()[0]:
-        # Ni admin
-        cur.execute("SELECT * FROM tekmovalec ORDER BY priimek, ime")
-        return template("tekmovalci.html", tekmovalci=cur, napaka="Niste admin.", username=username)
-    else:
-        return template('dodaj_tekmovalca.html', fis_code='', ime='', priimek='', drzava='', rojstvo='', klub='',
-                        smucke='', status='', napaka=None, username=username)
+    return template('dodaj_tekmovalca.html', fis_code='', ime='', priimek='', drzava='', rojstvo='', klub='',
+                        smucke='', status='', napaka=None, username=username, admin=is_admin(username))
 
 @post('/dodaj_tekmovalca')
 def dodaj_tekmovalca_post():
@@ -224,13 +223,13 @@ def dodaj_tekmovalca_post():
         conn.commit()
     except Exception as ex:
         return template('dodaj_tekmovalca.html', fis_code=fis_code, ime=ime, priimek=priimek, drzava=drzava, rojstvo=rojstvo, klub=klub, smucke=smucke, status=status,
-                        napaka = 'Zgodila se je napaka: %s' % ex, username = username)
+                        napaka = 'Zgodila se je napaka: %s' % ex, username = username, admin=is_admin(username))
     redirect("/")
 
 @get('/dodaj_tekmo')
 def dodaj_tekmo():
     username = get_user()
-    return template('dodaj_tekmo.html', id='', kraj='', drzava='', datum='', tip_tekme='', napaka=None, username = username)
+    return template('dodaj_tekmo.html', id='', kraj='', drzava='', datum='', tip_tekme='', napaka=None, username = username, admin=is_admin(username))
 
 @post('/dodaj_tekmo')
 def dodaj_tekmo_post():
@@ -246,7 +245,7 @@ def dodaj_tekmo_post():
         conn.commit()
     except Exception as ex:
         return template('dodaj_tekmo.html', id=id, kraj=kraj, datum=datum, drzava=drzava, tip_tekme=tip_tekme,
-                        napaka = 'Zgodila se je napaka: %s' % ex, username = username)
+                        napaka = 'Zgodila se je napaka: %s' % ex, username = username, admin=is_admin(username))
     redirect("/")
 
 ######################################################################

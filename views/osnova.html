@@ -52,7 +52,19 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="mx-3" role="img" viewBox="0 0 24 24" focusable="false"><title>Search</title><circle cx="10.5" cy="10.5" r="7.5"/><path d="M21 21l-5.2-5.2"/></svg>
         </a>
 		% if username:
-			<a class="col-4 text-center text-dark">{{username}}</a>
+            % if admin:
+                <a class="nav-item dropdown">
+                  <a class="dropdown-toggle col-4 text-center text-dark" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  {{username}}
+                  </a>
+                  <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="/dodaj_tekmovalca">Dodaj tekmovalca</a>
+                    <a class="dropdown-item" href="/dodaj_tekmo">Dodaj tekmo</a>
+                  </div>
+                </a>
+            % else:
+                <a class="col-4 text-center text-dark">{{username}}</a>
+            % end
 			<a class="btn btn-sm btn-outline-secondary" href="/Logout">Odjava</a>
 		% else:
 			<a class="btn btn-sm btn-outline-secondary" href="/Login">Prijava</a>
