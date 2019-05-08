@@ -6,31 +6,55 @@
  <thead class="thead-light">
   <tr>
      <th>Rank</th>
-     <th>Startna številka</th>
+     % if ekipna:
+        <th>Mesto v ekipi</th>
+     % else:
+        <th>Startna številka</th>
+     % end
      <th>FIS code</th>
      <th>Ime</th>
      <th>Priimek</th>
      <th>Država</th>
-     <th>Skoki</th>
-     <th>Točke</th>
-      <th>Serija</th>
-     <th>Mesto v ekipi</th>  
+     % if serija:
+        <th>1. skok</th>
+        <th>1. točke</th>
+        <th>2. skok</th>
+        <th>2. točke</th>
+        % if not ekipna:
+            <th>Skupne točke</th>
+        %end
+     % else:
+        <th>Skoki</th>
+        <th>Točke</th>
+        % if ekipna:
+            <th>Mesto v ekipi</th>
+        % end
+     % end
   </tr>
  </thead>
      <tbody>
-  %for (ranki,startna_stevilka,fis_code,ime,priimek,drzava,skoki,tocke,serija,mesto_v_ekipi) in tekma:
-    <tr>
-       <td>{{ranki}}</td>
-       <td>{{startna_stevilka}}</td>
-       <td>{{fis_code}}</td>
-       <td>{{ime}}</td>
-       <td>{{priimek}}</td>
-       <td>{{drzava}}</td>
-       <td>{{skoki}}</td>
-       <td>{{tocke}}</td>
-       <td>{{serija}}</td>
-        <td>{{mesto_v_ekipi}}</td>
-    </tr>
+  % if serija:
+    %for (ranki,startna_stevilka,fis_code,ime,priimek,drzava,skoki1,tocke1,skoki2,tocke2,mesto_v_ekipi) in tekma:
+        <tr>
+            <td>{{ranki}}</td>
+            % if ekipna:
+                <td>{{mesto_v_ekipi}}</td>
+            % else:
+                <td>{{startna_stevilka}}</td>
+            % end
+            <td>{{fis_code}}</td>
+            <td>{{ime}}</td>
+            <td>{{priimek}}</td>
+            <td>{{drzava}}</td>
+            <td>{{skoki1}}</td>
+            <td>{{tocke1}}</td>
+            <td>{{skoki2}}</td>
+            <td>{{tocke2}}</td>
+            % if not ekipna:
+                <td>{{tocke1 + tocke2}}</td>
+            % end
+        </tr>
+    %end
   %end
      </tbody>
   </table>
