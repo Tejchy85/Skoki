@@ -1,0 +1,31 @@
+%rebase('osnova.html', naslov='Tekmovalec {}'.format(x))
+
+%if napaka:
+    <div class="alert alert-warning">{{napaka}}</div>
+%end
+
+<h1>{{ime}} {{priimek}}</h1>
+
+<table class="table table-bordered table-hover">
+ <thead class="thead-light">
+  <tr>
+     <th scope="col">Datum</th>
+     <th scope="col">Kraj</th>
+     <th scope="col">Država</th>
+     <th scope="col">Tip tekme</th>
+     <th scope="col">Rank</th>
+  </tr>
+  </thead>
+  <tbody>
+  %for (datum,kraj,drzava,tip_tekme,rank) in tekmovalec:
+    <tr>
+       <td>{{datum}}</a></td>
+       <td>{{kraj}}</td>
+       <td>{{drzava}}</td>
+       <td>{{tip_tekme}}</td>
+       <td>{{rank}}</td>
+    </tr>
+  %end
+  </tbody>
+</table>
+</body>

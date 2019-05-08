@@ -166,6 +166,17 @@ def tekmovalci():
     cur.execute("SELECT * FROM tekmovalec ORDER BY priimek, ime")
     return template('tekmovalci.html', tekmovalci=cur, napaka=None, username = username, admin=admin)
 
+@get('/tekmovalec/:x/')
+def tekmovalec(x):
+    username = get_user()
+    admin = is_admin(username)
+    cur.execute("SELECT ime FROM tekmovalec WHERE fis_code = %s", [int(x)])
+    ime = cur.fetchone()[0]
+    cur.execute("SELECT priimek FROM tekmovalec WHERE fis_code = %s", [int(x)])
+    priimek = cur.fetchone()[0]
+    cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t.datum DESC", [int(x)])
+    return template('tekmovalec.html', x=x, tekmovalec=cur, ime=ime, priimek=priimek, napaka=None, username=username, admin=admin)
+
 @get('/sezone')
 def sezone():
     username = get_user()
