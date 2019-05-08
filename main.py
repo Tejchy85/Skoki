@@ -236,7 +236,7 @@ def dodaj_tekmovalca_post():
         conn.commit()
     except Exception as ex:
         return template('dodaj_tekmovalca.html', fis_code=fis_code, ime=ime, priimek=priimek, drzava=drzava, rojstvo=rojstvo, klub=klub, smucke=smucke, status=status,
-                        napaka = 'Zgodila se je napaka: %s' % ex, username = username, admin=admin)
+                        napaka = 'Zgodila se je napaka: %s' % ex, username=username, admin=admin)
     redirect("/")
 
 @get('/dodaj_tekmo')
