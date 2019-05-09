@@ -270,6 +270,15 @@ def dodaj_tekmovalca_post():
                         napaka = 'Zgodila se je napaka: %s' % ex, username=username, admin=admin)
     redirect("/")
 
+@get('/uredi_tekmovalca/:x/')
+def uredi_tekmovalca(x):
+    username = get_user()
+    admin = is_admin(username)
+    cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [int(x)])
+    podatki = cur.fetchone()
+    return template('uredi_tekmovalca.html', fis_code=x, status=podatki[1], ime=podatki[2], priimek=podatki[3], drzava=podatki[4], rojstvo=podatki[5], klub=podatki[6],
+                        smucke=podatki[7], x=x, napakaO=None, napaka=None, username=username, admin=admin)
+
 @get('/dodaj_tekmo')
 def dodaj_tekmo():
     username = get_user()

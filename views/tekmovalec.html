@@ -6,6 +6,12 @@
 
 <h1>{{ime}} {{priimek}}</h1>
 
+% if admin:
+    <p>
+	    <a href="/uredi_tekmovalca/{{x}}/" class="btn btn-dark btn-md active" role="button" aria-pressed="true">Uredi</a>
+    </p>
+% end
+
 <table class="table table-bordered table-hover">
  <thead class="thead-light">
   <tr>
