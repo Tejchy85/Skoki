@@ -194,12 +194,40 @@ def sezone():
     admin = is_admin(username)
     return template('sezone.html', napakaO=None, username = username, admin=admin)
 
-@get('/tekme/:x/')
-def tekme(x):
+@get('/tekme/:x/:y')
+def tekme(x,y):
     username = get_user()
     admin = is_admin(username)
-    cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY datum",
-            [datetime.date(int(x)-1, 11, 1), datetime.date(int(x), 3, 31)])
+    if y == '' or y == 'Datum-pad':
+        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY datum",
+                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
+    elif y == 'ID-pad':
+        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY id DESC",
+                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
+    elif y == 'Kraj-pad':
+        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY kraj",
+                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
+    elif y == 'Drzava-pad':
+        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY drzava",
+                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
+    elif y == 'Tip-pad':
+        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY tip_tekme",
+                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
+    elif y == 'Datum-nar':
+        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY datum DESC",
+                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
+    elif y == 'ID-nar':
+        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY id",
+                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
+    elif y == 'Kraj-nar':
+        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY kraj DESC",
+                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
+    elif y == 'Drzava-nar':
+        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY drzava DESC",
+                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
+    elif y == 'Tip-nar':
+        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY tip_tekme DESC",
+                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
     return template('tekme_sezona.html', napakaO=None, x=x, tekme=cur, username = username, admin=admin)
 
 @get('/tekma/:x/')

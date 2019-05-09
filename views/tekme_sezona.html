@@ -2,14 +2,32 @@
 
 <h1>Tekme v sezoni {{x}}</h1>
 
+<div class="dropdown" style="float:right;">
+  <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" align="right">
+    Razvrščanje
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <a class="dropdown-item" href="/tekme/{{x}}/ID-pad">ID - padajoče</a>
+    <a class="dropdown-item" href="/tekme/{{x}}/ID-nar">ID - naraščajoče</a>
+    <a class="dropdown-item" href="/tekme/{{x}}/Kraj-pad">Kraj - padajoče</a>
+    <a class="dropdown-item" href="/tekme/{{x}}/Kraj-nar">Kraj - naraščajoče</a>
+    <a class="dropdown-item" href="/tekme/{{x}}/Datum-pad">Datum - Starejši prej</a>
+    <a class="dropdown-item" href="/tekme/{{x}}/Datum-nar">Datum- Novejši prej</a>
+    <a class="dropdown-item" href="/tekme/{{x}}/Drzava-pad">Država - padajoče</a>
+    <a class="dropdown-item" href="/tekme/{{x}}/Drzava-nar">Država - naraščajoče</a>
+    <a class="dropdown-item" href="/tekme/{{x}}/Tip-pad">Tip tekme - padajoče</a>
+    <a class="dropdown-item" href="/tekme/{{x}}/Tip-nar">Tip tekme - naraščajoče</a>
+  </div>
+</div>
+
  <table class="table table-bordered table-hover">
  <thead class="thead-light">
   <tr>
      <th>ID</th>
      <th>Kraj</th>
      <th>Datum</th>
-     <th>Država</th> 
-     <th>Tip tekme</th> 
+     <th>Država</th>
+     <th>Tip tekme</th>
   </tr>
  </thead>
      <tbody>
