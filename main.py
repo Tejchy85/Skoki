@@ -174,41 +174,19 @@ def video():
 def tekmovalci(y):
     username = get_user()
     admin = is_admin(username)
-    if y == 'Fis_code-pad':
-        cur.execute("SELECT * FROM tekmovalec ORDER BY fis_code")
-    elif y == 'Fis_code-nar':
-        cur.execute("SELECT * FROM tekmovalec ORDER BY fis_code DESC")
-    elif y == 'Status-pad':
-        cur.execute("SELECT * FROM tekmovalec ORDER BY status")
-    elif y == 'Status-nar':
-        cur.execute("SELECT * FROM tekmovalec ORDER BY status DESC")
-    elif y == 'Ime-pad':
-        cur.execute("SELECT * FROM tekmovalec ORDER BY ime")
-    elif y == 'Ime-nar':
-        cur.execute("SELECT * FROM tekmovalec ORDER BY ime DESC")
-    elif y == 'Priimek-pad':
-        cur.execute("SELECT * FROM tekmovalec ORDER BY priimek")
-    elif y == 'Priimek-nar':
-        cur.execute("SELECT * FROM tekmovalec ORDER BY priimek DESC")
-    elif y == 'Drzava-pad':
-        cur.execute("SELECT * FROM tekmovalec ORDER BY drzava")
-    elif y == 'Drzava-nar':
-        cur.execute("SELECT * FROM tekmovalec ORDER BY drzava DESC")
-    elif y == 'Rojstvo-pad':
-        cur.execute("SELECT * FROM tekmovalec ORDER BY rojstvo")
-    elif y == 'Rojstvo-nar':
-        cur.execute("SELECT * FROM tekmovalec ORDER BY rojstvo DESC")
-    elif y == 'Klub-pad':
-        cur.execute("SELECT * FROM tekmovalec ORDER BY klub")
-    elif y == 'Klub-nar':
-        cur.execute("SELECT * FROM tekmovalec ORDER BY klub DESC")
-    elif y == 'Smucke-pad':
-        cur.execute("SELECT * FROM tekmovalec ORDER BY smucke")
-    elif y == 'Smucke-nar':
-        cur.execute("SELECT * FROM tekmovalec ORDER BY smucke DESC")
-    elif y == 'ime_priimek-pad':
-        cur.execute("SELECT * FROM tekmovalec ORDER BY priimek, ime")
-    return template('tekmovalci.html', tekmovalci=cur, napakaO=None, napaka=None, username = username, admin=admin)
+
+    sez = y.split('-')
+    if sez[1] == 'nar':
+        string = ''
+    else:
+        string = ' DESC'
+
+    if sez[0] == 'ime_priimek':
+        sez[0] = 'priimek, ime'
+
+    cur.execute("SELECT * FROM tekmovalec ORDER BY " + sez[0] + string)
+
+    return template('tekmovalci.html', tekmovalci=cur, napakaO=None, napaka=None, username=username, admin=admin)
 
 @get('/tekmovalec/:x/')
 def tekmovalec(x):
@@ -231,36 +209,21 @@ def sezone():
 def tekme(x,y):
     username = get_user()
     admin = is_admin(username)
-    if y == 'Datum-pad':
-        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY datum",
-                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
-    elif y == 'ID-pad':
-        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY id DESC",
-                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
-    elif y == 'Kraj-pad':
-        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY kraj",
-                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
-    elif y == 'Drzava-pad':
-        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY drzava",
-                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
-    elif y == 'Tip-pad':
-        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY tip_tekme",
-                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
-    elif y == 'Datum-nar':
-        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY datum DESC",
-                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
-    elif y == 'ID-nar':
-        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY id",
-                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
-    elif y == 'Kraj-nar':
-        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY kraj DESC",
-                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
-    elif y == 'Drzava-nar':
-        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY drzava DESC",
-                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
-    elif y == 'Tip-nar':
-        cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY tip_tekme DESC",
-                    [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
+
+    sez_datum = [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)]
+
+    sez = y.split('-')
+    if sez[1] == 'nar':
+        string = ''
+    else:
+        string = ' DESC'
+
+    if sez[0] == 'Tip':
+        sez[0] = 'tip_tekme'
+
+    cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY " + sez[0] + string,
+                sez_datum)
+
     return template('tekme_sezona.html', napakaO=None, x=x, tekme=cur, username = username, admin=admin)
 
 @get('/tekma/:x/')
