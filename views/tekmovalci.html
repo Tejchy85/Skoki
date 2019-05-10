@@ -10,6 +10,30 @@
         <div class="alert alert-warning">{{napaka}}</div>
 %end
 
+<div class="dropdown" style="float:right;">
+  <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" align="right">
+    Razvrščanje
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <a class="dropdown-item" href="/tekmovalci/Fis_code-pad">FIS code - padajoče</a>
+    <a class="dropdown-item" href="/tekmovalci/Fis_code-nar">FIS code - naraščajoče</a>
+    <a class="dropdown-item" href="/tekmovalci/Status-pad">Status - padajoče</a>
+    <a class="dropdown-item" href="/tekmovalci/Status-nar">Status - naraščajoče</a>
+    <a class="dropdown-item" href="/tekmovalci/Ime-pad">Ime - padajoče</a>
+    <a class="dropdown-item" href="/tekmovalci/Ime-nar">Ime - naraščajoče</a>
+    <a class="dropdown-item" href="/tekmovalci/Priimek-pad">Priimek - padajoče</a>
+    <a class="dropdown-item" href="/tekmovalci/Priimek-nar">Priimek - naraščajoče</a>
+    <a class="dropdown-item" href="/tekmovalci/Drzava-pad">Država - padajoče</a>
+    <a class="dropdown-item" href="/tekmovalci/Drzava-nar">Država - naraščajoče</a>
+    <a class="dropdown-item" href="/tekmovalci/Rojstvo-pad">Rojstvo - Starejši prej</a>
+    <a class="dropdown-item" href="/tekmovalci/Rojstvo-nar">Rojstvo - Mlajši prej</a>
+    <a class="dropdown-item" href="/tekmovalci/Klub-pad">Klub - padajoče</a>
+    <a class="dropdown-item" href="/tekmovalci/Klub-nar">Klub - naraščajoče</a>
+    <a class="dropdown-item" href="/tekmovalci/Smucke-pad">Smučke - padajoče</a>
+    <a class="dropdown-item" href="/tekmovalci/Smucke-nar">Smučke - naraščajoče</a>
+  </div>
+</div>
+
 <table class="table table-bordered table-hover">
  <thead class="thead-light">
   <tr>
@@ -26,7 +50,7 @@
   <tbody>
   %for (fis_code,status,ime,priimek,drzava,rojstvo,klub,smucke) in tekmovalci:
     <tr>
-       <td><a href="tekmovalec/{{fis_code}}/">{{fis_code}}</a></td>
+       <td><a href="/tekmovalec/{{fis_code}}/">{{fis_code}}</a></td>
        <td>{{status}}</td>
        <td>{{ime}}</td>
        <td>{{priimek}}</td>

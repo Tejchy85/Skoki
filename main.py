@@ -170,11 +170,44 @@ def register_post():
 def video():
     return template('Video.html', napakaO=None)
 
-@get('/tekmovalci')
-def tekmovalci():
+@get('/tekmovalci/:y')
+def tekmovalci(y):
     username = get_user()
     admin = is_admin(username)
-    cur.execute("SELECT * FROM tekmovalec ORDER BY priimek, ime")
+    if y == 'Fis_code-pad':
+        cur.execute("SELECT * FROM tekmovalec ORDER BY fis_code")
+    elif y == 'Fis_code-nar':
+        cur.execute("SELECT * FROM tekmovalec ORDER BY fis_code DESC")
+    elif y == 'Status-pad':
+        cur.execute("SELECT * FROM tekmovalec ORDER BY status")
+    elif y == 'Status-nar':
+        cur.execute("SELECT * FROM tekmovalec ORDER BY status DESC")
+    elif y == 'Ime-pad':
+        cur.execute("SELECT * FROM tekmovalec ORDER BY ime")
+    elif y == 'Ime-nar':
+        cur.execute("SELECT * FROM tekmovalec ORDER BY ime DESC")
+    elif y == 'Priimek-pad':
+        cur.execute("SELECT * FROM tekmovalec ORDER BY priimek")
+    elif y == 'Priimek-nar':
+        cur.execute("SELECT * FROM tekmovalec ORDER BY priimek DESC")
+    elif y == 'Drzava-pad':
+        cur.execute("SELECT * FROM tekmovalec ORDER BY drzava")
+    elif y == 'Drzava-nar':
+        cur.execute("SELECT * FROM tekmovalec ORDER BY drzava DESC")
+    elif y == 'Rojstvo-pad':
+        cur.execute("SELECT * FROM tekmovalec ORDER BY rojstvo")
+    elif y == 'Rojstvo-nar':
+        cur.execute("SELECT * FROM tekmovalec ORDER BY rojstvo DESC")
+    elif y == 'Klub-pad':
+        cur.execute("SELECT * FROM tekmovalec ORDER BY klub")
+    elif y == 'Klub-nar':
+        cur.execute("SELECT * FROM tekmovalec ORDER BY klub DESC")
+    elif y == 'Smucke-pad':
+        cur.execute("SELECT * FROM tekmovalec ORDER BY smucke")
+    elif y == 'Smucke-nar':
+        cur.execute("SELECT * FROM tekmovalec ORDER BY smucke DESC")
+    elif y == 'ime_priimek-pad':
+        cur.execute("SELECT * FROM tekmovalec ORDER BY priimek, ime")
     return template('tekmovalci.html', tekmovalci=cur, napakaO=None, napaka=None, username = username, admin=admin)
 
 @get('/tekmovalec/:x/')
@@ -198,7 +231,7 @@ def sezone():
 def tekme(x,y):
     username = get_user()
     admin = is_admin(username)
-    if y == '' or y == 'Datum-pad':
+    if y == 'Datum-pad':
         cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY datum",
                     [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
     elif y == 'ID-pad':
