@@ -57,6 +57,7 @@ def is_admin(username):
     else:
         return False
 
+# Pomožne funkcije
 ######################################################################
 
 @get('/static/<filename:path>')
