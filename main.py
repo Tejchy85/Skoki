@@ -176,16 +176,7 @@ def tekmovalci(y):
     username = get_user()
     admin = is_admin(username)
 
-    sez = y.split('-')
-    if sez[1] == 'nar':
-        string = ''
-    else:
-        string = ' DESC'
-
-    if sez[0] == 'ime_priimek':
-        sez[0] = 'priimek, ime'
-
-    cur.execute("SELECT * FROM tekmovalec ORDER BY " + sez[0] + string)
+    cur.execute("SELECT * FROM tekmovalec ORDER BY " + y.replace('-', ' '))
 
     return template('tekmovalci.html', tekmovalci=cur, napakaO=None, napaka=None, username=username, admin=admin)
 
@@ -211,19 +202,8 @@ def tekme(x,y):
     username = get_user()
     admin = is_admin(username)
 
-    sez_datum = [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)]
-
-    sez = y.split('-')
-    if sez[1] == 'nar':
-        string = ''
-    else:
-        string = ' DESC'
-
-    if sez[0] == 'Tip':
-        sez[0] = 'tip_tekme'
-
-    cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY " + sez[0] + string,
-                sez_datum)
+    cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY " + y.replace('-', ' '),
+                [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
 
     return template('tekme_sezona.html', napakaO=None, x=x, tekme=cur, username = username, admin=admin)
 
