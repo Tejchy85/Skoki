@@ -4,7 +4,27 @@
     <div class="alert alert-warning">{{napaka}}</div>
 %end
 
-<h1>{{ime}} {{priimek}}</h1>
+%for (fis_code,status,ime,priimek,drzava,rojstvo,klub,smucke) in tekmovalec:
+    <h1>{{ime}} {{priimek}}</h1>
+    <table style="width:800px">
+        <tr>
+            <th>Fis code: </th>
+            <th>{{fis_code}} </th>
+            <th>Status: </th>
+            <th>{{status}} </th>
+            <th>Država: </th>
+            <th>{{drzava}} </th>
+        </tr>
+        <tr>
+            <th>Rojstvo: </th>
+            <th>{{rojstvo}}</th>
+            <th>Klub: </th>
+            <th>{{klub}} </th>
+            <th>Smuči: </th>
+            <th>{{smucke}} </th>
+        </tr>
+    </table>
+%end
 
 % if admin:
     <p>
@@ -23,7 +43,7 @@
   </tr>
   </thead>
   <tbody>
-  %for (datum,kraj,drzava,tip_tekme,rank) in tekmovalec:
+  %for (datum,kraj,drzava,tip_tekme,rank) in tekme:
     <tr>
        <td>{{datum}}</a></td>
        <td>{{kraj}}</td>

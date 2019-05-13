@@ -182,10 +182,10 @@ def tekmovalci(y):
 def tekmovalec(x):
     username = get_user()
     admin = is_admin(username)
-    cur.execute("SELECT ime, priimek FROM tekmovalec WHERE fis_code = %s", [int(x)])
-    ime_priimek = cur.fetchone()
+    cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [int(x)])
+    tekmovalec = cur.fetchall()
     cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t.datum DESC", [int(x)])
-    return template('tekmovalec.html', x=x, tekmovalec=cur, ime=ime_priimek[0], priimek=ime_priimek[1], napakaO=None, napaka=None, username=username, admin=admin)
+    return template('tekmovalec.html', x=x, tekmovalec=tekmovalec,tekme=cur, napakaO=None, napaka=None, username=username, admin=admin)
 
 @get('/sezone')
 def sezone():
