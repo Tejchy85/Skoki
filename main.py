@@ -175,21 +175,17 @@ def video():
 def tekmovalci(y):
     username = get_user()
     admin = is_admin(username)
-
     cur.execute("SELECT * FROM tekmovalec ORDER BY " + y.replace('-', ' '))
-
     return template('tekmovalci.html', tekmovalci=cur, napakaO=None, napaka=None, username=username, admin=admin)
 
 @get('/tekmovalec/:x/')
 def tekmovalec(x):
     username = get_user()
     admin = is_admin(username)
-    cur.execute("SELECT ime FROM tekmovalec WHERE fis_code = %s", [int(x)])
-    ime = cur.fetchone()[0]
-    cur.execute("SELECT priimek FROM tekmovalec WHERE fis_code = %s", [int(x)])
-    priimek = cur.fetchone()[0]
+    cur.execute("SELECT ime, priimek FROM tekmovalec WHERE fis_code = %s", [int(x)])
+    ime_priimek = cur.fetchone()
     cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t.datum DESC", [int(x)])
-    return template('tekmovalec.html', x=x, tekmovalec=cur, ime=ime, priimek=priimek, napakaO=None, napaka=None, username=username, admin=admin)
+    return template('tekmovalec.html', x=x, tekmovalec=cur, ime=ime_priimek[0], priimek=ime_priimek[1], napakaO=None, napaka=None, username=username, admin=admin)
 
 @get('/sezone')
 def sezone():
@@ -201,21 +197,17 @@ def sezone():
 def tekme(x,y):
     username = get_user()
     admin = is_admin(username)
-
     cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY " + y.replace('-', ' '),
                 [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
-
     return template('tekme_sezona.html', napakaO=None, x=x, tekme=cur, username = username, admin=admin)
 
 @get('/tekma/:x/')
 def tekma(x):
     username = get_user()
     admin = is_admin(username)
-    cur.execute("SELECT kraj FROM tekma WHERE id = %s", [int(x)])
-    kraj = cur.fetchone()[0]
-    cur.execute("SELECT datum FROM tekma WHERE id = %s", [int(x)])
-    datum = cur.fetchone()[0]
-    datumi = str(datum).split('-')
+    cur.execute("SELECT kraj, datum FROM tekma WHERE id = %s", [int(x)])
+    kraj_datum = cur.fetchone()
+    datumi = str(kraj_datum[1]).split('-')
     datum = datumi[2] + '.' + datumi[1] + '.' + datumi[0]
     cur.execute("SELECT tip_tekme FROM tekma WHERE id = %s LIMIT 1", [int(x)])
     if cur.fetchone()[0] == 'posamicna':
@@ -226,10 +218,13 @@ def tekma(x):
     serija = cur.fetchone()[0]
     if serija == 2:
         cur.execute("SELECT r1.ranki, r1.startna_stevilka, t.fis_code, t.ime, t.priimek, t.drzava, r1.skoki AS skoki1, r1.tocke AS tocke1, r2.skoki AS skoki2, r2.tocke AS tocke2, r1.mesto_v_ekipi FROM rezultat r1 JOIN rezultat r2 ON r1.id = r2.id AND r1.fis_code = r2.fis_code AND r1.serija < r2.serija JOIN tekmovalec t ON r1.fis_code = t.fis_code WHERE r1.id = %s ORDER BY r1.ranki, r1.mesto_v_ekipi ASC",[int(x)])
-        return template('tekma.html', napakaO=None,x = x, tekma = cur, kraj=kraj, datum=datum, username = username, admin=admin, ekipna=ekipna, serija=True)
+        serija_bool = True
     else:
         cur.execute("SELECT r.ranki, r.startna_stevilka, r.fis_code, t.ime, t.priimek, r.drzava, r.tocke, r.mesto_v_ekipi FROM rezultat r LEFT JOIN tekmovalec t ON r.fis_code = t.fis_code WHERE id=%s ORDER BY ranki, mesto_v_ekipi ASC",[int(x)])
-        return template('tekma.html', napakaO=None,x = x, tekma = cur, kraj=kraj, datum=datum, username = username, admin=admin, ekipna=ekipna, serija=False)
+        serija_bool = False
+
+    return template('tekma.html', napakaO=None,x = x, tekma = cur, kraj=kraj_datum[0], datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija_bool)
+
 
 @get('/zadnja_tekma')
 def zadnja_tekma():
