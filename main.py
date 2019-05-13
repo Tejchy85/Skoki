@@ -225,6 +225,42 @@ def tekma(x):
 
     return template('tekma.html', napakaO=None,x = x, tekma = cur, kraj=kraj_datum[0], datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija_bool)
 
+@get('/drzave')
+def drzave():
+    username = get_user()
+    admin = is_admin(username)
+    cur.execute("SELECT kratica,ime FROM drzava ORDER BY kratica")
+    return template('drzave.html',napakaO=None, drzave=cur,username=username,admin=admin)
+
+@get('/drzava/:x')
+def drzava(x):
+    username = get_user()
+    cur.execute("SELECT ime FROM drzava WHERE kratica=%s",[x])
+    ime = cur.fetchone()[0]
+    admin = is_admin(username)
+    cur.execute("SELECT * FROM tekmovalec WHERE drzava=%s ORDER BY priimek,ime",[x])
+    tekmovalci=cur.fetchall()
+
+    cur.execute("SELECT id FROM tekma WHERE tip_tekme = 'ekipna' AND datum <= date('now') ORDER BY datum DESC LIMIT 1")
+    id = cur.fetchone()[0]
+    cur.execute("SELECT kraj FROM tekma WHERE tekma.id=%s",[int(id)])
+    kraj = cur.fetchone()[0]
+    cur.execute("SELECT datum FROM tekma WHERE tekma.id=%s",[int(id)])
+    datum = cur.fetchone()[0]
+    datumi = str(datum).split('-')
+    datum = datumi[2] + '.' + datumi[1] + '.' + datumi[0]
+    cur.execute(
+        "SELECT r1.ranki, r1.startna_stevilka, t.fis_code, t.ime, t.priimek, t.drzava, r1.skoki AS skoki1, r1.tocke AS tocke1, r2.skoki AS skoki2, r2.tocke AS tocke2, r1.mesto_v_ekipi "
+        "FROM rezultat r1 JOIN rezultat r2 ON r1.id = r2.id AND r1.fis_code = r2.fis_code AND r1.serija < r2.serija JOIN tekmovalec t ON r1.fis_code = t.fis_code "
+        "WHERE r1.id=%s ORDER BY r1.ranki, r1.mesto_v_ekipi ASC",[int(id)])
+    tekma=cur.fetchall()
+
+    cur.execute(
+        "WITH zdruzena AS (SELECT * FROM rezultat JOIN tekma ON rezultat.id = tekma.id WHERE rezultat.drzava = %s) "
+        "SELECT ranki, count(*) AS stevilo FROM zdruzena WHERE tip_tekme <> 'ekipna' GROUP BY ranki ORDER BY ranki",[x])
+    mesta = cur.fetchall()
+    return template('drzava.html', napakaO=None, x=x, ime=ime,tekmovalci=tekmovalci,kraj=kraj,datum=datum, tekma=tekma, serija=True, ekipna=True, mesta=mesta, username = username, admin=admin )
+
 
 @get('/zadnja_tekma')
 def zadnja_tekma():
