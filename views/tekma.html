@@ -25,9 +25,6 @@
         %end
      % else:
         <th>Točke</th>
-        % if ekipna:
-            <th>Mesto v ekipi</th>
-        % end
      % end
   </tr>
  </thead>
@@ -66,7 +63,7 @@
             <td>{{fis_code}}</td>
             <td>{{ime}}</td>
             <td>{{priimek}}</td>
-            <td>{{drzava}}</td>
+            <td><p><img class="imageWithText" src="/static/flags/{{drzava}}.png"> {{drzava}}</p></td>
             <td>{{tocke}}</td>
         </tr>
     %end
