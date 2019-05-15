@@ -336,8 +336,10 @@ def zanimivosti():
     sezone = [2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019]
     cur.execute("SELECT * FROM drzava ORDER BY kratica")
     drzave = cur.fetchall()
+    cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
+    vsi_tekmovalci = cur.fetchall()
     return template('zanimivosti.html',id=5263,sezone=sezone,drzave=drzave,napaka=None,
-                    username=username,admin=admin,napakaO=None,izpis=False,tekmovalci=cur)
+                    username=username,admin=admin,napakaO=None,izpis=False,tekmovalci=cur,vsi_tekmovalci=vsi_tekmovalci,tekme_boljsi=cur)
 
 @post('/zanimivosti')
 def zanimivosti_izpisi():
@@ -346,14 +348,18 @@ def zanimivosti_izpisi():
     sezone = [2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019]
     cur.execute("SELECT * FROM drzava ORDER BY kratica")
     drzave = cur.fetchall()
+    cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
+    vsi_tekmovalci = cur.fetchall()
     drzava = request.forms.drzava
     sezona1= request.forms.sezona1
     sezona2= request.forms.sezona2
     '''Potrebno še malo dodelat ta SQL stavek, za enkrat samo v zelo slabi strukturi, samo toliko da vidim če vse deluje.'''
     cur.execute("WITH tek AS (WITH zdruzena AS (SELECT * FROM tekmovalec JOIN drzava ON tekmovalec.drzava = drzava.kratica JOIN rezultat USING (fis_code) JOIN tekma USING (id))"
                 "SELECT fis_code FROM zdruzena WHERE kratica=%s AND datum BETWEEN %s AND %s GROUP BY fis_code) SELECT * FROM tek JOIN tekmovalec USING (fis_code)",[drzava, datetime.date(int(sezona1) - 1, 11, 1), datetime.date(int(sezona2), 3, 31)])
+    '''Potrebno še pobrati rezultate iz forma in napisati SQL stavek'''
+    tekme_boljsi = []
     return template('zanimivosti.html', id=5263,sezone=sezone,drzave=drzave,napaka=None,
-                    username=username,admin=admin,napakaO=None, izpis=True,tekmovalci=cur)
+                    username=username,admin=admin,napakaO=None, izpis=True,tekmovalci=cur,vsi_tekmovalci=vsi_tekmovalci,tekme_boljsi=tekme_boljsi)
 ######################################################################
 # Glavni program
 

@@ -57,11 +57,11 @@
       </div>
   </form>
 
-  %if izpis:
+
     <div class="container">
         <div class="modal fade" id="exampleModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div class="modal-dialog" role="document">
-            <div class="modal-content" style="overflow-x: auto; overflow-y:auto;">
+            <div class="modal-content" style="overflow-x: auto; overflow-y:auto;width:800px;height:500px;">
               <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">REZULTAT:</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -100,4 +100,73 @@
           </div>
         </div>
     </div>
-  %end
+
+
+<h1>Izberi si dva tekmovalca in primerjaj njune uvrstitve.</h1>
+<p>Pri določeni izberi, bo izpisalo tabelo, na kateri bodo tekme in dodaten stolpec z tekmovalcem, ki je na tej tekmi imel boljši rezultat.</p>
+  <form action="/zanimivosti" method="POST">
+      <div class="form-row">
+        <div class="form-group col-md-3">
+            <label>Tekmovalec 1</label>
+            <select type="text" name="tekmovalec1" value="" class="form-control" required="true">
+                %for (id,ime,priimek) in vsi_tekmovalci:
+                    <option>{{id}} - {{priimek}} {{ime}}</option>
+                %end
+            </select>
+        </div>
+        <div class="form-group col-md-3">
+            <label>Tekmovalec 2</label>
+            <select type="text" name="tekmovalec2" value="" class="form-control" required="true">
+                %for (id,ime,priimek) in vsi_tekmovalci:
+                    <option>{{id}} - {{priimek}} {{ime}}</option>
+                %end
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Išči</button>
+        %if izpis:
+          <button type="button" data-toggle="modal" data-target="#exampleModal2">
+              Prikaži
+          </button>
+        %end
+      </div>
+  </form>
+
+
+    <div class="container">
+        <div class="modal fade" id="exampleModal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content" style="overflow-x: auto; overflow-y:auto;width:800px;height:500px;">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">REZULTAT:</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+                <table class="table table-bordered table-hover">
+                 <thead class="thead-light">
+                  <tr>
+                     <th>ID</th>
+                     <th>Kraj</th>
+                     <th>Datum</th>
+                     <th>Država</th>
+                     <th>Tip tekme</th>
+                     <th>Boljši tekmovalec</th>
+                  </tr>
+                 </thead>
+                     <tbody>
+                  %for (id,kraj,datum,drzava,tip_tekme,boljsi) in tekme_boljsi:
+                    <tr>
+                       <td><a href="/tekma/{{id}}/">{{id}}</a></td>
+                       <td>{{kraj}}</td>
+                       <td>{{datum}}</td>
+                       <td><a href="/drzava/{{drzava}}"><p><img class="imageWithText" src="/static/flags/{{drzava}}.png"> {{drzava}}</p></a></td>
+                       <td>{{tip_tekme}}</td>
+                       <td>{{boljsi}}</td>
+                    </tr>
+                  %end
+                     </tbody>
+                  </table>
+            </div>
+          </div>
+        </div>
+    </div>
