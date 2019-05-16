@@ -171,7 +171,7 @@ def tekmovalci(y):
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT * FROM tekmovalec ORDER BY " + y.replace('-', ' '))
-    return template('tekmovalci.html', tekmovalci=cur, napakaO=None, napaka=None, username=username, admin=admin)
+    return template('tekmovalci.html', tekmovalci=cur, urejanje=True, napakaO=None, napaka=None, username=username, admin=admin)
 
 @post('/tekmovalci/:y')
 def tekmovalci(y):
@@ -200,7 +200,7 @@ def tekmovalci(y):
                     "OR LOWER(smucke) LIKE %s",
                     8*['%' + search + '%'])
 
-    return template('tekmovalci.html', tekmovalci=cur, napakaO=None, napaka=napaka, username=username, admin=admin)
+    return template('tekmovalci.html', tekmovalci=cur, urejanje=False, napakaO=None, napaka=napaka, username=username, admin=admin)
 
 @get('/tekmovalec/:x/:y')
 def tekmovalec(x,y):

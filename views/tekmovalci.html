@@ -19,29 +19,31 @@
         <circle cx="10.5" cy="10.5" r="7.5"/><path d="M21 21l-5.2-5.2"/></svg>
 </form>
 
-<div class="dropdown" style="float:right;">
-  <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" align="right">
-    Razvrščanje
-  </button>
-  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-    <a class="dropdown-item" href="/tekmovalci/Fis_code-DESC">FIS code - padajoče</a>
-    <a class="dropdown-item" href="/tekmovalci/Fis_code-ASC">FIS code - naraščajoče</a>
-    <a class="dropdown-item" href="/tekmovalci/Status-DESC">Status - padajoče</a>
-    <a class="dropdown-item" href="/tekmovalci/Status-ASC">Status - naraščajoče</a>
-    <a class="dropdown-item" href="/tekmovalci/Ime-DESC">Ime - padajoče</a>
-    <a class="dropdown-item" href="/tekmovalci/Ime-ASC">Ime - naraščajoče</a>
-    <a class="dropdown-item" href="/tekmovalci/Priimek-DESC">Priimek - padajoče</a>
-    <a class="dropdown-item" href="/tekmovalci/Priimek-ASC">Priimek - naraščajoče</a>
-    <a class="dropdown-item" href="/tekmovalci/Drzava-DESC">Država - padajoče</a>
-    <a class="dropdown-item" href="/tekmovalci/Drzava-ASC">Država - naraščajoče</a>
-    <a class="dropdown-item" href="/tekmovalci/Rojstvo-DESC">Rojstvo - Starejši prej</a>
-    <a class="dropdown-item" href="/tekmovalci/Rojstvo-ASC">Rojstvo - Mlajši prej</a>
-    <a class="dropdown-item" href="/tekmovalci/Klub-DESC">Klub - padajoče</a>
-    <a class="dropdown-item" href="/tekmovalci/Klub-ASC">Klub - naraščajoče</a>
-    <a class="dropdown-item" href="/tekmovalci/Smucke-DESC">Smučke - padajoče</a>
-    <a class="dropdown-item" href="/tekmovalci/Smucke-ASC">Smučke - naraščajoče</a>
-  </div>
-</div>
+%if urejanje:
+    <div class="dropdown" style="float:right;">
+      <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" align="right">
+        Razvrščanje
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item" href="/tekmovalci/Fis_code-DESC">FIS code - padajoče</a>
+        <a class="dropdown-item" href="/tekmovalci/Fis_code-ASC">FIS code - naraščajoče</a>
+        <a class="dropdown-item" href="/tekmovalci/Status-DESC">Status - padajoče</a>
+        <a class="dropdown-item" href="/tekmovalci/Status-ASC">Status - naraščajoče</a>
+        <a class="dropdown-item" href="/tekmovalci/Ime-DESC">Ime - padajoče</a>
+        <a class="dropdown-item" href="/tekmovalci/Ime-ASC">Ime - naraščajoče</a>
+        <a class="dropdown-item" href="/tekmovalci/Priimek-DESC">Priimek - padajoče</a>
+        <a class="dropdown-item" href="/tekmovalci/Priimek-ASC">Priimek - naraščajoče</a>
+        <a class="dropdown-item" href="/tekmovalci/Drzava-DESC">Država - padajoče</a>
+        <a class="dropdown-item" href="/tekmovalci/Drzava-ASC">Država - naraščajoče</a>
+        <a class="dropdown-item" href="/tekmovalci/Rojstvo-DESC">Rojstvo - Starejši prej</a>
+        <a class="dropdown-item" href="/tekmovalci/Rojstvo-ASC">Rojstvo - Mlajši prej</a>
+        <a class="dropdown-item" href="/tekmovalci/Klub-DESC">Klub - padajoče</a>
+        <a class="dropdown-item" href="/tekmovalci/Klub-ASC">Klub - naraščajoče</a>
+        <a class="dropdown-item" href="/tekmovalci/Smucke-DESC">Smučke - padajoče</a>
+        <a class="dropdown-item" href="/tekmovalci/Smucke-ASC">Smučke - naraščajoče</a>
+      </div>
+    </div>
+%end
 
 <table class="table table-bordered table-hover">
  <thead class="thead-light">
