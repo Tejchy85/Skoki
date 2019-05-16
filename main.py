@@ -241,13 +241,105 @@ def tekma(x):
     cur.execute("SELECT serija FROM rezultat WHERE id = %s ORDER BY serija DESC LIMIT 1", [int(x)])
     serija = cur.fetchone()[0]
     if serija == 2:
-        cur.execute("SELECT r1.ranki, r1.startna_stevilka, t.fis_code, t.ime, t.priimek, t.drzava, r1.skoki AS skoki1, r1.tocke AS tocke1, r2.skoki AS skoki2, r2.tocke AS tocke2, r1.mesto_v_ekipi FROM rezultat r1 JOIN rezultat r2 ON r1.id = r2.id AND r1.fis_code = r2.fis_code AND r1.serija < r2.serija JOIN tekmovalec t ON r1.fis_code = t.fis_code WHERE r1.id = %s ORDER BY r1.ranki, r1.mesto_v_ekipi ASC",[int(x)])
+        cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,skoki1,tocke1,skoki2,tocke2,tocke,mesto_v_ekipi FROM dve_seriji WHERE id = %s",[int(x)])
         serija_bool = True
     else:
-        cur.execute("SELECT r.ranki, r.startna_stevilka, r.fis_code, t.ime, t.priimek, r.drzava, r.tocke, r.mesto_v_ekipi FROM rezultat r LEFT JOIN tekmovalec t ON r.fis_code = t.fis_code WHERE id=%s ORDER BY ranki, mesto_v_ekipi ASC",[int(x)])
+        cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,tocke,mesto_v_ekipi FROM ena_serija WHERE id=%s",[int(x)])
         serija_bool = False
 
-    return template('tekma.html', napakaO=None,x = x, tekma = cur, kraj=kraj_datum[0], datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija_bool)
+    return template('tekma.html', napakaO=None, x = x, tekma = cur, kraj=kraj_datum[0], datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija_bool, napaka=None)
+
+@post('/tekma/:x/')
+def tekma_post(x):
+    search = request.forms.search.lower()
+    username = get_user()
+    admin = is_admin(username)
+
+    cur.execute("SELECT kraj, datum FROM tekma WHERE id = %s", [int(x)])
+    kraj_datum = cur.fetchone()
+    datumi = str(kraj_datum[1]).split('-')
+    datum = datumi[2] + '.' + datumi[1] + '.' + datumi[0]
+    cur.execute("SELECT tip_tekme FROM tekma WHERE id = %s LIMIT 1", [int(x)])
+    if cur.fetchone()[0] == 'posamicna':
+        ekipna = False
+    else:
+        ekipna = True
+    cur.execute("SELECT serija FROM rezultat WHERE id = %s ORDER BY serija DESC LIMIT 1", [int(x)])
+    serija = cur.fetchone()[0]
+    if serija == 2:
+        serija_bool = True
+    else:
+        serija_bool = False
+
+    napaka = None
+    head_list1 = ['rank', 'startna stevilka', 'fis code', 'ime', 'priimek', 'drzava', 'tocke', 'mesto v ekipi']
+    head_list2 = ['ranki', 'startna stevilka', 'fis code', 'ime', 'priimek', 'drzava', 'skoki1', 'tocke1', 'skoki2', 'tocke2', 'tocke', 'mesto v ekipi']
+
+    sez = search.split(':')
+    if len(sez) > 1:
+        if serija_bool:
+            cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,skoki1,tocke1,skoki2,tocke2,tocke,mesto_v_ekipi FROM dve_seriji WHERE id = %s AND (CAST(fis_code AS varchar(10)) LIKE %s"
+                        ['%' + search + '%'])
+        else:
+            cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,tocke,mesto_v_ekipi FROM ena_serija WHERE id = %s AND (CAST(fis_code AS varchar(10)) LIKE %s"
+                        ['%' + search + '%'])
+    else:
+        if serija_bool:
+            cur.execute(
+                "SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,skoki1,tocke1,skoki2,tocke2,tocke,mesto_v_ekipi FROM dve_seriji WHERE id = %s AND (CAST(fis_code AS varchar(10)) LIKE %s"
+                "OR CAST(ranki AS varchar(10)) LIKE %s"
+                "OR CAST(startna_stevilka AS varchar(10)) LIKE %s"
+                "OR LOWER(ime) LIKE %s"
+                "OR LOWER(priimek) LIKE %s"
+                "OR LOWER(drzava) LIKE %s"
+                "OR CAST(skoki1 AS varchar(10)) LIKE %s"
+                "OR CAST(skoki2 AS varchar(10)) LIKE %s"
+                "OR CAST(tocke1 AS varchar(10)) LIKE %s"
+                "OR CAST(tocke2 AS varchar(10)) LIKE %s"
+                "OR CAST(tocke AS varchar(10)) LIKE %s"
+                "OR CAST(mesto_v_ekipi AS varchar(10)) LIKE %s)",
+                [int(x)] + 12 * ['%' + search + '%'])
+        else:
+            cur.execute(
+                "SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,tocke,mesto_v_ekipi FROM ena_serija WHERE id = %s AND (CAST(fis_code AS varchar(10)) LIKE %s"
+                "OR CAST(ranki AS varchar(10)) LIKE %s"
+                "OR CAST(startna_stevilka AS varchar(10)) LIKE %s"
+                "OR LOWER(ime) LIKE %s"
+                "OR LOWER(priimek) LIKE %s"
+                "OR LOWER(drzava) LIKE %s"
+                "OR CAST(tocke AS varchar(10)) LIKE %s"
+                "OR CAST(mesto_v_ekipi AS varchar(10)) LIKE %s)",
+                [int(x)] + 8 * ['%' + search + '%'])
+
+
+
+    return template('tekma.html', napakaO=None, x=x, tekma=cur, kraj=kraj_datum[0], datum=datum, username=username,
+                    admin=admin, ekipna=ekipna, serija=serija_bool, napaka=napaka)
+
+    '''
+    sez = search.split(':')
+    if len(sez) > 1:
+        search = sez[1].strip()
+        if sez[0].replace(' ', '') == 'fiscode':
+            cur.execute("SELECT * FROM tekmovalec WHERE CAST(fis_code AS varchar(10)) LIKE %s", ['%' + search + '%'])
+        elif sez[0].strip() in head_list:
+            cur.execute("SELECT * FROM tekmovalec WHERE LOWER(" + sez[0] + ") LIKE %s", ['%' + search + '%'])
+        else:
+            napaka = "ne sam ne"
+    else:
+        cur.execute("SELECT * FROM tekmovalec WHERE CAST(fis_code AS varchar(10)) LIKE %s"
+                    "OR LOWER(status) LIKE %s"
+                    "OR LOWER(ime) LIKE %s"
+                    "OR LOWER(priimek) LIKE %s"
+                    "OR LOWER(drzava) LIKE %s"
+                    "OR LOWER(rojstvo) LIKE %s"
+                    "OR LOWER(klub) LIKE %s"
+                    "OR LOWER(smucke) LIKE %s",
+                    8 * ['%' + search + '%'])
+
+    return template('tekma.html', tekma=cur, napakaO=None, x=x, kraj=kraj_datum[0], datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija_bool, napaka=napaka)
+    '''
+
 
 @get('/drzave')
 def drzave():

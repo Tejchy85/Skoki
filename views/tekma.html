@@ -2,6 +2,24 @@
 
 <h1>{{kraj}}, {{datum}}</h1>
 
+%if napaka:
+        <div class="alert alert-warning">{{napaka}}</div>
+%end
+
+<!-- Search form -->
+<form class="form-inline" method="post">
+    <input class="form-control form-control-sm mr-3 w-25" type="text" placeholder="Search" aria-label="Search" name="search">
+    <i class="fas fa-search" aria-hidden="true"></i>
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="mx-3" role="img" viewBox="0 0 24 24" focusable="false"
+         data-toggle="popover" data-trigger="hover" data-placement="right" data-html="true"
+         data-content="Napredno iskanje:
+         <br/>'Ime stolpca' : 'iskalni parameter'
+         <br/>Na primer:
+         <br/>Fis code : 5658
+         <br/>Ime : Peter">
+        <circle cx="10.5" cy="10.5" r="7.5"/><path d="M21 21l-5.2-5.2"/></svg>
+</form>
+
  <table class="table table-bordered table-hover">
  <thead class="thead-light">
   <tr>
@@ -30,7 +48,7 @@
  </thead>
      <tbody>
   % if serija:
-    %for (ranki,startna_stevilka,fis_code,ime,priimek,drzava,skoki1,tocke1,skoki2,tocke2,mesto_v_ekipi) in tekma:
+    %for (ranki,startna_stevilka,fis_code,ime,priimek,drzava,skoki1,tocke1,skoki2,tocke2,tocke,mesto_v_ekipi) in tekma:
         <tr>
             <td>{{ranki}}</td>
             % if ekipna:
@@ -47,7 +65,7 @@
             <td>{{skoki2}}</td>
             <td>{{tocke2}}</td>
             % if not ekipna:
-                <td>{{tocke1 + tocke2}}</td>
+                <td>{{tocke}}</td>
             % end
         </tr>
     %end
