@@ -1,4 +1,16 @@
 %rebase('osnova.html', naslov='Tekmovalec {}'.format(x))
+<style>
+    #podatki{
+    border: 1px solid black;
+    width:100%;
+    background-color: #f2f2f2
+    }
+
+    #razsirjene{
+    padding: 15px;
+    }
+</style>
+
 
 %if napaka:
     <div class="alert alert-warning">{{napaka}}</div>
@@ -6,22 +18,22 @@
 
 %for (fis_code,status,ime,priimek,drzava,rojstvo,klub,smucke) in tekmovalec:
     <h1>{{ime}} {{priimek}}</h1>
-    <table style="width:800px">
-        <tr>
-            <th>Fis code: </th>
-            <th>{{fis_code}} </th>
-            <th>Status: </th>
-            <th>{{status}} </th>
-            <th>Država: </th>
-            <th>{{drzava}} </th>
+    <table id="podatki">
+        <tr id="razsirjene">
+            <th id="razsirjene">Fis code: </th>
+            <th id="razsirjene">{{fis_code}} </th>
+            <th id="razsirjene">Status: </th>
+            <th id="razsirjene">{{status}} </th>
+            <th id="razsirjene">Država: </th>
+            <th id="razsirjene">{{drzava}} </th>
         </tr>
-        <tr>
-            <th>Rojstvo: </th>
-            <th>{{rojstvo}}</th>
-            <th>Klub: </th>
-            <th>{{klub}} </th>
-            <th>Smuči: </th>
-            <th>{{smucke}} </th>
+        <tr id="razsirjene">
+            <th id="razsirjene">Rojstvo: </th>
+            <th id="razsirjene">{{rojstvo}}</th>
+            <th id="razsirjene">Klub: </th>
+            <th id="razsirjene">{{klub}} </th>
+            <th id="razsirjene">Smuči: </th>
+            <th id="razsirjene">{{smucke}} </th>
         </tr>
     </table>
 %end
@@ -32,7 +44,7 @@
     </p>
 % end
 
-<table class="table table-bordered table-hover">
+<table class="table table-bordered table-hover" style="margin-top:30px;">
  <thead class="thead-light">
   <tr>
      <th scope="col">Datum</th>
