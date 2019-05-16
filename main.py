@@ -254,6 +254,7 @@ def tekma_post(x):
     search = request.forms.search.lower()
     username = get_user()
     admin = is_admin(username)
+    napaka = None
 
     cur.execute("SELECT kraj, datum FROM tekma WHERE id = %s", [int(x)])
     kraj_datum = cur.fetchone()
@@ -268,77 +269,33 @@ def tekma_post(x):
     serija = cur.fetchone()[0]
     if serija == 2:
         serija_bool = True
+        head_list = ['ranki', 'startna_stevilka', 'fis_code', 'skoki1', 'tocke1', 'skoki2', 'tocke2', 'tocke', 'mesto_v_ekipi']
+        string = 'dve_seriji'
     else:
         serija_bool = False
+        head_list = ['ranki', 'startna_stevilka', 'fis_code', 'tocke', 'mesto_v_ekipi']
+        string = 'ena_serija'
 
-    napaka = None
-    head_list1 = ['rank', 'startna stevilka', 'fis code', 'ime', 'priimek', 'drzava', 'tocke', 'mesto v ekipi']
-    head_list2 = ['ranki', 'startna stevilka', 'fis code', 'ime', 'priimek', 'drzava', 'skoki1', 'tocke1', 'skoki2', 'tocke2', 'tocke', 'mesto v ekipi']
-
+    text_list = ['ime', 'priimek', 'drzava']
     sez = search.split(':')
+
     if len(sez) > 1:
-        if serija_bool:
-            cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,skoki1,tocke1,skoki2,tocke2,tocke,mesto_v_ekipi FROM dve_seriji WHERE id = %s AND (CAST(fis_code AS varchar(10)) LIKE %s"
-                        ['%' + search + '%'])
-        else:
-            cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,tocke,mesto_v_ekipi FROM ena_serija WHERE id = %s AND (CAST(fis_code AS varchar(10)) LIKE %s"
-                        ['%' + search + '%'])
-    else:
-        if serija_bool:
-            cur.execute(
-                "SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,skoki1,tocke1,skoki2,tocke2,tocke,mesto_v_ekipi FROM dve_seriji WHERE id = %s AND (CAST(fis_code AS varchar(10)) LIKE %s"
-                "OR CAST(ranki AS varchar(10)) LIKE %s"
-                "OR CAST(startna_stevilka AS varchar(10)) LIKE %s"
-                "OR LOWER(ime) LIKE %s"
-                "OR LOWER(priimek) LIKE %s"
-                "OR LOWER(drzava) LIKE %s"
-                "OR CAST(skoki1 AS varchar(10)) LIKE %s"
-                "OR CAST(skoki2 AS varchar(10)) LIKE %s"
-                "OR CAST(tocke1 AS varchar(10)) LIKE %s"
-                "OR CAST(tocke2 AS varchar(10)) LIKE %s"
-                "OR CAST(tocke AS varchar(10)) LIKE %s"
-                "OR CAST(mesto_v_ekipi AS varchar(10)) LIKE %s)",
-                [int(x)] + 12 * ['%' + search + '%'])
-        else:
-            cur.execute(
-                "SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,tocke,mesto_v_ekipi FROM ena_serija WHERE id = %s AND (CAST(fis_code AS varchar(10)) LIKE %s"
-                "OR CAST(ranki AS varchar(10)) LIKE %s"
-                "OR CAST(startna_stevilka AS varchar(10)) LIKE %s"
-                "OR LOWER(ime) LIKE %s"
-                "OR LOWER(priimek) LIKE %s"
-                "OR LOWER(drzava) LIKE %s"
-                "OR CAST(tocke AS varchar(10)) LIKE %s"
-                "OR CAST(mesto_v_ekipi AS varchar(10)) LIKE %s)",
-                [int(x)] + 8 * ['%' + search + '%'])
-
-
-
-    return template('tekma.html', napakaO=None, x=x, tekma=cur, kraj=kraj_datum[0], datum=datum, username=username,
-                    admin=admin, ekipna=ekipna, serija=serija_bool, napaka=napaka)
-
-    '''
-    sez = search.split(':')
-    if len(sez) > 1:
-        search = sez[1].strip()
-        if sez[0].replace(' ', '') == 'fiscode':
-            cur.execute("SELECT * FROM tekmovalec WHERE CAST(fis_code AS varchar(10)) LIKE %s", ['%' + search + '%'])
-        elif sez[0].strip() in head_list:
-            cur.execute("SELECT * FROM tekmovalec WHERE LOWER(" + sez[0] + ") LIKE %s", ['%' + search + '%'])
+        if sez[0].replace(' ', '_') in head_list:
+            cur.execute("SELECT " + ','.join(head_list[:3]) + ',' + ','.join(text_list) + ',' + ','.join(head_list[3:]) + ' FROM ' + string + " WHERE id = %s AND CAST(" + sez[0] + " AS varchar(10)) LIKE %s",
+            [int(x)] + ['%' + sez[1].strip() + '%'])
+        elif sez[0].replace(' ', '_') in text_list:
+            cur.execute("SELECT " + ','.join(head_list[:3]) + ',' + ','.join(text_list) + ',' + ','.join(head_list[3:]) + ' FROM ' + string + " WHERE id = %s AND LOWER(" + sez[0] + ") LIKE %s",
+            [int(x)] + ['%' + sez[1].strip() + '%'])
         else:
             napaka = "ne sam ne"
     else:
-        cur.execute("SELECT * FROM tekmovalec WHERE CAST(fis_code AS varchar(10)) LIKE %s"
-                    "OR LOWER(status) LIKE %s"
-                    "OR LOWER(ime) LIKE %s"
-                    "OR LOWER(priimek) LIKE %s"
-                    "OR LOWER(drzava) LIKE %s"
-                    "OR LOWER(rojstvo) LIKE %s"
-                    "OR LOWER(klub) LIKE %s"
-                    "OR LOWER(smucke) LIKE %s",
-                    8 * ['%' + search + '%'])
+        cur.execute("SELECT " + ','.join(head_list[:3]) + ',' + ','.join(text_list) + ',' + ','.join(head_list[3:]) + ' FROM ' + string + " WHERE id = %s AND (CAST("
+                    + ' AS varchar(10)) LIKE %s OR CAST('.join(head_list) + " AS varchar(10)) LIKE %s"
+                    + " OR LOWER(" + ') LIKE %s OR LOWER('.join(text_list) + ") LIKE %s)",
+                    [int(x)] + (len(head_list) + len(text_list)) * ['%' + search + '%'])
 
-    return template('tekma.html', tekma=cur, napakaO=None, x=x, kraj=kraj_datum[0], datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija_bool, napaka=napaka)
-    '''
+    return template('tekma.html', napakaO=None, x=x, tekma=cur, kraj=kraj_datum[0], datum=datum, username=username,
+                    admin=admin, ekipna=ekipna, serija=serija_bool, napaka=napaka)
 
 
 @get('/drzave')
