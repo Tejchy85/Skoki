@@ -178,12 +178,12 @@ def tekmovalci(y):
     search = request.forms.search
     username = get_user()
     admin = is_admin(username)
-    napaka=None
+    napaka = None
     head_list = ['status', 'ime', 'priimek', 'drzava', 'rojstvo', 'klub', 'smucke']
     sez = search.split(':')
     if len(sez) > 1:
         search = sez[1].strip()
-        if sez[0].strip().lower() == 'fis_code':
+        if sez[0].replace(' ', '').lower() == 'fiscode':
             cur.execute("SELECT * FROM tekmovalec WHERE CAST(fis_code AS varchar(10)) LIKE LOWER(%s)", ['%' + search + '%'])
         elif sez[0].strip().lower() in head_list:
             cur.execute("SELECT * FROM tekmovalec WHERE LOWER(" + sez[0] + ") LIKE LOWER(%s)", ['%' + search + '%'])
