@@ -166,11 +166,6 @@ def register_post():
             response.set_cookie('username', username, path='/', secret=secret)
             redirect("/")
 
-
-@get('/Video')
-def video():
-    return template('Video.html', napakaO=None)
-
 @get('/tekmovalci/:y')
 def tekmovalci(y):
     username = get_user()
