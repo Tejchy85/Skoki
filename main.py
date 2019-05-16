@@ -202,13 +202,16 @@ def tekmovalci(y):
 
     return template('tekmovalci.html', tekmovalci=cur, napakaO=None, napaka=napaka, username=username, admin=admin)
 
-@get('/tekmovalec/:x/')
-def tekmovalec(x):
+@get('/tekmovalec/:x/:y')
+def tekmovalec(x,y):
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [int(x)])
     tekmovalec = cur.fetchall()
-    cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t.datum DESC", [int(x)])
+    if 'Ranki' in y.split("-"):
+        cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY r."+ y.replace('-', ' '), [int(x)])
+    else:
+        cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t."+ y.replace('-', ' '), [int(x)])
     return template('tekmovalec.html', x=x, tekmovalec=tekmovalec,tekme=cur, napakaO=None, napaka=None, username=username, admin=admin)
 
 @get('/sezone')

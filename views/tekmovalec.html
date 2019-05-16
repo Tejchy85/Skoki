@@ -44,6 +44,25 @@
     </p>
 % end
 
+<div class="dropdown" style="float:right; margin-top:20px;">
+  <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" align="right">
+    Razvrščanje
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <a class="dropdown-item" href="/tekmovalec/{{x}}/Datum-ASC">Datum - Starejše prej</a>
+    <a class="dropdown-item" href="/tekmovalec/{{x}}/Datum-DESC">Datum - Novejše prej</a>
+    <a class="dropdown-item" href="/tekmovalec/{{x}}/Kraj-ASC">Kraj - od A do Ž</a>
+    <a class="dropdown-item" href="/tekmovalec/{{x}}/Kraj-DESC">Kraj - od Ž do A</a>
+    <a class="dropdown-item" href="/tekmovalec/{{x}}/Drzava-ASC">Država - od A do Ž</a>
+    <a class="dropdown-item" href="/tekmovalec/{{x}}/Drzava-DESC">Država - od Ž do A</a>
+    <a class="dropdown-item" href="/tekmovalec/{{x}}/Tip_tekme-ASC">Tip tekme - od A do Ž</a>
+    <a class="dropdown-item" href="/tekmovalec/{{x}}/Tip_tekme-DESC">Tip tekme - od Ž do A</a>
+    <a class="dropdown-item" href="/tekmovalec/{{x}}/Ranki-DESC">Rank - padajoče</a>
+    <a class="dropdown-item" href="/tekmovalec/{{x}}/Ranki-ASC">Rank - naraščajoče</a>
+  </div>
+</div>
+
+
 <table class="table table-bordered table-hover" style="margin-top:30px;">
  <thead class="thead-light">
   <tr>
