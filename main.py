@@ -173,6 +173,35 @@ def tekmovalci(y):
     cur.execute("SELECT * FROM tekmovalec ORDER BY " + y.replace('-', ' '))
     return template('tekmovalci.html', tekmovalci=cur, napakaO=None, napaka=None, username=username, admin=admin)
 
+@post('/tekmovalci/:y')
+def tekmovalci(y):
+    search = request.forms.search
+    username = get_user()
+    admin = is_admin(username)
+    napaka=None
+    head_list = ['status', 'ime', 'priimek', 'drzava', 'rojstvo', 'klub', 'smucke']
+    sez = search.split(':')
+    if len(sez) > 1:
+        search = sez[1].strip()
+        if sez[0].strip().lower() == 'fis_code':
+            cur.execute("SELECT * FROM tekmovalec WHERE CAST(fis_code AS varchar(10)) LIKE LOWER(%s)", ['%' + search + '%'])
+        elif sez[0].strip().lower() in head_list:
+            cur.execute("SELECT * FROM tekmovalec WHERE LOWER(" + sez[0] + ") LIKE LOWER(%s)", ['%' + search + '%'])
+        else:
+            napaka = "ne sam ne"
+    else:
+        cur.execute("SELECT * FROM tekmovalec WHERE CAST(fis_code AS varchar(10)) LIKE %s"
+                    "OR LOWER(status) LIKE LOWER(%s)"
+                    "OR LOWER(ime) LIKE LOWER(%s) "
+                    "OR LOWER(priimek) LIKE LOWER(%s)"
+                    "OR LOWER(drzava) LIKE LOWER(%s)"
+                    "OR LOWER(rojstvo) LIKE LOWER(%s)"
+                    "OR LOWER(klub) LIKE LOWER(%s)"
+                    "OR LOWER(smucke) LIKE LOWER(%s)",
+                    8*['%' + search + '%'])
+
+    return template('tekmovalci.html', tekmovalci=cur, napakaO=None, napaka=napaka, username=username, admin=admin)
+
 @get('/tekmovalec/:x/')
 def tekmovalec(x):
     username = get_user()
