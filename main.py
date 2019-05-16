@@ -175,7 +175,7 @@ def tekmovalci(y):
 
 @post('/tekmovalci/:y')
 def tekmovalci(y):
-    search = request.forms.search
+    search = request.forms.search.lower()
     username = get_user()
     admin = is_admin(username)
     napaka = None
@@ -183,21 +183,21 @@ def tekmovalci(y):
     sez = search.split(':')
     if len(sez) > 1:
         search = sez[1].strip()
-        if sez[0].replace(' ', '').lower() == 'fiscode':
-            cur.execute("SELECT * FROM tekmovalec WHERE CAST(fis_code AS varchar(10)) LIKE LOWER(%s)", ['%' + search + '%'])
-        elif sez[0].strip().lower() in head_list:
-            cur.execute("SELECT * FROM tekmovalec WHERE LOWER(" + sez[0] + ") LIKE LOWER(%s)", ['%' + search + '%'])
+        if sez[0].replace(' ', '') == 'fiscode':
+            cur.execute("SELECT * FROM tekmovalec WHERE CAST(fis_code AS varchar(10)) LIKE %s", ['%' + search + '%'])
+        elif sez[0].strip() in head_list:
+            cur.execute("SELECT * FROM tekmovalec WHERE LOWER(" + sez[0] + ") LIKE %s", ['%' + search + '%'])
         else:
             napaka = "ne sam ne"
     else:
         cur.execute("SELECT * FROM tekmovalec WHERE CAST(fis_code AS varchar(10)) LIKE %s"
-                    "OR LOWER(status) LIKE LOWER(%s)"
-                    "OR LOWER(ime) LIKE LOWER(%s) "
-                    "OR LOWER(priimek) LIKE LOWER(%s)"
-                    "OR LOWER(drzava) LIKE LOWER(%s)"
-                    "OR LOWER(rojstvo) LIKE LOWER(%s)"
-                    "OR LOWER(klub) LIKE LOWER(%s)"
-                    "OR LOWER(smucke) LIKE LOWER(%s)",
+                    "OR LOWER(status) LIKE %s"
+                    "OR LOWER(ime) LIKE %s"
+                    "OR LOWER(priimek) LIKE %s"
+                    "OR LOWER(drzava) LIKE %s"
+                    "OR LOWER(rojstvo) LIKE %s"
+                    "OR LOWER(klub) LIKE %s"
+                    "OR LOWER(smucke) LIKE %s",
                     8*['%' + search + '%'])
 
     return template('tekmovalci.html', tekmovalci=cur, napakaO=None, napaka=napaka, username=username, admin=admin)
