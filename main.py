@@ -342,7 +342,7 @@ def drzava(x):
 def zadnja_tekma():
     cur.execute("SELECT id FROM tekma WHERE datum <= date('now') ORDER BY datum DESC LIMIT 1")
     id = cur.fetchone()[0]
-    return tekma(id)
+    return tekma(id,'ranki-ASC')
 
 @get('/dodaj_tekmovalca')
 def dodaj_tekmovalca():
