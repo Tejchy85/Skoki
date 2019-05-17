@@ -228,8 +228,8 @@ def tekme(x,y):
                 [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
     return template('tekme_sezona.html', napakaO=None, x=x, tekme=cur, username = username, admin=admin)
 
-@get('/tekma/:x/')
-def tekma(x):
+@get('/tekma/:x/:y')
+def tekma(x,y):
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT kraj, datum FROM tekma WHERE id = %s", [int(x)])
@@ -244,16 +244,16 @@ def tekma(x):
     cur.execute("SELECT serija FROM rezultat WHERE id = %s ORDER BY serija DESC LIMIT 1", [int(x)])
     serija = cur.fetchone()[0]
     if serija == 2:
-        cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,skoki1,tocke1,skoki2,tocke2,tocke,mesto_v_ekipi FROM dve_seriji WHERE id = %s",[int(x)])
+        cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,skoki1,tocke1,skoki2,tocke2,tocke,mesto_v_ekipi FROM dve_seriji WHERE id = %s ORDER BY " + y.replace('-', ' '),[int(x)])
         serija_bool = True
     else:
-        cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,tocke,mesto_v_ekipi FROM ena_serija WHERE id=%s",[int(x)])
+        cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,tocke,mesto_v_ekipi FROM ena_serija WHERE id=%s ORDER BY " + y.replace('-', ' '),[int(x)])
         serija_bool = False
 
-    return template('tekma.html', napakaO=None, x = x, tekma = cur, kraj=kraj_datum[0], datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija_bool, napaka=None)
+    return template('tekma.html', napakaO=None, x = x, tekma = cur, kraj=kraj_datum[0], datum=datum, username = username, urejanje=True, admin=admin, ekipna=ekipna, serija=serija_bool, napaka=None)
 
-@post('/tekma/:x/')
-def tekma_post(x):
+@post('/tekma/:x/:y')
+def tekma_post(x,y):
     search = request.forms.search.lower()
     username = get_user()
     admin = is_admin(username)
@@ -297,7 +297,7 @@ def tekma_post(x):
                     + " OR LOWER(" + ') LIKE %s OR LOWER('.join(text_list) + ") LIKE %s)",
                     [int(x)] + (len(head_list) + len(text_list)) * ['%' + search + '%'])
 
-    return template('tekma.html', napakaO=None, x=x, tekma=cur, kraj=kraj_datum[0], datum=datum, username=username,
+    return template('tekma.html', napakaO=None, x=x, tekma=cur, kraj=kraj_datum[0], datum=datum, username=username, urejanje=False,
                     admin=admin, ekipna=ekipna, serija=serija_bool, napaka=napaka)
 
 
