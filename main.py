@@ -344,17 +344,41 @@ def zadnja_tekma():
     id = cur.fetchone()[0]
     return tekma(id,'ranki-ASC')
 
+@get('/dodaj_drzavo')
+def dodaj_drzavo():
+    username = get_user()
+    admin = is_admin(username)
+    return template('dodaj_drzavo.html',kratica='',ime='',napakaO=None, napaka=None,username=username,admin=admin)
+
+@post('/dodaj_drzavo')
+def dodaj_drzavo_post():
+    username = get_user()
+    admin=is_admin(username)
+    kratica = request.forms.kratica
+    ime = request.forms.ime
+
+    try:
+        cur.execute("INSERT INTO drzava (kratica,ime) VALUES (%s,%s)",[kratica,ime])
+        conn.commit()
+    except Exception as ex:
+        return template('dodaj_drzavo.html',kratica=kratica,ime=ime,napakaO=None,napaka='Zgodila se je napaka: %s'% ex,username=username,admin=admin)
+    redirect("/")
+
 @get('/dodaj_tekmovalca')
 def dodaj_tekmovalca():
     username = get_user()
     admin = is_admin(username)
-    return template('dodaj_tekmovalca.html', fis_code='', ime='', priimek='', drzava='', rojstvo='', klub='',
+    cur.execute("SELECT kratica,ime FROM drzava")
+    drzave = cur.fetchall()
+    return template('dodaj_tekmovalca.html', fis_code='', ime='', priimek='', drzave=drzave, rojstvo='', klub='',
                         smucke='', status='', napakaO=None, napaka=None, username=username, admin=admin)
 
 @post('/dodaj_tekmovalca')
 def dodaj_tekmovalca_post():
     username = get_user()
     admin = is_admin(username)
+    cur.execute("SELECT kratica,ime FROM drzava")
+    drzave = cur.fetchall()
     fis_code = request.forms.fis_code
     ime = request.forms.ime
     priimek = request.forms.priimek
@@ -368,7 +392,7 @@ def dodaj_tekmovalca_post():
                     (fis_code, ime, priimek, drzava, rojstvo, klub, smucke, status))
         conn.commit()
     except Exception as ex:
-        return template('dodaj_tekmovalca.html', napakaO=None, fis_code=fis_code, ime=ime, priimek=priimek, drzava=drzava, rojstvo=rojstvo, klub=klub, smucke=smucke, status=status,
+        return template('dodaj_tekmovalca.html', napakaO=None, fis_code=fis_code, ime=ime, priimek=priimek, drzave=drzave, rojstvo=rojstvo, klub=klub, smucke=smucke, status=status,
                         napaka = 'Zgodila se je napaka: %s' % ex, username=username, admin=admin)
     redirect("/")
 
@@ -376,21 +400,26 @@ def dodaj_tekmovalca_post():
 def uredi_tekmovalca(x):
     username = get_user()
     admin = is_admin(username)
+    cur.execute("SELECT kratica,ime FROM drzava")
+    drzave = cur.fetchall()
     cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [int(x)])
     podatki = cur.fetchone()
-    return template('uredi_tekmovalca.html', fis_code=x, status=podatki[1], ime=podatki[2], priimek=podatki[3], drzava=podatki[4], rojstvo=podatki[5], klub=podatki[6],
+    return template('uredi_tekmovalca.html', fis_code=x, status=podatki[1], ime=podatki[2], priimek=podatki[3], drzave=drzave, rojstvo=podatki[5], klub=podatki[6],
                         smucke=podatki[7], x=x, napakaO=None, napaka=None, username=username, admin=admin)
 
 @get('/dodaj_tekmo')
 def dodaj_tekmo():
     username = get_user()
     admin = is_admin(username)
-    return template('dodaj_tekmo.html', napakaO=None, id='', kraj='', drzava='', datum='', tip_tekme='', napaka=None, username = username, admin=admin)
+    cur.execute("SELECT kratica,ime FROM drzava")
+    return template('dodaj_tekmo.html', napakaO=None, id='', kraj='', drzave=cur, datum='', tip_tekme='', napaka=None, username = username, admin=admin)
 
 @post('/dodaj_tekmo')
 def dodaj_tekmo_post():
     username = get_user()
     admin = is_admin(username)
+    cur.execute("SELECT kratica,ime FROM drzava")
+    drzave = cur.fetchall()
     id = request.forms.id
     kraj = request.forms.kraj
     drzava = request.forms.drzava
@@ -401,7 +430,7 @@ def dodaj_tekmo_post():
                     (id, kraj, datum, drzava, tip_tekme))
         conn.commit()
     except Exception as ex:
-        return template('dodaj_tekmo.html', id=id, kraj=kraj, datum=datum, drzava=drzava, tip_tekme=tip_tekme, napakaO=None,
+        return template('dodaj_tekmo.html', id=id, kraj=kraj, datum=datum, drzave=drzave, tip_tekme=tip_tekme, napakaO=None,
                         napaka = 'Zgodila se je napaka: %s' % ex, username = username, admin=admin)
     redirect("/")
 

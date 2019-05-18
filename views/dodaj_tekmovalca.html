@@ -20,9 +20,14 @@
         </div>
       </div>
       <div class="form-group">
-        <label>Država</label>
-        <input type="text" name="drzava" value="{{drzava}}" class="form-control" placeholder="Država" required="true">
+            <label>Država</label>
+            <select type="text" name="drzava" value="" class="form-control" required="true">
+                %for (kratica,ime) in drzave:
+                    <option>{{kratica}}</option>
+                %end
+            </select>
       </div>
+          <p><a href="/dodaj_drzavo">Če na seznamu ni željene države, prosim izpolnji najprej obrazec za dodajo tekme.</a></p>
       <div class="form-group">
         <label>Rojstvo</label>
         <input type="text" name="rojstvo" value="{{rojstvo}}" class="form-control" placeholder="DD-MM-YYYY ali YYYY" required="true">
