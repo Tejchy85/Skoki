@@ -17,12 +17,13 @@
         <div class="form-group col-md-6">
             <label>Država</label>
             <select type="text" name="drzava" value="" class="form-control" required="true">
+                <option value="" selected disabled hidden>Država</option>
                 %for (kratica,ime) in drzave:
                     <option>{{kratica}}</option>
                 %end
             </select>
+            <p><a class="form-text text-muted small" href="/dodaj_drzavo">Če želene države še ni med možnostmi, najprej izpolni obrazec in jo dodaj.</a></p>
         </div>
-          <p><a href="/dodaj_drzavo">Če na seznamu ni željene države, prosim izpolnji najprej obrazec za dodajo tekme.</a></p>
       </div>
       <div class="form-group">
         <label>Datum</label>
@@ -31,6 +32,7 @@
       <div class="form-group">
         <label>Tip tekme</label>
         <select type="text" name="tip_tekme" value="{{tip_tekme}}" class="form-control" required="true">
+            <option value="" selected disabled hidden>posamicna/ekipna</option>
             <option>posamicna</option>
             <option>ekipna</option>
         </select>

@@ -1,4 +1,4 @@
-%rebase('osnova.html', naslov='{} - {}'.format(x,ime))
+%rebase('osnova.html', naslov='{} ({})'.format(ime, x))
 <style>
     *{
     margin:0;
@@ -37,7 +37,7 @@
 
 </style>
 
-<h1> {{x}} - {{ime}}</h1>
+<h1> {{ime}} ({{x}})</h1>
 <div id="zunanji">
     <div id="levi">
          <h3>Število doseženih mest na posamičnih tekmah v sezonah 2009-2019.</h3>

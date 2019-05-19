@@ -1,13 +1,11 @@
 %rebase('osnova.html', naslov='Tekmovalec {}'.format(x))
 <style>
     #podatki{
-    border: 1px solid black;
     width:100%;
-    background-color: #f2f2f2
     }
 
     #razsirjene{
-    padding: 15px;
+    padding: 13px;
     }
 </style>
 
@@ -17,32 +15,41 @@
 %end
 
 %for (fis_code,status,ime,priimek,drzava,rojstvo,klub,smucke) in tekmovalec:
-    <h1>{{ime}} {{priimek}}</h1>
-    <table id="podatki">
-        <tr id="razsirjene">
-            <th id="razsirjene">Fis code: </th>
-            <th id="razsirjene">{{fis_code}} </th>
-            <th id="razsirjene">Status: </th>
-            <th id="razsirjene">{{status}} </th>
-            <th id="razsirjene">Država: </th>
-            <th id="razsirjene">{{drzava}} </th>
-        </tr>
-        <tr id="razsirjene">
-            <th id="razsirjene">Rojstvo: </th>
-            <th id="razsirjene">{{rojstvo}}</th>
-            <th id="razsirjene">Klub: </th>
-            <th id="razsirjene">{{klub}} </th>
-            <th id="razsirjene">Smuči: </th>
-            <th id="razsirjene">{{smucke}} </th>
-        </tr>
-    </table>
+    <div class="row">
+        <div class="col">
+          <h1 style="display:inline-block">{{ime}} {{priimek}}</h1>
+          % if admin:
+            <a href="/uredi_tekmovalca/{{x}}/" class="btn btn-dark btn-md active float-right" role="button" aria-pressed="true">Uredi</a>
+          % end
+        </div>
+    </div>
+    <div class="container rounded shadow" style="background-color: #f2f2f2">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel-body">
+                    <table id="podatki">
+                        <tr id="razsirjene">
+                            <th id="razsirjene">Fis code: </th>
+                            <th class="font-weight-normal" id="razsirjene">{{fis_code}} </th>
+                            <th id="razsirjene">Status: </th>
+                            <th class="font-weight-normal" id="razsirjene">{{status}} </th>
+                            <th id="razsirjene">Država: </th>
+                            <th class="font-weight-normal" id="razsirjene">{{drzava}} </th>
+                        </tr>
+                        <tr id="razsirjene">
+                            <th id="razsirjene">Rojstvo: </th>
+                            <th class="font-weight-normal" id="razsirjene">{{rojstvo}}</th>
+                            <th id="razsirjene">Klub: </th>
+                            <th class="font-weight-normal" id="razsirjene">{{klub}} </th>
+                            <th id="razsirjene">Smuči: </th>
+                            <th class="font-weight-normal" id="razsirjene">{{smucke}} </th>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 %end
-
-% if admin:
-    <p style="margin-top:30px">
-	    <a href="/uredi_tekmovalca/{{x}}/" class="btn btn-dark btn-md active" role="button" aria-pressed="true">Uredi</a>
-    </p>
-% end
 
 <div class="dropdown" style="float:right; margin-top:20px;">
   <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" align="right">
