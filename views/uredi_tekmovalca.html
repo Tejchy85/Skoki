@@ -4,7 +4,7 @@
   <p class="opozorilo">{{napaka}}</p>
 %end
 
-  <form action="/dodaj_tekmovalca" method="POST">
+  <form action="/uredi_tekmovalca/{{x}}/" method="POST">
       <div class="form-group">
         <label>FIS code</label>
         <input type="integer" name="fis_code" value="{{fis_code}}" class="form-control" placeholder="{{fis_code}}" disabled>

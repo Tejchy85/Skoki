@@ -407,6 +407,28 @@ def uredi_tekmovalca(x):
     return template('uredi_tekmovalca.html', fis_code=x, status=podatki[1], ime=podatki[2], priimek=podatki[3], drzave=drzave, rojstvo=podatki[5], klub=podatki[6],
                         smucke=podatki[7], x=x, napakaO=None, napaka=None, username=username, admin=admin)
 
+@post('/uredi_tekmovalca/:x/')
+def uredi_tekmovalca_post(x):
+    username = get_user()
+    admin = is_admin(username)
+    cur.execute("SELECT kratica,ime FROM drzava")
+    drzave = cur.fetchall()
+    status=request.forms.status
+    ime=request.forms.ime
+    priimek=request.forms.priimek
+    drzava=request.forms.drzava
+    rojstvo=request.forms.rojstvo
+    klub=request.forms.klub
+    smucke=request.forms.smucke
+    try:
+        cur.execute("UPDATE tekmovalec SET status=%s,drzava=%s, rojstvo=%s,klub=%s,smucke=%s WHERE fis_code=%s",
+                    [status,drzava,rojstvo,klub,smucke,x])
+        conn.commit()
+    except Exception as ex:
+        return template('uredi_tekmovalca.html', fis_code=x, status=status, ime=ime, priimek=priimek, drzave=drzave, rojstvo=rojstvo, klub=klub,
+                        smucke=smucke, x=x, napakaO=None, napaka = 'Zgodila se je napaka: %s' % ex, username=username, admin=admin)
+    redirect("/")
+
 @get('/dodaj_tekmo')
 def dodaj_tekmo():
     username = get_user()
