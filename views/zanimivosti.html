@@ -27,6 +27,8 @@
   <li>Milk</li>
 </ul>
 
+% if username:
+
 
 %if zanimivost == 1:
 <h1>Tekmovalci, ki so zastopali izbrano državo v svetovnem pokalu v izbranem obdobju.</h1>
@@ -111,7 +113,7 @@
     </div>
 %end
 
-%if zanimivost ==2:
+%if zanimivost == 2:
     <h1>Izberi si dva tekmovalca in primerjaj njune uvrstitve.</h1>
     <p>Pri določeni izbiri bo izpisalo tabelo, v kateri bodo tekme in dodaten stolpec s tekmovalcem, ki je na tej tekmi imel boljši rezultat.</p>
       <form action="/zanimivosti/2" method="POST">
@@ -181,3 +183,12 @@
             </div>
         </div>
 %end
+
+% else:
+    % if zanimivost != 0:
+        <div class="alert alert-warning">
+            <strong>Pozor!</strong> Zanimivosti so dostopne samo uporabnikom.
+        </div>
+    % end
+
+% end
