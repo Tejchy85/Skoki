@@ -404,7 +404,7 @@ def uredi_tekmovalca(x):
     drzave = cur.fetchall()
     cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [int(x)])
     podatki = cur.fetchone()
-    return template('uredi_tekmovalca.html', fis_code=x, status=podatki[1], ime=podatki[2], priimek=podatki[3], drzave=drzave, rojstvo=podatki[5], klub=podatki[6],
+    return template('uredi_tekmovalca.html', fis_code=x, status=podatki[1], ime=podatki[2], priimek=podatki[3], drzava=podatki[4], drzave=drzave, rojstvo=podatki[5], klub=podatki[6],
                         smucke=podatki[7], x=x, napakaO=None, napaka=None, username=username, admin=admin)
 
 @post('/uredi_tekmovalca/:x/')
@@ -425,7 +425,7 @@ def uredi_tekmovalca_post(x):
                     [status,drzava,rojstvo,klub,smucke,x])
         conn.commit()
     except Exception as ex:
-        return template('uredi_tekmovalca.html', fis_code=x, status=status, ime=ime, priimek=priimek, drzave=drzave, rojstvo=rojstvo, klub=klub,
+        return template('uredi_tekmovalca.html', fis_code=x, status=status, ime=ime, priimek=priimek, drzava=drzava, drzave=drzave, rojstvo=rojstvo, klub=klub,
                         smucke=smucke, x=x, napakaO=None, napaka = 'Zgodila se je napaka: %s' % ex, username=username, admin=admin)
     redirect("/")
 
