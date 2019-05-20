@@ -456,8 +456,8 @@ def dodaj_tekmo_post():
                         napaka = 'Zgodila se je napaka: %s' % ex, username = username, admin=admin)
     redirect("/")
 
-@get('/zanimivosti')
-def zanimivosti():
+@get('/zanimivosti/:x')
+def zanimivosti(x):
     username=get_user()
     admin=is_admin(username)
     sezone = [2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019]
@@ -465,28 +465,41 @@ def zanimivosti():
     drzave = cur.fetchall()
     cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
     vsi_tekmovalci = cur.fetchall()
-    return template('zanimivosti.html',id=5263,sezone=sezone,drzave=drzave,napaka=None,
+    return template('zanimivosti.html',sezone=sezone,drzave=drzave,napaka=None, zanimivost=int(x),
                     username=username,admin=admin,napakaO=None,izpis=False,tekmovalci=cur,vsi_tekmovalci=vsi_tekmovalci,tekme_boljsi=cur)
 
-@post('/zanimivosti')
-def zanimivosti_izpisi():
+@post('/zanimivosti/1')
+def zanimivosti_post_1():
     username=get_user()
     admin=is_admin(username)
     sezone = [2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019]
     cur.execute("SELECT * FROM drzava ORDER BY kratica")
     drzave = cur.fetchall()
-    cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
-    vsi_tekmovalci = cur.fetchall()
     drzava = request.forms.drzava
     sezona1= request.forms.sezona1
     sezona2= request.forms.sezona2
     '''Potrebno še malo dodelat ta SQL stavek, za enkrat samo v zelo slabi strukturi, samo toliko da vidim če vse deluje.'''
     cur.execute("WITH tek AS (WITH zdruzena AS (SELECT * FROM tekmovalec JOIN drzava ON tekmovalec.drzava = drzava.kratica JOIN rezultat USING (fis_code) JOIN tekma USING (id))"
                 "SELECT fis_code FROM zdruzena WHERE kratica=%s AND datum BETWEEN %s AND %s GROUP BY fis_code) SELECT * FROM tek JOIN tekmovalec USING (fis_code)",[drzava, datetime.date(int(sezona1) - 1, 11, 1), datetime.date(int(sezona2), 3, 31)])
+    return template('zanimivosti.html',sezone=sezone,drzave=drzave,napaka=None,tekmovalci=cur, zanimivost=1,
+                    username=username,admin=admin,napakaO=None,izpis=True,vsi_tekmovalci=cur,tekme_boljsi=cur)
+
+@post('/zanimivosti/2')
+def zanimivosti_post_2():
+    username=get_user()
+    admin=is_admin(username)
+    cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
+    vsi_tekmovalci = cur.fetchall()
+    tekmovalec1 = request.forms.tekmovalec1
+    tekmovalec2 = request.forms.tekmovalec2
+    id_1 = int(tekmovalec1.split('-')[0])
+    print(id_1)
+    id_2 = int(tekmovalec2.split('-')[0])
     '''Potrebno še pobrati rezultate iz forma in napisati SQL stavek'''
     tekme_boljsi = []
-    return template('zanimivosti.html', id=5263,sezone=sezone,drzave=drzave,napaka=None,
-                    username=username,admin=admin,napakaO=None, izpis=True,tekmovalci=cur,vsi_tekmovalci=vsi_tekmovalci,tekme_boljsi=tekme_boljsi)
+    return template('zanimivosti.html',tekme_boljsi=tekme_boljsi,vsi_tekmovalci=vsi_tekmovalci,izpis=True,
+                    sezone=cur,drzave=cur,napaka=None,tekmovalci=cur,zanimivost=2,username=username,admin=admin,napakO=None)
+
 ######################################################################
 # Glavni program
 
