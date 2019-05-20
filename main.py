@@ -495,10 +495,27 @@ def zanimivosti_post_2():
     id_1 = int(tekmovalec1.split('-')[0])
     print(id_1)
     id_2 = int(tekmovalec2.split('-')[0])
-    '''Potrebno še pobrati rezultate iz forma in napisati SQL stavek'''
-    tekme_boljsi = []
-    return template('zanimivosti.html',tekme_boljsi=tekme_boljsi,vsi_tekmovalci=vsi_tekmovalci,izpis=True,
-                    sezone=cur,drzave=cur,napaka=None,tekmovalci=cur,zanimivost=2,username=username,admin=admin,napakO=None)
+    cur.execute("with boljsi as ("
+                "  with oba as ("
+                "    select id, count(id) as oba from tekma"
+                "    join rezultat using (id)"
+                "    where (fis_code = %s or fis_code = %s) and (serija = 1 or serija = 3)"
+                "    group by id"
+                "  )"
+                "  select id, min(ranki) as ranki from tekma"
+                "  join oba using (id)"
+                "  join rezultat using (id)"
+                "  where oba = 2 and (fis_code = %s or fis_code = %s) and (serija = 1 or serija = 3)"
+                "  group by id"
+                ")"
+                " select id, kraj, datum, t.drzava, tip_tekme, ime, priimek from tekma t"
+                " join boljsi using(id)"
+                " join rezultat using(ranki, id)"
+                " join tekmovalec using(fis_code)"
+                " where (serija = 1 or serija = 3) and (fis_code = %s or fis_code = %s)", 3 * [id_1, id_2])
+    tekme_boljsi = cur.fetchall()
+    return template('zanimivosti.html', tekme_boljsi=tekme_boljsi, vsi_tekmovalci=vsi_tekmovalci, izpis=True,
+                    sezone=cur, drzave=cur, napaka=None, napakaO=None, tekmovalci=cur, zanimivost=2, username=username, admin=admin)
 
 ######################################################################
 # Glavni program
