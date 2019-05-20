@@ -456,6 +456,80 @@ def dodaj_tekmo_post():
                         napaka = 'Zgodila se je napaka: %s' % ex, username = username, admin=admin)
     redirect("/")
 
+@get('/dodaj_rezultat/:x/')
+def dodaj_rezultat(x):
+    username = get_user()
+    admin = is_admin(username)
+    cur.execute("SELECT kratica,ime FROM drzava")
+    drzave=cur.fetchall()
+    cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
+    vsi_tekmovalci = cur.fetchall()
+    cur.execute("SELECT tip_tekme FROM tekma WHERE id = %s", [int(x)])
+    if cur.fetchone()[0] == 'posamicna':
+        ekipna = False
+    else:
+        ekipna = True
+    if not ekipna:
+        return template('dodaj_rezultat.html', napakaO=None, x=x, id=x, ranki='', startna_stevilka='', fis_code='', drzava='',
+                        skoki1='', tocke1='', skoki2='', tocke2='', drzave=drzave, vsi_tekmovalci=vsi_tekmovalci, ekipna=ekipna,
+                        napaka=None, username=username, admin=admin)
+    else:
+        return template('dodaj_rezultat.html', napakaO=None, x=x, id=x, ranki='', startna_stevilka='', fis_code='',
+                        drzava='', skoki1='', tocke1='', skoki2='', tocke2='', mesto_v_ekipi = '', drzave=drzave, vsi_tekmovalci=vsi_tekmovalci, ekipna=ekipna,
+                        napaka=None, username=username, admin=admin)
+
+@post('/dodaj_rezultat/:x/')
+def dodaj_tekmo_post(x):
+    username = get_user()
+    admin = is_admin(username)
+    cur.execute("SELECT kratica,ime FROM drzava")
+    drzave = cur.fetchall()
+    cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
+    vsi_tekmovalci = cur.fetchall()
+    cur.execute("SELECT tip_tekme FROM tekma WHERE id = %s", [int(x)])
+    if cur.fetchone()[0] == 'posamicna':
+        ekipna = False
+    else:
+        ekipna = True
+    ranki = request.forms.ranki
+    startna_stevilka = request.forms.startna_stevilka
+    fis_code = request.forms.fis_code.split(' ')[0]
+    drzava = request.forms.drzava
+    skoki1 = request.forms.skoki1
+    tocke1 = request.forms.tocke1
+    skoki2 = request.forms.skoki2
+    tocke2 = request.forms.tocke2
+    if ekipna:
+        mesto_v_ekipi = request.forms.mesto_v_ekipi
+    try:
+        if ekipna:
+            cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                        (x, ranki, startna_stevilka, fis_code, drzava, skoki1, tocke1, 1, mesto_v_ekipi))
+            conn.commit()
+            cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                        (x, ranki, startna_stevilka, fis_code, drzava, skoki2, tocke2, 2, mesto_v_ekipi))
+            conn.commit()
+        else:
+            cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                        (x, ranki, startna_stevilka, fis_code, drzava, skoki1, tocke1, 1, 0))
+            conn.commit()
+            cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                        (x, ranki, startna_stevilka, fis_code, drzava, skoki2, tocke2, 2, 0))
+            conn.commit()
+    except Exception as ex:
+        if not ekipna:
+            return template('dodaj_rezultat.html', napakaO=None, x=x, id=x, ranki=ranki,
+                            startna_stevilka=startna_stevilka, fis_code=fis_code,
+                            drzava=drzava, skoki1=skoki1, tocke1=tocke1, skoki2=skoki2, tocke2=tocke2, drzave=drzave,
+                            vsi_tekmovalci=vsi_tekmovalci, ekipna=ekipna,
+                            napaka='Zgodila se je napaka: %s' % ex, username=username, admin=admin)
+        else:
+            return template('dodaj_rezultat.html', napakaO=None, x=x, id=x, ranki=ranki, startna_stevilka=startna_stevilka, fis_code=fis_code,
+                            drzava=drzava, skoki1=skoki1, tocke1=tocke1, skoki2=skoki2, tocke2=tocke2, mesto_v_ekipi=mesto_v_ekipi, drzave=drzave,
+                            vsi_tekmovalci=vsi_tekmovalci, ekipna=ekipna,
+                            napaka='Zgodila se je napaka: %s' % ex, username=username, admin=admin)
+    redirect("/")
+
 @get('/zanimivosti/:x')
 def zanimivosti(x):
     username=get_user()
