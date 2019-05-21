@@ -214,6 +214,37 @@ def tekmovalec(x,y):
         cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t."+ y.replace('-', ' '), [int(x)])
     return template('tekmovalec.html', x=x, tekmovalec=tekmovalec,tekme=cur, napakaO=None, napaka=None, username=username, admin=admin)
 
+@post('/tekmovalec/:x/:y')
+def tekmovalci(x,y):
+    search = request.forms.search.lower()
+    username = get_user()
+    admin = is_admin(username)
+    cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [int(x)])
+    tekmovalec = cur.fetchall()
+    napaka = None
+    head_list = ['datum', 'kraj', 'drzava', 'tip tekme', 'rank']
+    sez = search.split(':')
+    if len(sez) > 1:
+        search = sez[1].strip()
+        if sez[0].replace(' ', '') == 'tiptekme':
+            cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(t.tip_tekme AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki", [int(x),'%' + search + '%'])
+        elif sez[0].lower() =='rank':
+            cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(r.ranki AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki", [int(x),'%' + search + '%'])
+        elif sez[0].strip() in head_list:
+            cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(t." + sez[0] + " AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki", [int(x),'%' + search + '%'])
+        else:
+            napaka = "ne sam ne"
+    else:
+        cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND (LOWER(tip_tekme) LIKE %s"
+                    "OR CAST(datum AS varchar(10)) LIKE %s"
+                    "OR LOWER(kraj) LIKE %s"
+                    "OR LOWER(t.drzava) LIKE %s"
+                    "OR CAST(ranki AS varchar(10)) LIKE %s)"
+                    "GROUP BY t.id, r.fis_code, r.ranki",
+                    [int(x),'%' + search + '%','%' + search + '%','%' + search + '%','%' + search + '%','%' + search + '%'])
+
+    return template('tekmovalec.html',x=x, tekmovalec=tekmovalec,tekme=cur, urejanje=False, napakaO=None, napaka=napaka, username=username, admin=admin)
+
 @get('/sezone')
 def sezone():
     username = get_user()
