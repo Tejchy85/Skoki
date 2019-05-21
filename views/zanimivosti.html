@@ -23,8 +23,8 @@
 
 <ul style="list-style-type:circle;">
     <li><a href="/zanimivosti/1">Tekmovalci, ki so zastopali izbrano državo v izbranem obdobju.</a></li>
-    <li><a href="/zanimivosti/2">Primerjava rezultatov dveh poljubnih tekmovalcev</a></li>
-  <li>Milk</li>
+    <li><a href="/zanimivosti/2">Primerjava rezultatov dveh poljubnih tekmovalcev.</a></li>
+    <li><a href="/zanimivosti/3">Število skokov preko določene dolžine.</a></li>
 </ul>
 
 % if username:
@@ -182,6 +182,72 @@
               </div>
             </div>
         </div>
+%end
+
+%if zanimivost == 3:
+<h1>Število skokov preko določene dolžine.</h1>
+<p>Če te zanima kdo je največkrat preskočil oznako 200.5 m, vnesi številko "200.5". Kot rezultat boš dobil tabelo z vsemi tekmovalci,
+ki so preskočili 200.5 m. V stolpcu "Število skokov", pa je zapisano, kolikokrat je tekmovalec preskočil 200.5 metersko oznako.</p>
+  <form action="/zanimivosti/3" method="POST">
+      <div class="form-row">
+        <div class="form-group">
+        <label>Dolžina skoka</label>
+        <input type="decimal" name="dolzina" value="{{dolzina}}" class="form-control" placeholder="Primer: 200.5" required="true">
+        </div>
+        <button type="submit" class="btn btn-primary">Išči</button>
+        %if izpis:
+          <button type="button" data-toggle="modal" data-target="#exampleModal3">
+              Prikaži
+          </button>
+        %end
+      </div>
+  </form>
+
+
+    <div class="container">
+        <div class="modal fade" id="exampleModal3" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="overflow-x: auto; overflow-y:auto;width:800px;height:500px;">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">REZULTAT:</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+                <table class="table table-bordered table-hover">
+                 <thead class="thead-light">
+                  <tr>
+                     <th scope="col">FIS code</th>
+                     <th scope="col">Status</th>
+                     <th scope="col">Ime</th>
+                     <th scope="col">Priimek</th>
+                     <th scope="col">Država</th>
+                     <th scope="col">Rojstvo</th>
+                     <th scope="col">Klub</th>
+                     <th scope="col">Smučke</th>
+                     <th scope="col">Število skokov</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  %for (fis_code,status,ime,priimek,drzava,rojstvo,klub,smucke,stevilo) in tekmovalci_dolzina:
+                    <tr>
+                       <td><a href="/tekmovalec/{{fis_code}}/Datum-DESC">{{fis_code}}</a></td>
+                       <td>{{status}}</td>
+                       <td>{{ime}}</td>
+                       <td>{{priimek}}</td>
+                       <td><a href="/drzava/{{drzava}}"><p><img class="imageWithText" src="/static/flags/{{drzava}}.png"> {{drzava}}</p></a></td>
+                       <td>{{rojstvo}}</td>
+                       <td>{{klub}}</td>
+                       <td>{{smucke}}</td>
+                       <td>{{stevilo}}</td>
+                    </tr>
+                  %end
+                  </tbody>
+                </table>
+            </div>
+          </div>
+        </div>
+    </div>
 %end
 
 % else:
