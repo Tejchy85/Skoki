@@ -175,7 +175,7 @@ def tekmovalci(y):
 
 @post('/tekmovalci/:y')
 def tekmovalci(y):
-    search = request.forms.search.lower()
+    search = request.forms.search.lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
     username = get_user()
     admin = is_admin(username)
     napaka = None
