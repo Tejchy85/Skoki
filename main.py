@@ -234,6 +234,7 @@ def tekmovalci_post():
 
     return template('tekmovalci.html', tekmovalci=cur, napakaO=None, napaka=napaka, username=username, admin=admin)
 
+
 @get('/tekmovalec/:x/:y')
 def tekmovalec(x,y):
     username = get_user()
@@ -245,6 +246,7 @@ def tekmovalec(x,y):
     else:
         cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t."+ y.replace('-', ' '), [int(x)])
     return template('tekmovalec.html', x=x, tekmovalec=tekmovalec,tekme=cur, napakaO=None, napaka=None, username=username, admin=admin)
+
 
 @post('/tekmovalec/:x/:y')
 def tekmovalci(x,y):
@@ -390,19 +392,6 @@ def tekma_post(x,y):
 
     return template('tekma.html', napakaO=None, x=x, tekma=cur, kraj=kraj_datum[0], datum=datum, username=username,
                     admin=admin, ekipna=ekipna, serija=serija_bool, napaka=napaka)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 @get('/drzave')
@@ -777,8 +766,6 @@ def najljubsi_get(napaka=None):
     username = get_user()
     admin = is_admin(username)
 
-    print("najl_get")
-
     cur.execute("SELECT najljubsi_tekmovalci FROM uporabnik WHERE username = %s", [username])
 
     list_najljubsih = cur.fetchone()[0]
@@ -790,8 +777,6 @@ def najljubsi_get(napaka=None):
         list_najljubsih = list_najljubsih.split(',')[:-1]
         stringFC = ', '.join(list_najljubsih)
         cur.execute("SELECT * FROM tekmovalec WHERE fis_code IN (" + stringFC + ")")
-
-    print('pršu do html')
 
     return template('najljubsi.html', tekmovalci=cur, napakaO=None, napaka=napaka, username=username,
                     admin=admin)
