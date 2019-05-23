@@ -181,27 +181,41 @@ def register_post():
             response.set_cookie('username', username, path='/', secret=secret)
             redirect("/")
 
-@get('/tekmovalci/:y')
-def tekmovalci(y):
+@get('/tekmovalci')
+def tekmovalci_get():
     username = get_user()
     admin = is_admin(username)
-    cur.execute("SELECT * FROM tekmovalec ORDER BY " + y.replace('-', ' '))
-    return template('tekmovalci.html', tekmovalci=cur, urejanje=True, napakaO=None, napaka=None, username=username, admin=admin)
+    cur.execute("SELECT * FROM tekmovalec")
+    return template('tekmovalci.html', tekmovalci=cur, napakaO=None, napaka=None, username=username, admin=admin)
 
-@post('/tekmovalci/:y')
-def tekmovalci(y):
+@post('/tekmovalci')
+def tekmovalci_post():
     search = request.forms.search.lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
     username = get_user()
     admin = is_admin(username)
+    raz = request.forms.razvrscanje
+
+    sezR = raz.split('-')
+    asc = ['naraščajoče', 'od A do Ž', 'Starejši prej']
+
+    if sezR[1].strip() in asc:
+        y = sezR[0].replace(' ', '').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z') + ' ASC'
+    else:
+        y = sezR[0].replace(' ', '').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z') + ' DESC'
+
+    if search == "":
+        cur.execute("SELECT * FROM tekmovalec ORDER BY " + y.replace('-', ' '))
+        return template('tekmovalci.html', tekmovalci=cur, napakaO=None, napaka=None, username=username,
+                        admin=admin)
     napaka = None
     head_list = ['status', 'ime', 'priimek', 'drzava', 'rojstvo', 'klub', 'smucke']
     sez = search.split(':')
     if len(sez) > 1:
         search = sez[1].strip()
         if sez[0].replace(' ', '') == 'fiscode':
-            cur.execute("SELECT * FROM tekmovalec WHERE CAST(fis_code AS varchar(10)) LIKE %s", ['%' + search + '%'])
+            cur.execute("SELECT * FROM tekmovalec WHERE CAST(fis_code AS varchar(10)) LIKE %s" + "ORDER BY " + y.replace('-', ' '), ['%' + search + '%'])
         elif sez[0].strip() in head_list:
-            cur.execute("SELECT * FROM tekmovalec WHERE LOWER(" + sez[0] + ") LIKE %s", ['%' + search + '%'])
+            cur.execute("SELECT * FROM tekmovalec WHERE LOWER(" + sez[0] + ") LIKE %s" + "ORDER BY " + y.replace('-', ' '), ['%' + search + '%'])
         else:
             napaka = "ne sam ne"
     else:
@@ -212,10 +226,10 @@ def tekmovalci(y):
                     "OR LOWER(drzava) LIKE %s"
                     "OR LOWER(rojstvo) LIKE %s"
                     "OR LOWER(klub) LIKE %s"
-                    "OR LOWER(smucke) LIKE %s",
+                    "OR LOWER(smucke) LIKE %s" + "ORDER BY " + y.replace('-', ' '),
                     8*['%' + search + '%'])
 
-    return template('tekmovalci.html', tekmovalci=cur, urejanje=False, napakaO=None, napaka=napaka, username=username, admin=admin)
+    return template('tekmovalci.html', tekmovalci=cur, napakaO=None, napaka=napaka, username=username, admin=admin)
 
 @get('/tekmovalec/:x/:y')
 def tekmovalec(x,y):
@@ -242,11 +256,11 @@ def tekmovalci(x,y):
     if len(sez) > 1:
         search = sez[1].strip()
         if sez[0].replace(' ', '') == 'tiptekme':
-            cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(t.tip_tekme AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki", [int(x),'%' + search + '%'])
+            cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(t.tip_tekme AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + "ORDER BY " + y.replace('-', ' '), [int(x),'%' + search + '%'])
         elif sez[0].lower() =='rank':
-            cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(r.ranki AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki", [int(x),'%' + search + '%'])
+            cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(r.ranki AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + "ORDER BY " + y.replace('-', ' '), [int(x),'%' + search + '%'])
         elif sez[0].strip() in head_list:
-            cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(t." + sez[0] + " AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki", [int(x),'%' + search + '%'])
+            cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(t." + sez[0] + " AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + "ORDER BY " + y.replace('-', ' '), [int(x),'%' + search + '%'])
         else:
             napaka = "ne sam ne"
     else:
@@ -255,7 +269,7 @@ def tekmovalci(x,y):
                     "OR LOWER(kraj) LIKE %s"
                     "OR LOWER(t.drzava) LIKE %s"
                     "OR CAST(ranki AS varchar(10)) LIKE %s)"
-                    "GROUP BY t.id, r.fis_code, r.ranki",
+                    "GROUP BY t.id, r.fis_code, r.ranki" + "ORDER BY " + y.replace('-', ' '),
                     [int(x),'%' + search + '%','%' + search + '%','%' + search + '%','%' + search + '%','%' + search + '%'])
 
     return template('tekmovalec.html',x=x, tekmovalec=tekmovalec,tekme=cur, urejanje=False, napakaO=None, napaka=napaka, username=username, admin=admin)
@@ -330,17 +344,17 @@ def tekma_post(x,y):
 
     if len(sez) > 1:
         if sez[0].replace(' ', '_') in head_list:
-            cur.execute("SELECT " + ','.join(head_list[:3]) + ',' + ','.join(text_list) + ',' + ','.join(head_list[3:]) + ' FROM ' + string + " WHERE id = %s AND CAST(" + sez[0] + " AS varchar(10)) LIKE %s",
+            cur.execute("SELECT " + ','.join(head_list[:3]) + ',' + ','.join(text_list) + ',' + ','.join(head_list[3:]) + ' FROM ' + string + " WHERE id = %s AND CAST(" + sez[0] + " AS varchar(10)) LIKE %s" + "ORDER BY " + y.replace('-', ' '),
             [int(x)] + ['%' + sez[1].strip() + '%'])
         elif sez[0].replace(' ', '_') in text_list:
-            cur.execute("SELECT " + ','.join(head_list[:3]) + ',' + ','.join(text_list) + ',' + ','.join(head_list[3:]) + ' FROM ' + string + " WHERE id = %s AND LOWER(" + sez[0] + ") LIKE %s",
+            cur.execute("SELECT " + ','.join(head_list[:3]) + ',' + ','.join(text_list) + ',' + ','.join(head_list[3:]) + ' FROM ' + string + " WHERE id = %s AND LOWER(" + sez[0] + ") LIKE %s" + "ORDER BY " + y.replace('-', ' '),
             [int(x)] + ['%' + sez[1].strip() + '%'])
         else:
             napaka = "ne sam ne"
     else:
         cur.execute("SELECT " + ','.join(head_list[:3]) + ',' + ','.join(text_list) + ',' + ','.join(head_list[3:]) + ' FROM ' + string + " WHERE id = %s AND (CAST("
                     + ' AS varchar(10)) LIKE %s OR CAST('.join(head_list) + " AS varchar(10)) LIKE %s"
-                    + " OR LOWER(" + ') LIKE %s OR LOWER('.join(text_list) + ") LIKE %s)",
+                    + " OR LOWER(" + ') LIKE %s OR LOWER('.join(text_list) + ") LIKE %s)" + "ORDER BY " + y.replace('-', ' '),
                     [int(x)] + (len(head_list) + len(text_list)) * ['%' + search + '%'])
 
     return template('tekma.html', napakaO=None, x=x, tekma=cur, kraj=kraj_datum[0], datum=datum, username=username, urejanje=False,

@@ -11,6 +11,29 @@
 <form class="form-inline" method="post">
     <input class="form-control form-control-sm mr-3 w-25" type="text" placeholder="Search" aria-label="Search" name="search">
     <i class="fas fa-search" aria-hidden="true"></i>
+    <div class="dropdown">
+        <div class="form-group col-md-3">
+            <select type="text" name="razvrscanje" value="" class="form-control" required="true">
+                <option>FIS code - padajoče</option>
+                <option>FIS code - naraščajoče</option>
+                <option>Status - od A do Ž</option>
+                <option>Status - od Ž do A</option>
+                <option>Ime - od A do Ž</option>
+                <option>Ime - od Ž do A</option>
+                <option>Priimek - od A do Ž</option>
+                <option>Priimek - od Ž do A</option>
+                <option>Država - od A do Ž</option>
+                <option>Država - od Ž do A</option>
+                <option>Rojstvo - Starejši prej</option>
+                <option>Rojstvo - Mlajši prej</option>
+                <option>Klub - od A do Ž</option>
+                <option>Klub - od Ž do A</option>
+                <option>Smučke - od A do Ž</option>
+                <option>Smučke - od Ž do A</option>
+            </select>
+        </div>
+    </div>
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Najdi in razvrsti</button>
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="mx-3" role="img" viewBox="0 0 24 24" focusable="false"
          data-toggle="popover" data-trigger="hover" data-placement="right" data-html="true"
          data-content="Napredno iskanje:
@@ -20,32 +43,6 @@
          <br/>Ime : Peter">
         <circle cx="10.5" cy="10.5" r="7.5"/><path d="M21 21l-5.2-5.2"/></svg>
 </form>
-
-%if urejanje:
-    <div class="dropdown" style="float:right;">
-      <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" align="right">
-        Razvrščanje
-      </button>
-      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <a class="dropdown-item" href="/tekmovalci/Fis_code-DESC">FIS code - padajoče</a>
-        <a class="dropdown-item" href="/tekmovalci/Fis_code-ASC">FIS code - naraščajoče</a>
-        <a class="dropdown-item" href="/tekmovalci/Status-ASC">Status - od A do Ž</a>
-        <a class="dropdown-item" href="/tekmovalci/Status-DESC">Status - od Ž do A</a>
-        <a class="dropdown-item" href="/tekmovalci/Ime-ASC">Ime - od A do Ž</a>
-        <a class="dropdown-item" href="/tekmovalci/Ime-DESC">Ime - od Ž do A</a>
-        <a class="dropdown-item" href="/tekmovalci/Priimek-ASC">Priimek - od A do Ž</a>
-        <a class="dropdown-item" href="/tekmovalci/Priimek-DESC">Priimek - od Ž do A</a>
-        <a class="dropdown-item" href="/tekmovalci/Drzava-ASC">Država - od A do Ž</a>
-        <a class="dropdown-item" href="/tekmovalci/Drzava-DESC">Država - od Ž do A</a>
-        <a class="dropdown-item" href="/tekmovalci/Rojstvo-ASC">Rojstvo - Starejši prej</a>
-        <a class="dropdown-item" href="/tekmovalci/Rojstvo-DESC">Rojstvo - Mlajši prej</a>
-        <a class="dropdown-item" href="/tekmovalci/Klub-ASC">Klub - od A do Ž</a>
-        <a class="dropdown-item" href="/tekmovalci/Klub-DESC">Klub - od Ž do A</a>
-        <a class="dropdown-item" href="/tekmovalci/Smucke-ASC">Smučke - od A do Ž</a>
-        <a class="dropdown-item" href="/tekmovalci/Smucke-DESC">Smučke - od Ž do A</a>
-      </div>
-    </div>
-%end
 
 <table class="table table-bordered table-hover">
  <thead class="thead-light">
