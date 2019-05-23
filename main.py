@@ -21,6 +21,7 @@ debug(True)
 
 secret = "to skrivnost je zelo tezko uganiti 1094107c907cw982982c42"
 adminGeslo = "1111"
+search_order_string = ""
 
 ######################################################################
 # Pomožne funkcije
@@ -74,13 +75,27 @@ def index():
 def postani_admin():
     username = get_user()
     adminPassword = request.forms.adminPassword
-    if adminPassword == adminGeslo:
-        cur.execute("UPDATE uporabnik SET isadmin = True WHERE username=%s", [username])
-        admin = is_admin(username)
-        return template('zacetna_stran.html', napakaO=None, username=username, admin=admin)
+    password = request.forms.password
+
+    if password is None:
+        if adminPassword == adminGeslo:
+            cur.execute("UPDATE uporabnik SET isadmin = True WHERE username=%s", [username])
+            admin = is_admin(username)
+            return template('zacetna_stran.html', napakaO=None, username=username, admin=admin)
+        else:
+            admin = is_admin(username)
+            return template('zacetna_stran.html', napakaO="Vnesili ste napačno admin geslo.", username=username, admin=admin)
     else:
-        admin = is_admin(username)
-        return template('zacetna_stran.html', napakaO="Vnesili ste napačno admin geslo.", username=username, admin=admin)
+        cur.execute("SELECT password FROM uporabnik WHERE username=%s", [username])
+        if cur.fetchone()[0] == password_md5(password):
+            cur.execute("DELETE FROM uporabnik WHERE username=%s", [username])
+            response.delete_cookie('username')
+            return template('zacetna_stran.html', napakaO=None, username=None, admin=None)
+        else:
+            admin = is_admin(username)
+            return template('zacetna_stran.html', napakaO="Vnesili ste napačno geslo.", username=username,
+                            admin=admin)
+
 
 @get('/Login')
 def login():

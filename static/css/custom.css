@@ -1,9 +1,5 @@
 /* stylelint-disable selector-list-comma-newline-after */
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
-}
-
 .card-img-right {
   height: 100%;
   border-radius: 0 3px 3px 0;
