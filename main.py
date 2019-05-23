@@ -278,7 +278,7 @@ def tekmovalci(x,y):
                     "GROUP BY t.id, r.fis_code, r.ranki" + "ORDER BY " + y.replace('-', ' '),
                     [int(x),'%' + search + '%','%' + search + '%','%' + search + '%','%' + search + '%','%' + search + '%'])
 
-    return template('tekmovalec.html',x=x, tekmovalec=tekmovalec,tekme=cur, urejanje=False, napakaO=None, napaka=napaka, username=username, admin=admin)
+    return template('tekmovalec.html',x=x, tekmovalec=tekmovalec,tekme=cur, napakaO=None, napaka=napaka, username=username, admin=admin)
 
 
 @get('/sezone')
@@ -319,7 +319,7 @@ def tekma(x,y):
         cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,tocke,mesto_v_ekipi FROM ena_serija WHERE id=%s ORDER BY " + y.replace('-', ' '),[int(x)])
         serija_bool = False
 
-    return template('tekma.html', napakaO=None, x = x, tekma = cur, kraj=kraj_datum[0], datum=datum, username = username, urejanje=True, admin=admin, ekipna=ekipna, serija=serija_bool, napaka=None)
+    return template('tekma.html', napakaO=None, x = x, tekma = cur, kraj=kraj_datum[0], datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija_bool, napaka=None)
 
 
 @post('/tekma/:x/:y')
@@ -331,6 +331,24 @@ def tekma_post(x,y):
     username = get_user()
     admin = is_admin(username)
     napaka = None
+
+    raz = request.forms.razvrscanje
+
+    sezR = raz.split('-')
+    asc = ['naraščajoče', 'od A do Ž']
+
+    slovar = {'1._skok': 'skoki1', '2._skok': 'skoki2', '1._tocke': 'tocke1', '2._tocke': 'tocke2', 'rank': 'ranki'}
+
+    if sezR[1].strip() in asc:
+        z = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
+        if z in slovar:
+            z = slovar.get(z)
+        y = z + ' ASC'
+    else:
+        z = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
+        if z in slovar:
+            z = slovar.get(z)
+        y = z + ' DESC'
 
     cur.execute("SELECT kraj, datum FROM tekma WHERE id = %s", [int(x)])
     kraj_datum = cur.fetchone()
@@ -370,8 +388,21 @@ def tekma_post(x,y):
                     + " OR LOWER(" + ') LIKE %s OR LOWER('.join(text_list) + ") LIKE %s)" + "ORDER BY " + y.replace('-', ' '),
                     [int(x)] + (len(head_list) + len(text_list)) * ['%' + search + '%'])
 
-    return template('tekma.html', napakaO=None, x=x, tekma=cur, kraj=kraj_datum[0], datum=datum, username=username, urejanje=False,
+    return template('tekma.html', napakaO=None, x=x, tekma=cur, kraj=kraj_datum[0], datum=datum, username=username,
                     admin=admin, ekipna=ekipna, serija=serija_bool, napaka=napaka)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 @get('/drzave')

@@ -8,8 +8,50 @@
 
 <!-- Search form -->
 <form class="form-inline" method="post">
-    <input class="form-control form-control-sm mr-3 w-25" type="text" placeholder="Search" aria-label="Search" name="search">
+    <input class="form-control form-control-sm mr-3 w-25" type="text" placeholder="Išči" aria-label="Search" name="search">
     <i class="fas fa-search" aria-hidden="true"></i>
+    <div class="dropdown">
+        <div class="form-group col-md-3">
+            <select type="text" name="razvrscanje" value="" class="form-control" required="true">
+                <option selected disabled hidden>Izberi razvrščanje</option>
+                <option>Rank - padajoče</option>
+                <option>Rank - naraščajoče</option>
+                %if ekipna:
+                    <option>Mesto v ekipi - padajoče</option>
+                    <option>Mesto v ekipi - naraščajoče</option>
+                %else:
+                    <option>Startna številka - padajoče</option>
+                    <option>Startna številka - naraščajoče</option>
+                %end
+                <option>Fis code - padajoče</option>
+                <option>Fis code - naraščajoče</option>
+                <option>Ime - od A do Ž</option>
+                <option>Ime - od Ž do A</option>
+                <option>Priimek - od A do Ž</option>
+                <option>Priimek - od Ž do A</option>
+                <option>Država - od A do Ž</option>
+                <option>Država - od Ž do A</option>
+                %if serija:
+                    <option>1. skok - padajoče</option>
+                    <option>1. skok - naraščajoče</option>
+                    <option>1. točke - padajoče</option>
+                    <option>1. točke - naraščajoče</option>
+                    <option>2. skok - padajoče</option>
+                    <option>2. skok - naraščajoče</option>
+                    <option>2. točke - padajoče</option>
+                    <option>2. točke - naraščajoče</option>
+                        %if not ekipna:
+                            <option>Skupne točke - padajoče</option>
+                            <option>Skupne točke - naraščajoče</option>
+                        %end
+                %else:
+                    <option>Točke - padajoče</option>
+                    <option>Točke - naraščajoče</option>
+                %end
+            </select>
+        </div>
+    </div>
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Najdi in razvrsti</button>
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="mx-3" role="img" viewBox="0 0 24 24" focusable="false"
          data-toggle="popover" data-trigger="hover" data-placement="right" data-html="true"
          data-content="Napredno iskanje:
@@ -19,50 +61,6 @@
          <br/>Ime : Peter">
         <circle cx="10.5" cy="10.5" r="7.5"/><path d="M21 21l-5.2-5.2"/></svg>
 </form>
-
-%if urejanje:
-    <div class="dropdown" style="float:right;">
-      <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" align="right">
-        Razvrščanje
-      </button>
-      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <a class="dropdown-item" href="/tekma/{{x}}/ranki-DESC">Rank - padajoče</a>
-        <a class="dropdown-item" href="/tekma/{{x}}/ranki-ASC">Rank - naraščajoče</a>
-        %if ekipna:
-            <a class="dropdown-item" href="/tekma/{{x}}/mesto_v_ekipi-DESC">Mesto v ekipi - padajoče</a>
-            <a class="dropdown-item" href="/tekma/{{x}}/mesto_v_ekipi-ASC">Mesto v ekipi - naraščajoče</a>
-        %else:
-            <a class="dropdown-item" href="/tekma/{{x}}/startna_stevilka-DESC">Startna številka - padajoče</a>
-            <a class="dropdown-item" href="/tekma/{{x}}/startna_stevilka-ASC">Startna številka - naraščajoče</a>
-        %end
-        <a class="dropdown-item" href="/tekma/{{x}}/fis_code-DESC">Fis code - padajoče</a>
-        <a class="dropdown-item" href="/tekma/{{x}}/fis_code-ASC">Fis code - naraščajoče</a>
-        <a class="dropdown-item" href="/tekma/{{x}}/ime-ASC">Ime - od A do Ž</a>
-        <a class="dropdown-item" href="/tekma/{{x}}/ime-DESC">Ime - od Ž do A</a>
-        <a class="dropdown-item" href="/tekma/{{x}}/priimek-ASC">Priimek - od A do Ž</a>
-        <a class="dropdown-item" href="/tekma/{{x}}/priimek-DESC">Priimek - od Ž do A</a>
-        <a class="dropdown-item" href="/tekma/{{x}}/drzava-ASC">Država - od A do Ž</a>
-        <a class="dropdown-item" href="/tekma/{{x}}/drzava-DESC">Država - od Ž do A</a>
-        %if serija:
-            <a class="dropdown-item" href="/tekma/{{x}}/skoki1-DESC">1. skok - padajoče</a>
-            <a class="dropdown-item" href="/tekma/{{x}}/skoki1-ASC">1. skok - naraščajoče</a>
-            <a class="dropdown-item" href="/tekma/{{x}}/tocke1-DESC">1. točke - padajoče</a>
-            <a class="dropdown-item" href="/tekma/{{x}}/tocke1-ASC">1. točke - naraščajoče</a>
-            <a class="dropdown-item" href="/tekma/{{x}}/skoki2-DESC">2. skok - padajoče</a>
-            <a class="dropdown-item" href="/tekma/{{x}}/skoki2-ASC">2. skok - naraščajoče</a>
-            <a class="dropdown-item" href="/tekma/{{x}}/tocke2-DESC">2. točke - padajoče</a>
-            <a class="dropdown-item" href="/tekma/{{x}}/tocke2-ASC">2. točke - naraščajoče</a>
-            %if not ekipna:
-                <a class="dropdown-item" href="/tekma/{{x}}/tocke-DESC">Skupne točke - padajoče</a>
-                <a class="dropdown-item" href="/tekma/{{x}}/tocke-ASC">Skupne točke - naraščajoče</a>
-            %end
-        %else:
-            <a class="dropdown-item" href="/tekma/{{x}}/tocke-DESC">Točke - padajoče</a>
-            <a class="dropdown-item" href="/tekma/{{x}}/tocke-ASC">Točke - naraščajoče</a>
-        %end
-      </div>
-    </div>
-%end
 
  <table class="table table-bordered table-hover">
  <thead class="thead-light">
