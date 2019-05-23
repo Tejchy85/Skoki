@@ -202,9 +202,9 @@ def tekmovalci_post():
     asc = ['naraščajoče', 'od A do Ž', 'Starejši prej']
 
     if sezR[1].strip() in asc:
-        y = sezR[0].replace(' ', '').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z') + ' ASC'
+        y = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z') + ' ASC'
     else:
-        y = sezR[0].replace(' ', '').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z') + ' DESC'
+        y = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z') + ' DESC'
 
     if search == "":
         cur.execute("SELECT * FROM tekmovalec ORDER BY " + y.replace('-', ' '))
@@ -699,7 +699,7 @@ def zanimivosti_post_3():
                     admin=admin)
 
 @get('/najljubsi')
-def najljubsi():
+def najljubsi_get():
     username = get_user()
     admin = is_admin(username)
 
@@ -709,6 +709,14 @@ def najljubsi():
 
     return template('najljubsi.html', tekmovalci=cur, napakaO=None, napaka=None, username=username,
                     admin=admin)
+
+@post('/najljubsi')
+def najljubsi_post():
+    print('add najlj.')
+    # don't forget to do a check if the fis code or name or what ever exists ect maybe give him an option to pick from a table
+
+    redirect('/najljubsi')
+
 
 ######################################################################
 # Glavni program
