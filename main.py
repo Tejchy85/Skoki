@@ -190,6 +190,9 @@ def tekmovalci_get():
 
 @post('/tekmovalci')
 def tekmovalci_post():
+    if (request.forms.adminPassword != "") or (request.forms.password != ""):
+        postani_admin()
+
     search = request.forms.search.lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
     username = get_user()
     admin = is_admin(username)
@@ -245,6 +248,9 @@ def tekmovalec(x,y):
 
 @post('/tekmovalec/:x/:y')
 def tekmovalci(x,y):
+    if (request.forms.adminPassword != "") or (request.forms.password != ""):
+        postani_admin()
+
     search = request.forms.search.lower()
     username = get_user()
     admin = is_admin(username)
@@ -314,6 +320,9 @@ def tekma(x,y):
 
 @post('/tekma/:x/:y')
 def tekma_post(x,y):
+    if (request.forms.adminPassword != "") or (request.forms.password != ""):
+        postani_admin()
+
     search = request.forms.search.lower()
     username = get_user()
     admin = is_admin(username)
@@ -412,6 +421,9 @@ def dodaj_drzavo():
 
 @post('/dodaj_drzavo')
 def dodaj_drzavo_post():
+    if (request.forms.adminPassword != "") or (request.forms.password != ""):
+        postani_admin()
+
     username = get_user()
     admin=is_admin(username)
     kratica = request.forms.kratica
@@ -435,6 +447,9 @@ def dodaj_tekmovalca():
 
 @post('/dodaj_tekmovalca')
 def dodaj_tekmovalca_post():
+    if (request.forms.adminPassword != "") or (request.forms.password != ""):
+        postani_admin()
+
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT kratica,ime FROM drzava")
@@ -469,6 +484,9 @@ def uredi_tekmovalca(x):
 
 @post('/uredi_tekmovalca/:x/')
 def uredi_tekmovalca_post(x):
+    if (request.forms.adminPassword != "") or (request.forms.password != ""):
+        postani_admin()
+
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT kratica,ime FROM drzava")
@@ -498,6 +516,9 @@ def dodaj_tekmo():
 
 @post('/dodaj_tekmo')
 def dodaj_tekmo_post():
+    if (request.forms.adminPassword != "") or (request.forms.password != ""):
+        postani_admin()
+
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT kratica,ime FROM drzava")
@@ -540,6 +561,9 @@ def dodaj_rezultat(x):
 
 @post('/dodaj_rezultat/:x/')
 def dodaj_tekmo_post(x):
+    if (request.forms.adminPassword != "") or (request.forms.password != ""):
+        postani_admin()
+
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT kratica,ime FROM drzava")
@@ -605,6 +629,9 @@ def zanimivosti(x):
 
 @post('/zanimivosti/1')
 def zanimivosti_post_1():
+    if (request.forms.adminPassword != "") or (request.forms.password != ""):
+        postani_admin()
+
     username=get_user()
     admin=is_admin(username)
     sezone = [2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019]
@@ -621,6 +648,9 @@ def zanimivosti_post_1():
 
 @post('/zanimivosti/2')
 def zanimivosti_post_2():
+    if (request.forms.adminPassword != "") or (request.forms.password != ""):
+        postani_admin()
+
     username=get_user()
     admin=is_admin(username)
     cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
@@ -655,6 +685,9 @@ def zanimivosti_post_2():
 
 @post('/zanimivosti/3')
 def zanimivosti_post_3():
+    if (request.forms.adminPassword != "") or (request.forms.password != ""):
+        postani_admin()
+
     username = get_user()
     admin = is_admin(username)
     dolzina = request.forms.dolzina
