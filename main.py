@@ -664,7 +664,7 @@ def zanimivosti(x):
     vsi_tekmovalci = cur.fetchall()
     return template('zanimivosti.html',sezone=sezone,drzave=drzave,napaka=None, zanimivost=int(x),
                     username=username,admin=admin,napakaO=None,izpis=False,tekmovalci=cur,vsi_tekmovalci=vsi_tekmovalci,tekme_boljsi=cur,
-                    tekmovalci_dolzina=cur, ranki=cur, dolzina='')
+                    tekmovalci_dolzina=cur, ranki=cur, dolzina='',skupni_sestevek=cur)
 
 
 @post('/zanimivosti/1')
@@ -685,7 +685,7 @@ def zanimivosti_post_1():
                 "SELECT fis_code FROM zdruzena WHERE kratica=%s AND datum BETWEEN %s AND %s GROUP BY fis_code) SELECT * FROM tek JOIN tekmovalec USING (fis_code)",[drzava, datetime.date(int(sezona1) - 1, 11, 1), datetime.date(int(sezona2), 3, 31)])
     return template('zanimivosti.html',sezone=sezone,drzave=drzave,napaka=None,tekmovalci=cur, zanimivost=1,
                     username=username,admin=admin,napakaO=None,izpis=True,vsi_tekmovalci=cur,tekme_boljsi=cur,tekmovalci_dolzina=cur,dolzina='',
-                    ranki=cur)
+                    ranki=cur,skupni_sestevek=cur)
 
 
 @post('/zanimivosti/2')
@@ -723,7 +723,7 @@ def zanimivosti_post_2():
     tekme_boljsi = cur.fetchall()
     return template('zanimivosti.html', tekme_boljsi=tekme_boljsi, vsi_tekmovalci=vsi_tekmovalci, izpis=True,
                     sezone=cur, drzave=cur, napaka=None, napakaO=None, tekmovalci=cur, zanimivost=2, username=username, admin=admin,
-                    tekmovalci_dolzina=cur,dolzina='',ranki=cur)
+                    tekmovalci_dolzina=cur,dolzina='',ranki=cur,skupni_sestevek=cur)
 
 
 @post('/zanimivosti/3')
@@ -739,7 +739,7 @@ def zanimivosti_post_3():
                 "JOIN tekmovalec USING (fis_code) ORDER BY stevilo DESC",[int(dolzina)])
     return template('zanimivosti.html', tekmovalci_dolzina=cur, dolzina=dolzina, tekme_boljsi=cur, vsi_tekmovalci=cur, izpis=True,
                     sezone=cur, drzave=cur, napaka=None, napakaO=None, tekmovalci=cur, zanimivost=3, username=username,
-                    admin=admin,ranki=cur)
+                    admin=admin,ranki=cur,skupni_sestevek=cur)
 
 
 @post('/zanimivosti/4')
@@ -762,8 +762,27 @@ def zanimivosti_post_4():
                                                                                    datetime.date(int(koncna), 3, 31)])
     ranki=cur.fetchall()
     return template('zanimivosti.html',ranki=ranki,izpis=True,zanimivost=4,napaka=None,napakaO=None,admin=admin,username=username,
-                    tekmovalci_dolzina=cur,dolzina='',tekme_boljsi=cur,vsi_tekmovalci=vsi_tekmovalci,sezone=sezone,drzave=cur,tekmovalci=cur,)
+                    tekmovalci_dolzina=cur,dolzina='',tekme_boljsi=cur,vsi_tekmovalci=vsi_tekmovalci,sezone=sezone,drzave=cur,tekmovalci=cur,skupni_sestevek=cur)
 
+@post('/zanimivosti/5')
+def zanimivosti_post_5():
+    if (request.forms.adminPassword != "") or (request.forms.password != ""):
+        postani_admin()
+
+    username = get_user()
+    admin = is_admin(username)
+    sezone = [2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019]
+    sezona = request.forms.sezona_skupni
+    cur.execute("WITH umesna3 AS (WITH umesna2 AS (WITH umesna AS (SELECT id, ranki, fis_code FROM rezultat JOIN tekma USING (id) "
+                "WHERE datum BETWEEN %s AND %s AND tip_tekme = 'posamicna' GROUP BY id, ranki, fis_code ORDER BY id,ranki)"
+                "SELECT tocke,fis_code, count(*) AS stevilo FROM umesna JOIN tocke USING(ranki) GROUP BY tocke,fis_code)"
+                "SELECT fis_code, sum(stevilo*tocke) AS sestevek FROM umesna2 GROUP BY fis_code)"
+                "SELECT fis_code, ime, priimek, sestevek FROM umesna3 JOIN tekmovalec USING(fis_code) ORDER BY sestevek DESC",
+                [datetime.date(int(sezona) - 1, 11, 1), datetime.date(int(sezona), 3, 31)])
+    skupni_sestevek = cur.fetchall()
+    return template('zanimivosti.html', skupni_sestevek=skupni_sestevek,sezone=sezone,izpis=True,zanimivost=5,napaka=None,
+                    napakaO=None,admin=admin,username=username,ranki=cur,tekmovalci_dolzina=cur,dolzina='',tekme_boljsi=cur,
+                    vsi_tekmovalci=cur,drzave=cur,tekmovalci=cur)
 
 @get('/najljubsi')
 def najljubsi_get(napaka=None):

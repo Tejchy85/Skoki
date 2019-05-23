@@ -26,6 +26,7 @@
     <li><a href="/zanimivosti/2">Primerjava rezultatov dveh poljubnih tekmovalcev.</a></li>
     <li><a href="/zanimivosti/3">Število skokov preko določene dolžine.</a></li>
     <li><a href="/zanimivosti/4">Število posameznih mest.</a></li>
+    <li><a href="/zanimivosti/5">Skupni sestevek.</a></li>
 </ul>
 
 % if username:
@@ -311,6 +312,64 @@ ki so preskočili 200.5 m. V stolpcu "Število skokov", pa je zapisano, kolikokr
                   %for (mesto,stevilo) in ranki:
                     <tr>
                        <td>{{mesto}}</td>
+                       <td>{{stevilo}}</td>
+                    </tr>
+                  %end
+                  </tbody>
+                </table>
+            </div>
+          </div>
+        </div>
+    </div>
+%end
+
+%if zanimivost == 5:
+<h1>Skupni seštevek.</h1>
+<p>Izbira "2018" bo vrnila skupni seštevek za sezono 2018.</p>
+  <form action="/zanimivosti/5" method="POST">
+        <div class="form-group">
+        <label>Sezona</label>
+            <select type="integer" name="sezona_skupni" value="" class="form-control" required="true">
+                %for (sezona) in sezone:
+                    <option>{{sezona}}</option>
+                %end
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Išči</button>
+        %if izpis:
+          <button type="button" data-toggle="modal" data-target="#exampleModal5">
+              Prikaži
+          </button>
+        %end
+      </div>
+  </form>
+
+
+    <div class="container">
+        <div class="modal fade" id="exampleModal5" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="overflow-x: auto; overflow-y:auto;width:800px;height:500px;">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">REZULTAT:</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+                <table class="table table-bordered table-hover">
+                 <thead class="thead-light">
+                  <tr>
+                     <th scope="col">Fis code</th>
+                     <th scope="col">Ime</th>
+                     <th scope="col">Priimek</th>
+                     <th scope="col">Število točk</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  %for (fis_code,ime,priimek,stevilo) in skupni_sestevek:
+                    <tr>
+                       <td><a href="/tekmovalec/{{fis_code}}/Datum-DESC">{{fis_code}}</a></td>
+                       <td>{{ime}}</td>
+                       <td>{{priimek}}</td>
                        <td>{{stevilo}}</td>
                     </tr>
                   %end
