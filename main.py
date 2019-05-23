@@ -21,7 +21,7 @@ debug(True)
 
 secret = "to skrivnost je zelo tezko uganiti 1094107c907cw982982c42"
 adminGeslo = "1111"
-search_order_string = ""
+
 
 ######################################################################
 # Pomožne funkcije
@@ -651,6 +651,15 @@ def zanimivosti_post_3():
                     sezone=cur, drzave=cur, napaka=None, napakaO=None, tekmovalci=cur, zanimivost=3, username=username,
                     admin=admin)
 
+@get('/najljubsi')
+def najljubsi():
+    username = get_user()
+    admin = is_admin(username)
+
+    list_najljubsih = [1995, 5658]
+
+    return template('najljubsi.html', tekmovalci=cur, urejanje=True, napakaO=None, napaka=None, username=username,
+                    admin=admin)
 
 ######################################################################
 # Glavni program
