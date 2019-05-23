@@ -703,9 +703,11 @@ def najljubsi():
     username = get_user()
     admin = is_admin(username)
 
-    list_najljubsih = [1995, 5658]
+    list_najljubsih = ['1995', '5658']
+    stringFC = ', '.join(list_najljubsih)
+    cur.execute("SELECT * FROM tekmovalec WHERE fis_code IN (" + stringFC + ")")
 
-    return template('najljubsi.html', tekmovalci=cur, urejanje=True, napakaO=None, napaka=None, username=username,
+    return template('najljubsi.html', tekmovalci=cur, napakaO=None, napaka=None, username=username,
                     admin=admin)
 
 ######################################################################
