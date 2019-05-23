@@ -339,6 +339,9 @@ def tekma_post(x,y):
     sezR = raz.split('-')
     asc = ['naraščajoče', 'od A do Ž']
 
+    if len(sezR) < 2:
+        sezR = ['rank', 'naraščajoče']
+
     slovar = {'1._skok': 'skoki1', '2._skok': 'skoki2', '1._tocke': 'tocke1', '2._tocke': 'tocke2', 'rank': 'ranki'}
 
     if sezR[1].strip() in asc:
@@ -374,12 +377,13 @@ def tekma_post(x,y):
 
     text_list = ['ime', 'priimek', 'drzava']
     sez = search.split(':')
+    sez[0] = sez[0].replace('č', 'c').replace('š', 's').replace('ž', 'z')
 
     if len(sez) > 1:
-        if sez[0].replace(' ', '_') in head_list:
+        if sez[0].strip().replace(' ', '_') in head_list:
             cur.execute("SELECT " + ','.join(head_list[:3]) + ',' + ','.join(text_list) + ',' + ','.join(head_list[3:]) + ' FROM ' + string + " WHERE id = %s AND CAST(" + sez[0] + " AS varchar(10)) LIKE %s" + "ORDER BY " + y.replace('-', ' '),
             [int(x)] + ['%' + sez[1].strip() + '%'])
-        elif sez[0].replace(' ', '_') in text_list:
+        elif sez[0].strip().replace(' ', '_') in text_list:
             cur.execute("SELECT " + ','.join(head_list[:3]) + ',' + ','.join(text_list) + ',' + ','.join(head_list[3:]) + ' FROM ' + string + " WHERE id = %s AND LOWER(" + sez[0] + ") LIKE %s" + "ORDER BY " + y.replace('-', ' '),
             [int(x)] + ['%' + sez[1].strip() + '%'])
         else:
