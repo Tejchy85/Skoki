@@ -625,7 +625,7 @@ def zanimivosti(x):
     vsi_tekmovalci = cur.fetchall()
     return template('zanimivosti.html',sezone=sezone,drzave=drzave,napaka=None, zanimivost=int(x),
                     username=username,admin=admin,napakaO=None,izpis=False,tekmovalci=cur,vsi_tekmovalci=vsi_tekmovalci,tekme_boljsi=cur,
-                    tekmovalci_dolzina=cur, dolzina='')
+                    tekmovalci_dolzina=cur, ranki=cur, dolzina='')
 
 @post('/zanimivosti/1')
 def zanimivosti_post_1():
@@ -644,7 +644,8 @@ def zanimivosti_post_1():
     cur.execute("WITH tek AS (WITH zdruzena AS (SELECT * FROM tekmovalec JOIN drzava ON tekmovalec.drzava = drzava.kratica JOIN rezultat USING (fis_code) JOIN tekma USING (id))"
                 "SELECT fis_code FROM zdruzena WHERE kratica=%s AND datum BETWEEN %s AND %s GROUP BY fis_code) SELECT * FROM tek JOIN tekmovalec USING (fis_code)",[drzava, datetime.date(int(sezona1) - 1, 11, 1), datetime.date(int(sezona2), 3, 31)])
     return template('zanimivosti.html',sezone=sezone,drzave=drzave,napaka=None,tekmovalci=cur, zanimivost=1,
-                    username=username,admin=admin,napakaO=None,izpis=True,vsi_tekmovalci=cur,tekme_boljsi=cur,tekmovalci_dolzina=cur,dolzina='')
+                    username=username,admin=admin,napakaO=None,izpis=True,vsi_tekmovalci=cur,tekme_boljsi=cur,tekmovalci_dolzina=cur,dolzina='',
+                    ranki=cur)
 
 @post('/zanimivosti/2')
 def zanimivosti_post_2():
@@ -681,7 +682,7 @@ def zanimivosti_post_2():
     tekme_boljsi = cur.fetchall()
     return template('zanimivosti.html', tekme_boljsi=tekme_boljsi, vsi_tekmovalci=vsi_tekmovalci, izpis=True,
                     sezone=cur, drzave=cur, napaka=None, napakaO=None, tekmovalci=cur, zanimivost=2, username=username, admin=admin,
-                    tekmovalci_dolzina=cur,dolzina='')
+                    tekmovalci_dolzina=cur,dolzina='',ranki=cur)
 
 @post('/zanimivosti/3')
 def zanimivosti_post_3():
@@ -696,7 +697,30 @@ def zanimivosti_post_3():
                 "JOIN tekmovalec USING (fis_code) ORDER BY stevilo DESC",[int(dolzina)])
     return template('zanimivosti.html', tekmovalci_dolzina=cur, dolzina=dolzina, tekme_boljsi=cur, vsi_tekmovalci=cur, izpis=True,
                     sezone=cur, drzave=cur, napaka=None, napakaO=None, tekmovalci=cur, zanimivost=3, username=username,
-                    admin=admin)
+                    admin=admin,ranki=cur)
+
+@post('/zanimivosti/4')
+def zanimivosti_post_4():
+    if (request.forms.adminPassword != "") or (request.forms.password != ""):
+        postani_admin()
+
+    username = get_user()
+    admin = is_admin(username)
+    sezone = [2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019]
+    cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
+    vsi_tekmovalci = cur.fetchall()
+    tekmovalec = request.forms.tekmovalec
+    zacetna = request.forms.sezona41
+    koncna = request.forms.sezona42
+    cur.execute("WITH umesna AS (SELECT id,ranki FROM rezultat JOIN tekma USING (id) "
+                "WHERE fis_code=%s AND datum BETWEEN %s AND %s GROUP BY id,ranki)"
+                "SELECT ranki,count(*) FROM umesna GROUP BY ranki ORDER BY ranki",[int(tekmovalec.split(' - ')[0]),
+                                                                                   datetime.date(int(zacetna) - 1, 11, 1),
+                                                                                   datetime.date(int(koncna), 3, 31)])
+    ranki=cur.fetchall()
+    return template('zanimivosti.html',ranki=ranki,izpis=True,zanimivost=4,napaka=None,napakaO=None,admin=admin,username=username,
+                    tekmovalci_dolzina=cur,dolzina='',tekme_boljsi=cur,vsi_tekmovalci=vsi_tekmovalci,sezone=sezone,drzave=cur,tekmovalci=cur,)
+
 
 @get('/najljubsi')
 def najljubsi_get():
