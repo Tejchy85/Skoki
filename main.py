@@ -77,7 +77,7 @@ def postani_admin():
     adminPassword = request.forms.adminPassword
     password = request.forms.password
 
-    if password is None:
+    if password == "":
         if adminPassword == adminGeslo:
             cur.execute("UPDATE uporabnik SET isadmin = True WHERE username=%s", [username])
             admin = is_admin(username)
