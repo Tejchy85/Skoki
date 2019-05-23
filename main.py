@@ -280,11 +280,13 @@ def tekmovalci(x,y):
 
     return template('tekmovalec.html',x=x, tekmovalec=tekmovalec,tekme=cur, urejanje=False, napakaO=None, napaka=napaka, username=username, admin=admin)
 
+
 @get('/sezone')
 def sezone():
     username = get_user()
     admin = is_admin(username)
     return template('sezone.html', napakaO=None, username = username, admin=admin)
+
 
 @get('/tekme/:x/:y')
 def tekme(x,y):
@@ -293,6 +295,7 @@ def tekme(x,y):
     cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY " + y.replace('-', ' '),
                 [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
     return template('tekme_sezona.html', napakaO=None, x=x, tekme=cur, username = username, admin=admin)
+
 
 @get('/tekma/:x/:y')
 def tekma(x,y):
@@ -317,6 +320,7 @@ def tekma(x,y):
         serija_bool = False
 
     return template('tekma.html', napakaO=None, x = x, tekma = cur, kraj=kraj_datum[0], datum=datum, username = username, urejanje=True, admin=admin, ekipna=ekipna, serija=serija_bool, napaka=None)
+
 
 @post('/tekma/:x/:y')
 def tekma_post(x,y):
@@ -377,6 +381,7 @@ def drzave():
     cur.execute("SELECT kratica,ime FROM drzava ORDER BY kratica")
     return template('drzave.html',napakaO=None, drzave=cur,username=username,admin=admin)
 
+
 @get('/drzava/:x')
 def drzava(x):
     username = get_user()
@@ -413,11 +418,13 @@ def zadnja_tekma():
     id = cur.fetchone()[0]
     return tekma(id,'ranki-ASC')
 
+
 @get('/dodaj_drzavo')
 def dodaj_drzavo():
     username = get_user()
     admin = is_admin(username)
     return template('dodaj_drzavo.html',kratica='',ime='',napakaO=None, napaka=None,username=username,admin=admin)
+
 
 @post('/dodaj_drzavo')
 def dodaj_drzavo_post():
@@ -445,6 +452,7 @@ def dodaj_tekmovalca():
     return template('dodaj_tekmovalca.html', fis_code='', ime='', priimek='', drzave=drzave, rojstvo='', klub='',
                         smucke='', status='', napakaO=None, napaka=None, username=username, admin=admin)
 
+
 @post('/dodaj_tekmovalca')
 def dodaj_tekmovalca_post():
     if (request.forms.adminPassword != "") or (request.forms.password != ""):
@@ -471,6 +479,7 @@ def dodaj_tekmovalca_post():
                         napaka = 'Zgodila se je napaka: %s' % ex, username=username, admin=admin)
     redirect("/")
 
+
 @get('/uredi_tekmovalca/:x/')
 def uredi_tekmovalca(x):
     username = get_user()
@@ -481,6 +490,7 @@ def uredi_tekmovalca(x):
     podatki = cur.fetchone()
     return template('uredi_tekmovalca.html', fis_code=x, status=podatki[1], ime=podatki[2], priimek=podatki[3], drzava=podatki[4], drzave=drzave, rojstvo=podatki[5], klub=podatki[6],
                         smucke=podatki[7], x=x, napakaO=None, napaka=None, username=username, admin=admin)
+
 
 @post('/uredi_tekmovalca/:x/')
 def uredi_tekmovalca_post(x):
@@ -507,12 +517,14 @@ def uredi_tekmovalca_post(x):
                         smucke=smucke, x=x, napakaO=None, napaka = 'Zgodila se je napaka: %s' % ex, username=username, admin=admin)
     redirect("/")
 
+
 @get('/dodaj_tekmo')
 def dodaj_tekmo():
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT kratica,ime FROM drzava")
     return template('dodaj_tekmo.html', napakaO=None, id='', kraj='', drzave=cur, datum='', tip_tekme='', napaka=None, username = username, admin=admin)
+
 
 @post('/dodaj_tekmo')
 def dodaj_tekmo_post():
@@ -537,6 +549,7 @@ def dodaj_tekmo_post():
                         napaka = 'Zgodila se je napaka: %s' % ex, username = username, admin=admin)
     redirect("/")
 
+
 @get('/dodaj_rezultat/:x/')
 def dodaj_rezultat(x):
     username = get_user()
@@ -558,6 +571,7 @@ def dodaj_rezultat(x):
         return template('dodaj_rezultat.html', napakaO=None, x=x, id=x, ranki='', startna_stevilka='', fis_code='',
                         drzava='', skoki1='', tocke1='', skoki2='', tocke2='', mesto_v_ekipi = '', drzave=drzave, vsi_tekmovalci=vsi_tekmovalci, ekipna=ekipna,
                         napaka=None, username=username, admin=admin)
+
 
 @post('/dodaj_rezultat/:x/')
 def dodaj_tekmo_post(x):
@@ -614,6 +628,7 @@ def dodaj_tekmo_post(x):
                             napaka='Zgodila se je napaka: %s' % ex, username=username, admin=admin)
     redirect("/")
 
+
 @get('/zanimivosti/:x')
 def zanimivosti(x):
     username=get_user()
@@ -626,6 +641,7 @@ def zanimivosti(x):
     return template('zanimivosti.html',sezone=sezone,drzave=drzave,napaka=None, zanimivost=int(x),
                     username=username,admin=admin,napakaO=None,izpis=False,tekmovalci=cur,vsi_tekmovalci=vsi_tekmovalci,tekme_boljsi=cur,
                     tekmovalci_dolzina=cur, ranki=cur, dolzina='')
+
 
 @post('/zanimivosti/1')
 def zanimivosti_post_1():
@@ -646,6 +662,7 @@ def zanimivosti_post_1():
     return template('zanimivosti.html',sezone=sezone,drzave=drzave,napaka=None,tekmovalci=cur, zanimivost=1,
                     username=username,admin=admin,napakaO=None,izpis=True,vsi_tekmovalci=cur,tekme_boljsi=cur,tekmovalci_dolzina=cur,dolzina='',
                     ranki=cur)
+
 
 @post('/zanimivosti/2')
 def zanimivosti_post_2():
@@ -684,6 +701,7 @@ def zanimivosti_post_2():
                     sezone=cur, drzave=cur, napaka=None, napakaO=None, tekmovalci=cur, zanimivost=2, username=username, admin=admin,
                     tekmovalci_dolzina=cur,dolzina='',ranki=cur)
 
+
 @post('/zanimivosti/3')
 def zanimivosti_post_3():
     if (request.forms.adminPassword != "") or (request.forms.password != ""):
@@ -698,6 +716,7 @@ def zanimivosti_post_3():
     return template('zanimivosti.html', tekmovalci_dolzina=cur, dolzina=dolzina, tekme_boljsi=cur, vsi_tekmovalci=cur, izpis=True,
                     sezone=cur, drzave=cur, napaka=None, napakaO=None, tekmovalci=cur, zanimivost=3, username=username,
                     admin=admin,ranki=cur)
+
 
 @post('/zanimivosti/4')
 def zanimivosti_post_4():
@@ -723,23 +742,37 @@ def zanimivosti_post_4():
 
 
 @get('/najljubsi')
-def najljubsi_get():
+def najljubsi_get(napaka=None):
     username = get_user()
     admin = is_admin(username)
 
-    list_najljubsih = ['1995', '5658']
+    cur.execute("SELECT najljubsi_tekmovalci FROM uporabnik WHERE username = %s", [username])
+
+    list_najljubsih = cur.fetchone()[0].split(',')[:-1]
     stringFC = ', '.join(list_najljubsih)
     cur.execute("SELECT * FROM tekmovalec WHERE fis_code IN (" + stringFC + ")")
 
-    return template('najljubsi.html', tekmovalci=cur, napakaO=None, napaka=None, username=username,
+    return template('najljubsi.html', tekmovalci=cur, napakaO=None, napaka=napaka, username=username,
                     admin=admin)
+
 
 @post('/najljubsi')
 def najljubsi_post():
-    print('add najlj.')
-    # don't forget to do a check if the fis code or name or what ever exists ect maybe give him an option to pick from a table
+    dodaj = request.forms.dodaj
+    cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [dodaj])
+    if len(cur.fetchone()) > 0:
+        username = get_user()
+        cur.execute("SELECT najljubsi_tekmovalci FROM uporabnik WHERE username = %s", [username])
+        stringFC = cur.fetchone()[0]
+        if stringFC is None:
+            stringFC = ''
 
-    redirect('/najljubsi')
+        cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [stringFC + dodaj + ',', username])
+        napaka = 'Tekmovalec je bil uspešno dodan med najljubše'
+    else:
+        napaka = 'Ne obstaja tekmovalec z to fis kodo'
+
+    najljubsi_get(napaka)
 
 
 ######################################################################
