@@ -58,6 +58,18 @@ def is_admin(username):
     else:
         return False
 
+def sezone():
+    cur.execute("SELECT datum FROM tekma ORDER BY datum LIMIT 1")
+    prva = cur.fetchone()[0]
+    prva = prva.year
+    cur.execute("SELECT datum FROM tekma ORDER BY datum DESC LIMIT 1")
+    zadnja = cur.fetchone()[0]
+    zadnja = zadnja.year
+    sezone = []
+    for i in range(int(prva)+1,int(zadnja)+1):
+        sezone.append(i)
+    return sezone
+
 # Pomožne funkcije
 ######################################################################
 
@@ -69,7 +81,7 @@ def static(filename):
 def index():
     username = get_user()
     admin = is_admin(username)
-    return template('zacetna_stran.html', napakaO=None, username=username, admin=admin)
+    return template('zacetna_stran.html', sezone=sezone(), napakaO=None, username=username, admin=admin)
 
 @post('/')
 def postani_admin():
@@ -81,19 +93,19 @@ def postani_admin():
         if adminPassword == adminGeslo:
             cur.execute("UPDATE uporabnik SET isadmin = True WHERE username=%s", [username])
             admin = is_admin(username)
-            return template('zacetna_stran.html', napakaO=None, username=username, admin=admin)
+            return template('zacetna_stran.html', sezone=sezone(), napakaO=None, username=username, admin=admin)
         else:
             admin = is_admin(username)
-            return template('zacetna_stran.html', napakaO="Vnesili ste napačno admin geslo.", username=username, admin=admin)
+            return template('zacetna_stran.html', sezone=sezone(), napakaO="Vnesili ste napačno admin geslo.", username=username, admin=admin)
     else:
         cur.execute("SELECT password FROM uporabnik WHERE username=%s", [username])
         if cur.fetchone()[0] == password_md5(password):
             cur.execute("DELETE FROM uporabnik WHERE username=%s", [username])
             response.delete_cookie('username')
-            return template('zacetna_stran.html', napakaO=None, username=None, admin=None)
+            return template('zacetna_stran.html', sezone=sezone(), napakaO=None, username=None, admin=None)
         else:
             admin = is_admin(username)
-            return template('zacetna_stran.html', napakaO="Vnesili ste napačno geslo.", username=username,
+            return template('zacetna_stran.html', sezone=sezone(), napakaO="Vnesili ste napačno geslo.", username=username,
                             admin=admin)
 
 
@@ -186,7 +198,8 @@ def tekmovalci_get():
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT * FROM tekmovalec")
-    return template('tekmovalci.html', tekmovalci=cur, napakaO=None, napaka=None, username=username, admin=admin)
+    tekmovalci = cur.fetchall()
+    return template('tekmovalci.html', tekmovalci=tekmovalci, sezone=sezone(), napakaO=None, napaka=None, username=username, admin=admin)
 
 @post('/tekmovalci')
 def tekmovalci_post():
@@ -208,7 +221,8 @@ def tekmovalci_post():
 
     if search == "":
         cur.execute("SELECT * FROM tekmovalec ORDER BY " + y.replace('-', ' '))
-        return template('tekmovalci.html', tekmovalci=cur, napakaO=None, napaka=None, username=username,
+        tekmovalci = cur.fetchall()
+        return template('tekmovalci.html', tekmovalci=tekmovalci, sezone=sezone(), napakaO=None, napaka=None, username=username,
                         admin=admin)
     napaka = None
     head_list = ['status', 'ime', 'priimek', 'drzava', 'rojstvo', 'klub', 'smucke']
@@ -231,8 +245,8 @@ def tekmovalci_post():
                     "OR LOWER(klub) LIKE %s"
                     "OR LOWER(smucke) LIKE %s" + "ORDER BY " + y.replace('-', ' '),
                     8*['%' + search + '%'])
-
-    return template('tekmovalci.html', tekmovalci=cur, napakaO=None, napaka=napaka, username=username, admin=admin)
+    tekmovalci = cur.fetchall()
+    return template('tekmovalci.html', tekmovalci=tekmovalci, sezone=sezone(), napakaO=None, napaka=napaka, username=username, admin=admin)
 
 
 @get('/tekmovalec/:x/:y')
@@ -245,7 +259,8 @@ def tekmovalec(x,y):
         cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY r."+ y.replace('-', ' '), [int(x)])
     else:
         cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t."+ y.replace('-', ' '), [int(x)])
-    return template('tekmovalec.html', x=x, tekmovalec=tekmovalec,tekme=cur, napakaO=None, napaka=None, username=username, admin=admin)
+    tekme = cur.fetchall()
+    return template('tekmovalec.html', x=x, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(), napakaO=None, napaka=None, username=username, admin=admin)
 
 
 @post('/tekmovalec/:x/:y')
@@ -279,15 +294,8 @@ def tekmovalci(x,y):
                     "OR CAST(ranki AS varchar(10)) LIKE %s)"
                     "GROUP BY t.id, r.fis_code, r.ranki" + "ORDER BY " + y.replace('-', ' '),
                     [int(x),'%' + search + '%','%' + search + '%','%' + search + '%','%' + search + '%','%' + search + '%'])
-
-    return template('tekmovalec.html',x=x, tekmovalec=tekmovalec,tekme=cur, napakaO=None, napaka=napaka, username=username, admin=admin)
-
-
-@get('/sezone')
-def sezone():
-    username = get_user()
-    admin = is_admin(username)
-    return template('sezone.html', napakaO=None, username = username, admin=admin)
+    tekme = cur.fetchall()
+    return template('tekmovalec.html',x=x, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(), napakaO=None, napaka=napaka, username=username, admin=admin)
 
 
 @get('/tekme/:x/:y')
@@ -296,7 +304,8 @@ def tekme(x,y):
     admin = is_admin(username)
     cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY " + y.replace('-', ' '),
                 [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
-    return template('tekme_sezona.html', napakaO=None, x=x, tekme=cur, username = username, admin=admin)
+    tekme = cur.fetchall()
+    return template('tekme_sezona.html', sezone=sezone(), napakaO=None, x=x, tekme=tekme, username = username, admin=admin)
 
 
 @get('/tekma/:x/:y')
@@ -320,8 +329,8 @@ def tekma(x,y):
     else:
         cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,tocke,mesto_v_ekipi FROM ena_serija WHERE id=%s ORDER BY " + y.replace('-', ' '),[int(x)])
         serija_bool = False
-
-    return template('tekma.html', napakaO=None, x = x, tekma = cur, kraj=kraj_datum[0], datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija_bool, napaka=None)
+    tekma = cur.fetchall()
+    return template('tekma.html', napakaO=None, sezone=sezone(), x = x, tekma = tekma, kraj=kraj_datum[0], datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija_bool, napaka=None)
 
 
 @post('/tekma/:x/:y')
@@ -393,9 +402,9 @@ def tekma_post(x,y):
                     + ' AS varchar(10)) LIKE %s OR CAST('.join(head_list) + " AS varchar(10)) LIKE %s"
                     + " OR LOWER(" + ') LIKE %s OR LOWER('.join(text_list) + ") LIKE %s)" + "ORDER BY " + y.replace('-', ' '),
                     [int(x)] + (len(head_list) + len(text_list)) * ['%' + search + '%'])
-
-    return template('tekma.html', napakaO=None, x=x, tekma=cur, kraj=kraj_datum[0], datum=datum, username=username,
-                    admin=admin, ekipna=ekipna, serija=serija_bool, napaka=napaka)
+    tekma = cur.fetchall()
+    return template('tekma.html', napakaO=None, x=x, tekma=tekma, kraj=kraj_datum[0], datum=datum, username=username,
+                    admin=admin, ekipna=ekipna, serija=serija_bool, sezone=sezone(), napaka=napaka)
 
 
 @get('/drzave')
@@ -403,7 +412,8 @@ def drzave():
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT kratica,ime FROM drzava ORDER BY kratica")
-    return template('drzave.html',napakaO=None, drzave=cur,username=username,admin=admin)
+    drzave = cur.fetchall()
+    return template('drzave.html', sezone=sezone(), napakaO=None, drzave=drzave,username=username,admin=admin)
 
 
 @get('/drzava/:x')
@@ -433,7 +443,7 @@ def drzava(x):
         "WITH zdruzena AS (SELECT * FROM rezultat JOIN tekma ON rezultat.id = tekma.id WHERE rezultat.drzava = %s) "
         "SELECT ranki, count(*) AS stevilo FROM zdruzena WHERE tip_tekme <> 'ekipna' GROUP BY ranki ORDER BY ranki",[x])
     mesta = cur.fetchall()
-    return template('drzava.html', napakaO=None, x=x, ime=ime,tekmovalci=tekmovalci,kraj=kraj,datum=datum, tekma=tekma, serija=True, ekipna=True, mesta=mesta, username = username, admin=admin )
+    return template('drzava.html', sezone=sezone(), napakaO=None, x=x, ime=ime,tekmovalci=tekmovalci,kraj=kraj,datum=datum, tekma=tekma, serija=True, ekipna=True, mesta=mesta, username = username, admin=admin )
 
 
 @get('/zadnja_tekma')
@@ -447,7 +457,7 @@ def zadnja_tekma():
 def dodaj_drzavo():
     username = get_user()
     admin = is_admin(username)
-    return template('dodaj_drzavo.html',kratica='',ime='',napakaO=None, napaka=None,username=username,admin=admin)
+    return template('dodaj_drzavo.html',kratica='',ime='', sezone=sezone(), napakaO=None, napaka=None,username=username,admin=admin)
 
 
 @post('/dodaj_drzavo')
@@ -464,7 +474,7 @@ def dodaj_drzavo_post():
         cur.execute("INSERT INTO drzava (kratica,ime) VALUES (%s,%s)",[kratica,ime])
         conn.commit()
     except Exception as ex:
-        return template('dodaj_drzavo.html',kratica=kratica,ime=ime,napakaO=None,napaka='Zgodila se je napaka: %s'% ex,username=username,admin=admin)
+        return template('dodaj_drzavo.html',kratica=kratica,ime=ime,napakaO=None,napaka='Zgodila se je napaka: %s'% ex, sezone=sezone(), username=username, admin=admin)
     redirect("/")
 
 @get('/dodaj_tekmovalca')
@@ -474,7 +484,7 @@ def dodaj_tekmovalca():
     cur.execute("SELECT kratica,ime FROM drzava")
     drzave = cur.fetchall()
     return template('dodaj_tekmovalca.html', fis_code='', ime='', priimek='', drzave=drzave, rojstvo='', klub='',
-                        smucke='', status='', napakaO=None, napaka=None, username=username, admin=admin)
+                        smucke='', status='', sezone=sezone(), napakaO=None, napaka=None, username=username, admin=admin)
 
 
 @post('/dodaj_tekmovalca')
@@ -499,7 +509,7 @@ def dodaj_tekmovalca_post():
                     (fis_code, ime, priimek, drzava, rojstvo, klub, smucke, status))
         conn.commit()
     except Exception as ex:
-        return template('dodaj_tekmovalca.html', napakaO=None, fis_code=fis_code, ime=ime, priimek=priimek, drzave=drzave, rojstvo=rojstvo, klub=klub, smucke=smucke, status=status,
+        return template('dodaj_tekmovalca.html', sezone=sezone(), napakaO=None, fis_code=fis_code, ime=ime, priimek=priimek, drzave=drzave, rojstvo=rojstvo, klub=klub, smucke=smucke, status=status,
                         napaka = 'Zgodila se je napaka: %s' % ex, username=username, admin=admin)
     redirect("/")
 
@@ -513,7 +523,7 @@ def uredi_tekmovalca(x):
     cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [int(x)])
     podatki = cur.fetchone()
     return template('uredi_tekmovalca.html', fis_code=x, status=podatki[1], ime=podatki[2], priimek=podatki[3], drzava=podatki[4], drzave=drzave, rojstvo=podatki[5], klub=podatki[6],
-                        smucke=podatki[7], x=x, napakaO=None, napaka=None, username=username, admin=admin)
+                        smucke=podatki[7], x=x, sezone=sezone(), napakaO=None, napaka=None, username=username, admin=admin)
 
 
 @post('/uredi_tekmovalca/:x/')
@@ -538,7 +548,7 @@ def uredi_tekmovalca_post(x):
         conn.commit()
     except Exception as ex:
         return template('uredi_tekmovalca.html', fis_code=x, status=status, ime=ime, priimek=priimek, drzava=drzava, drzave=drzave, rojstvo=rojstvo, klub=klub,
-                        smucke=smucke, x=x, napakaO=None, napaka = 'Zgodila se je napaka: %s' % ex, username=username, admin=admin)
+                        smucke=smucke, x=x, sezone=sezone(), napakaO=None, napaka = 'Zgodila se je napaka: %s' % ex, username=username, admin=admin)
     redirect("/")
 
 
@@ -547,7 +557,8 @@ def dodaj_tekmo():
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT kratica,ime FROM drzava")
-    return template('dodaj_tekmo.html', napakaO=None, id='', kraj='', drzave=cur, datum='', tip_tekme='', napaka=None, username = username, admin=admin)
+    drzave = cur.fetchall()
+    return template('dodaj_tekmo.html', sezone=sezone(), napakaO=None, id='', kraj='', drzave=drzave, datum='', tip_tekme='', napaka=None, username = username, admin=admin)
 
 
 @post('/dodaj_tekmo')
@@ -570,7 +581,7 @@ def dodaj_tekmo_post():
         conn.commit()
     except Exception as ex:
         return template('dodaj_tekmo.html', id=id, kraj=kraj, datum=datum, drzave=drzave, tip_tekme=tip_tekme, napakaO=None,
-                        napaka = 'Zgodila se je napaka: %s' % ex, username = username, admin=admin)
+                        napaka = 'Zgodila se je napaka: %s' % ex, sezone=sezone(), username = username, admin=admin)
     redirect("/")
 
 
@@ -590,11 +601,11 @@ def dodaj_rezultat(x):
     if not ekipna:
         return template('dodaj_rezultat.html', napakaO=None, x=x, id=x, ranki='', startna_stevilka='', fis_code='', drzava='',
                         skoki1='', tocke1='', skoki2='', tocke2='', drzave=drzave, vsi_tekmovalci=vsi_tekmovalci, ekipna=ekipna,
-                        napaka=None, username=username, admin=admin)
+                        sezone=sezone(), napaka=None, username=username, admin=admin)
     else:
         return template('dodaj_rezultat.html', napakaO=None, x=x, id=x, ranki='', startna_stevilka='', fis_code='',
                         drzava='', skoki1='', tocke1='', skoki2='', tocke2='', mesto_v_ekipi = '', drzave=drzave, vsi_tekmovalci=vsi_tekmovalci, ekipna=ekipna,
-                        napaka=None, username=username, admin=admin)
+                        sezone=sezone(), napaka=None, username=username, admin=admin)
 
 
 @post('/dodaj_rezultat/:x/')
@@ -640,13 +651,13 @@ def dodaj_tekmo_post(x):
             conn.commit()
     except Exception as ex:
         if not ekipna:
-            return template('dodaj_rezultat.html', napakaO=None, x=x, id=x, ranki=ranki,
+            return template('dodaj_rezultat.html', sezone=sezone(), napakaO=None, x=x, id=x, ranki=ranki,
                             startna_stevilka=startna_stevilka, fis_code=fis_code,
                             drzava=drzava, skoki1=skoki1, tocke1=tocke1, skoki2=skoki2, tocke2=tocke2, drzave=drzave,
                             vsi_tekmovalci=vsi_tekmovalci, ekipna=ekipna,
                             napaka='Zgodila se je napaka: %s' % ex, username=username, admin=admin)
         else:
-            return template('dodaj_rezultat.html', napakaO=None, x=x, id=x, ranki=ranki, startna_stevilka=startna_stevilka, fis_code=fis_code,
+            return template('dodaj_rezultat.html', sezone=sezone(), napakaO=None, x=x, id=x, ranki=ranki, startna_stevilka=startna_stevilka, fis_code=fis_code,
                             drzava=drzava, skoki1=skoki1, tocke1=tocke1, skoki2=skoki2, tocke2=tocke2, mesto_v_ekipi=mesto_v_ekipi, drzave=drzave,
                             vsi_tekmovalci=vsi_tekmovalci, ekipna=ekipna,
                             napaka='Zgodila se je napaka: %s' % ex, username=username, admin=admin)
@@ -657,12 +668,11 @@ def dodaj_tekmo_post(x):
 def zanimivosti(x):
     username=get_user()
     admin=is_admin(username)
-    sezone = [2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019]
     cur.execute("SELECT * FROM drzava ORDER BY kratica")
     drzave = cur.fetchall()
     cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
     vsi_tekmovalci = cur.fetchall()
-    return template('zanimivosti.html',sezone=sezone,drzave=drzave,napaka=None, zanimivost=int(x),
+    return template('zanimivosti.html',sezone=sezone(),drzave=drzave,napaka=None, zanimivost=int(x),
                     username=username,admin=admin,napakaO=None,izpis=False,tekmovalci=cur,vsi_tekmovalci=vsi_tekmovalci,tekme_boljsi=cur,
                     tekmovalci_dolzina=cur, ranki=cur, dolzina='',skupni_sestevek=cur)
 
@@ -674,16 +684,15 @@ def zanimivosti_post_1():
 
     username=get_user()
     admin=is_admin(username)
-    sezone = [2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019]
     cur.execute("SELECT * FROM drzava ORDER BY kratica")
     drzave = cur.fetchall()
     drzava = request.forms.drzava
     sezona1= request.forms.sezona1
     sezona2= request.forms.sezona2
-    '''Potrebno še malo dodelat ta SQL stavek, za enkrat samo v zelo slabi strukturi, samo toliko da vidim če vse deluje.'''
     cur.execute("WITH tek AS (WITH zdruzena AS (SELECT * FROM tekmovalec JOIN drzava ON tekmovalec.drzava = drzava.kratica JOIN rezultat USING (fis_code) JOIN tekma USING (id))"
                 "SELECT fis_code FROM zdruzena WHERE kratica=%s AND datum BETWEEN %s AND %s GROUP BY fis_code) SELECT * FROM tek JOIN tekmovalec USING (fis_code)",[drzava, datetime.date(int(sezona1) - 1, 11, 1), datetime.date(int(sezona2), 3, 31)])
-    return template('zanimivosti.html',sezone=sezone,drzave=drzave,napaka=None,tekmovalci=cur, zanimivost=1,
+    tekmovalci_drzave = cur.fetchall()
+    return template('zanimivosti.html',sezone=sezone(),drzave=drzave,napaka=None,tekmovalci=tekmovalci_drzave, zanimivost=1,
                     username=username,admin=admin,napakaO=None,izpis=True,vsi_tekmovalci=cur,tekme_boljsi=cur,tekmovalci_dolzina=cur,dolzina='',
                     ranki=cur,skupni_sestevek=cur)
 
@@ -737,7 +746,8 @@ def zanimivosti_post_3():
     cur.execute("WITH umesna AS (SELECT fis_code, count(*) AS stevilo FROM rezultat WHERE skoki >= %s GROUP BY fis_code)"
                 "SELECT fis_code, status, ime, priimek, drzava, rojstvo, klub, smucke, stevilo FROM umesna "
                 "JOIN tekmovalec USING (fis_code) ORDER BY stevilo DESC",[int(dolzina)])
-    return template('zanimivosti.html', tekmovalci_dolzina=cur, dolzina=dolzina, tekme_boljsi=cur, vsi_tekmovalci=cur, izpis=True,
+    tekmovalci_dolzina = cur.fetchall()
+    return template('zanimivosti.html', tekmovalci_dolzina=tekmovalci_dolzina, dolzina=dolzina, tekme_boljsi=cur, vsi_tekmovalci=cur, izpis=True,
                     sezone=cur, drzave=cur, napaka=None, napakaO=None, tekmovalci=cur, zanimivost=3, username=username,
                     admin=admin,ranki=cur,skupni_sestevek=cur)
 
@@ -749,7 +759,6 @@ def zanimivosti_post_4():
 
     username = get_user()
     admin = is_admin(username)
-    sezone = [2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019]
     cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
     vsi_tekmovalci = cur.fetchall()
     tekmovalec = request.forms.tekmovalec
@@ -762,7 +771,7 @@ def zanimivosti_post_4():
                                                                                    datetime.date(int(koncna), 3, 31)])
     ranki=cur.fetchall()
     return template('zanimivosti.html',ranki=ranki,izpis=True,zanimivost=4,napaka=None,napakaO=None,admin=admin,username=username,
-                    tekmovalci_dolzina=cur,dolzina='',tekme_boljsi=cur,vsi_tekmovalci=vsi_tekmovalci,sezone=sezone,drzave=cur,tekmovalci=cur,skupni_sestevek=cur)
+                    tekmovalci_dolzina=cur,dolzina='',tekme_boljsi=cur,vsi_tekmovalci=vsi_tekmovalci,sezone=sezone(),drzave=cur,tekmovalci=cur,skupni_sestevek=cur)
 
 @post('/zanimivosti/5')
 def zanimivosti_post_5():
@@ -771,7 +780,6 @@ def zanimivosti_post_5():
 
     username = get_user()
     admin = is_admin(username)
-    sezone = [2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019]
     sezona = request.forms.sezona_skupni
     cur.execute("WITH umesna3 AS (WITH umesna2 AS (WITH umesna AS (SELECT id, ranki, fis_code FROM rezultat JOIN tekma USING (id) "
                 "WHERE datum BETWEEN %s AND %s AND tip_tekme = 'posamicna' GROUP BY id, ranki, fis_code ORDER BY id,ranki)"
@@ -780,7 +788,7 @@ def zanimivosti_post_5():
                 "SELECT fis_code, ime, priimek, sestevek FROM umesna3 JOIN tekmovalec USING(fis_code) ORDER BY sestevek DESC",
                 [datetime.date(int(sezona) - 1, 11, 1), datetime.date(int(sezona), 3, 31)])
     skupni_sestevek = cur.fetchall()
-    return template('zanimivosti.html', skupni_sestevek=skupni_sestevek,sezone=sezone,izpis=True,zanimivost=5,napaka=None,
+    return template('zanimivosti.html', skupni_sestevek=skupni_sestevek,sezone=sezone(),izpis=True,zanimivost=5,napaka=None,
                     napakaO=None,admin=admin,username=username,ranki=cur,tekmovalci_dolzina=cur,dolzina='',tekme_boljsi=cur,
                     vsi_tekmovalci=cur,drzave=cur,tekmovalci=cur)
 
@@ -800,8 +808,8 @@ def najljubsi_get(napaka=None):
         list_najljubsih = list_najljubsih.split(',')[:-1]
         stringFC = ', '.join(list_najljubsih)
         cur.execute("SELECT * FROM tekmovalec WHERE fis_code IN (" + stringFC + ")")
-
-    return template('najljubsi.html', tekmovalci=cur, napakaO=None, napaka=napaka, username=username,
+    tekmovalci = cur.fetchall()
+    return template('najljubsi.html', tekmovalci=tekmovalci, sezone=sezone(), napakaO=None, napaka=napaka, username=username,
                     admin=admin)
 
 
