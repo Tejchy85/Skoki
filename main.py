@@ -619,8 +619,13 @@ def dodaj_rezultat(x):
                         skoki1='', tocke1='', skoki2='', tocke2='', drzave=drzave, vsi_tekmovalci=vsi_tekmovalci, ekipna=ekipna,
                         sezone=sezone(), napaka=None, username=username, admin=admin)
     else:
-        return template('dodaj_rezultat.html', napakaO=None, x=x, id=x, kraj=kraj, datum=datum, ranki='', startna_stevilka='', fis_code='',
-                        drzava='', skoki1='', tocke1='', skoki2='', tocke2='', mesto_v_ekipi = '', drzave=drzave, vsi_tekmovalci=vsi_tekmovalci, ekipna=ekipna,
+        return template('dodaj_rezultat.html', napakaO=None, x=x, id=x, kraj=kraj, datum=datum, ranki='',
+                        fis_code1='', fis_code2='', fis_code3='', fis_code4='',
+                        skoki11='', tocke11='', skoki21='', tocke21='',
+                        skoki12='', tocke12='', skoki22='', tocke22='',
+                        skoki13='', tocke13='', skoki23='', tocke23='',
+                        skoki14='', tocke14='', skoki24='', tocke24='',
+                        drzava='', drzave=drzave, vsi_tekmovalci=vsi_tekmovalci, ekipna=ekipna,
                         sezone=sezone(), napaka=None, username=username, admin=admin)
 
 
