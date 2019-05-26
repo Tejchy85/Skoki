@@ -81,7 +81,16 @@ def static(filename):
 def index():
     username = get_user()
     admin = is_admin(username)
-    return template('zacetna_stran.html', sezone=sezone(), napakaO=None, username=username, admin=admin)
+    sezone_seznam = sezone()
+    sezona = sezone_seznam[-1]
+    cur.execute("WITH umesna3 AS (WITH umesna2 AS (WITH umesna AS (SELECT id, ranki, fis_code FROM rezultat JOIN tekma USING (id) "
+                "WHERE datum BETWEEN %s AND %s AND tip_tekme = 'posamicna' GROUP BY id, ranki, fis_code ORDER BY id,ranki)"
+                "SELECT tocke,fis_code, count(*) AS stevilo FROM umesna JOIN tocke USING(ranki) GROUP BY tocke,fis_code)"
+                "SELECT fis_code, sum(stevilo*tocke) AS sestevek FROM umesna2 GROUP BY fis_code)"
+                "SELECT fis_code, ime, priimek, sestevek FROM umesna3 JOIN tekmovalec USING(fis_code) ORDER BY sestevek DESC",
+                [datetime.date(int(sezona) - 1, 11, 1), datetime.date(int(sezona), 3, 31)])
+    skupni_sestevek = cur.fetchall()
+    return template('zacetna_stran.html', sezone=sezone_seznam, skupni_sestevek=skupni_sestevek, napakaO=None, username=username, admin=admin)
 
 @post('/')
 def postani_admin():
