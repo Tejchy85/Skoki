@@ -5,28 +5,42 @@
 %end
 
   <form action="/dodaj_rezultat/{{x}}/" method="POST">
-      <div class="form-group">
-        <label>ID</label>
+      <div class="form-row">
+        <div class="form-group col-md-4">
+            <label>ID</label>
         <input type="integer" name="id" value="{{id}}" class="form-control" placeholder="{{id}}" disabled>
+        </div>
+        <div class="form-group col-md-4">
+            <label>Kraj</label>
+            <input type="text" name="kraj" value="{{kraj}}" class="form-control" placeholder="{{kraj}}" disabled>
+        </div>
+        <div class="form-group col-md-4">
+            <label>Datum</label>
+            <input type="date" name="datum" value="{{datum}}" class="form-control" placeholder="{{datum}}" disabled>
+        </div>
       </div>
       <div class="form-group">
         <label>Rank</label>
         <input type="integer" name="ranki" value="{{ranki}}" class="form-control" placeholder="{{ranki}}">
       </div>
-      <div class="form-group">
-        <label>Startna številka</label>
-        <input type="integer" name="startna_stevilka" value="{{startna_stevilka}}" class="form-control" placeholder="{{startna_stevilka}}">
-      </div>
-      <div class="form-group">
-        <label>FIS code</label>
-        <select type="integer" name="fis_code" value="{{fis_code}}" class="form-control" required="true">
-            <option value="" selected disabled hidden>FIS code - PRIIMEK Ime</option>
-            %for (fis_code, ime, priimek) in vsi_tekmovalci:
-                <option>{{fis_code}} - {{priimek}} {{ime}}</option>
-            %end
-        </select>
-        <p><a class="form-text text-muted small" href="/dodaj_tekmovalca">Če želenega tekmovalca še ni med možnostmi, najprej izpolni obrazec in ga dodaj.</a></p>
-      </div>
+
+      % if not ekipna:
+          <div class="form-group">
+            <label>Startna številka</label>
+            <input type="integer" name="startna_stevilka" value="{{startna_stevilka}}" class="form-control" placeholder="{{startna_stevilka}}">
+          </div>
+          <div class="form-group">
+            <label>FIS code</label>
+            <select type="integer" name="fis_code" value="{{fis_code}}" class="form-control" required="true">
+                <option value="" selected disabled hidden>FIS code - PRIIMEK Ime</option>
+                %for (fis_code, ime, priimek) in vsi_tekmovalci:
+                    <option>{{fis_code}} - {{priimek}} {{ime}}</option>
+                %end
+            </select>
+            <p><a class="form-text text-muted small" href="/dodaj_tekmovalca">Če želenega tekmovalca še ni med možnostmi, najprej izpolni obrazec in ga dodaj.</a></p>
+          </div>
+      % end
+
       <div class="form-group">
         <label>Država</label>
         <select type="integer" name="drzava" value="{{drzava}}" class="form-control" required="true">
@@ -37,39 +51,159 @@
         </select>
         <p><a class="form-text text-muted small" href="/dodaj_tekmovalca">Če želene države še ni med možnostmi, najprej izpolni obrazec in jo dodaj.</a></p>
       </div>
-      <div class="form-row">
-        <div class="form-group col-md-6">
-            <label>1. skok</label>
-            <input type="decimal" name="skoki1" value="{{skoki1}}" class="form-control" placeholder="Primer: 129.5" required="true">
-        </div>
-        <div class="form-group col-md-6">
-            <label>1. točke</label>
-            <input type="decimal" name="tocke1" value="{{tocke1}}" class="form-control" placeholder="Primer: 99.9" required="true">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group col-md-6">
-            <label>2. skok</label>
-            <input type="decimal" name="skoki2" value="{{skoki2}}" class="form-control" placeholder="Primer: 122.5">
-        </div>
-        <div class="form-group col-md-6">
-            <label>2. točke</label>
-            <input type="decimal" name="tocke2" value="{{tocke2}}" class="form-control" placeholder="Primer: 98.6">
-        </div>
-      </div>
 
-      % if ekipna:
-          <div class="form-group">
-                <label>Mesto v ekipi</label>
-                <select type="integer" name="mesto_v_ekipi" value="{{mesto_v_ekipi}}" class="form-control">
-                    <option value="" selected disabled hidden>Mesto v ekipi</option>
-                    <option>1</option>
-                    <option>2</option>
-                    <option>3</option>
-                    <option>4</option>
-                </select>
+      % if not ekipna:
+          <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>1. skok</label>
+                <input type="decimal" name="skoki1" value="{{skoki1}}" class="form-control" placeholder="Primer: 129.5" required="true">
+            </div>
+            <div class="form-group col-md-6">
+                <label>1. točke</label>
+                <input type="decimal" name="tocke1" value="{{tocke1}}" class="form-control" placeholder="Primer: 99.9" required="true">
+            </div>
           </div>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>2. skok</label>
+                <input type="decimal" name="skoki2" value="{{skoki2}}" class="form-control" placeholder="Primer: 122.5">
+            </div>
+            <div class="form-group col-md-6">
+                <label>2. točke</label>
+                <input type="decimal" name="tocke2" value="{{tocke2}}" class="form-control" placeholder="Primer: 98.6">
+            </div>
+          </div>
+
+       % else:
+        <h3>Prvi tekmovalec</h3>
+        <div class="form-group">
+            <label>FIS code</label>
+            <select type="integer" name="fis_code1" value="{{fis_code1}}" class="form-control" required="true">
+                <option value="" selected disabled hidden>FIS code - PRIIMEK Ime</option>
+                %for (fis_code, ime, priimek) in vsi_tekmovalci:
+                    <option>{{fis_code}} - {{priimek}} {{ime}}</option>
+                %end
+            </select>
+            <p><a class="form-text text-muted small" href="/dodaj_tekmovalca">Če želenega tekmovalca še ni med možnostmi, najprej izpolni obrazec in ga dodaj.</a></p>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>1. skok</label>
+                <input type="decimal" name="skoki11" value="{{skoki11}}" class="form-control" placeholder="Primer: 129.5" required="true">
+            </div>
+            <div class="form-group col-md-6">
+                <label>1. točke</label>
+                <input type="decimal" name="tocke11" value="{{tocke11}}" class="form-control" placeholder="Primer: 99.9" required="true">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>2. skok</label>
+                <input type="decimal" name="skoki21" value="{{skoki21}}" class="form-control" placeholder="Primer: 122.5">
+            </div>
+            <div class="form-group col-md-6">
+                <label>2. točke</label>
+                <input type="decimal" name="tocke21" value="{{tocke21}}" class="form-control" placeholder="Primer: 98.6">
+            </div>
+        </div>
+
+        <h3>Drugi tekmovalec</h3>
+        <div class="form-group">
+            <label>FIS code</label>
+            <select type="integer" name="fis_code2" value="{{fis_code2}}" class="form-control" required="true">
+                <option value="" selected disabled hidden>FIS code - PRIIMEK Ime</option>
+                %for (fis_code, ime, priimek) in vsi_tekmovalci:
+                    <option>{{fis_code}} - {{priimek}} {{ime}}</option>
+                %end
+            </select>
+            <p><a class="form-text text-muted small" href="/dodaj_tekmovalca">Če želenega tekmovalca še ni med možnostmi, najprej izpolni obrazec in ga dodaj.</a></p>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>1. skok</label>
+                <input type="decimal" name="skoki12" value="{{skoki12}}" class="form-control" placeholder="Primer: 129.5" required="true">
+            </div>
+            <div class="form-group col-md-6">
+                <label>1. točke</label>
+                <input type="decimal" name="tocke12" value="{{tocke12}}" class="form-control" placeholder="Primer: 99.9" required="true">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>2. skok</label>
+                <input type="decimal" name="skoki22" value="{{skoki22}}" class="form-control" placeholder="Primer: 122.5">
+            </div>
+            <div class="form-group col-md-6">
+                <label>2. točke</label>
+                <input type="decimal" name="tocke22" value="{{tocke22}}" class="form-control" placeholder="Primer: 98.6">
+            </div>
+        </div>
+
+        <h3>Tretji tekmovalec</h3>
+        <div class="form-group">
+            <label>FIS code</label>
+            <select type="integer" name="fis_code3" value="{{fis_code3}}" class="form-control" required="true">
+                <option value="" selected disabled hidden>FIS code - PRIIMEK Ime</option>
+                %for (fis_code, ime, priimek) in vsi_tekmovalci:
+                    <option>{{fis_code}} - {{priimek}} {{ime}}</option>
+                %end
+            </select>
+            <p><a class="form-text text-muted small" href="/dodaj_tekmovalca">Če želenega tekmovalca še ni med možnostmi, najprej izpolni obrazec in ga dodaj.</a></p>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>1. skok</label>
+                <input type="decimal" name="skoki13" value="{{skoki13}}" class="form-control" placeholder="Primer: 129.5" required="true">
+            </div>
+            <div class="form-group col-md-6">
+                <label>1. točke</label>
+                <input type="decimal" name="tocke13" value="{{tocke13}}" class="form-control" placeholder="Primer: 99.9" required="true">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>2. skok</label>
+                <input type="decimal" name="skoki23" value="{{skoki23}}" class="form-control" placeholder="Primer: 122.5">
+            </div>
+            <div class="form-group col-md-6">
+                <label>2. točke</label>
+                <input type="decimal" name="tocke23" value="{{tocke23}}" class="form-control" placeholder="Primer: 98.6">
+            </div>
+        </div>
+
+        <h3>Četrti tekmovalec</h3>
+        <div class="form-group">
+            <label>FIS code</label>
+            <select type="integer" name="fis_code4" value="{{fis_code4}}" class="form-control" required="true">
+                <option value="" selected disabled hidden>FIS code - PRIIMEK Ime</option>
+                %for (fis_code, ime, priimek) in vsi_tekmovalci:
+                    <option>{{fis_code}} - {{priimek}} {{ime}}</option>
+                %end
+            </select>
+            <p><a class="form-text text-muted small" href="/dodaj_tekmovalca">Če želenega tekmovalca še ni med možnostmi, najprej izpolni obrazec in ga dodaj.</a></p>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>1. skok</label>
+                <input type="decimal" name="skoki14" value="{{skoki14}}" class="form-control" placeholder="Primer: 129.5" required="true">
+            </div>
+            <div class="form-group col-md-6">
+                <label>1. točke</label>
+                <input type="decimal" name="tocke14" value="{{tocke14}}" class="form-control" placeholder="Primer: 99.9" required="true">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>2. skok</label>
+                <input type="decimal" name="skoki24" value="{{skoki24}}" class="form-control" placeholder="Primer: 122.5">
+            </div>
+            <div class="form-group col-md-6">
+                <label>2. točke</label>
+                <input type="decimal" name="tocke24" value="{{tocke24}}" class="form-control" placeholder="Primer: 98.6">
+            </div>
+        </div>
       % end
 
-      <button type="submit" class="btn btn-primary">Dodaj</button>
+      <button type="submit" name="zakljuci" value="ne" class="btn btn-primary">Dodaj in nadaljuj</button>
+      <button type="submit" name="zakljuci" value="ja" class="btn btn-primary">Dodaj in zaključi</button>
   </form>

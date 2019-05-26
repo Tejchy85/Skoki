@@ -64,9 +64,12 @@ def sezone():
     prva = prva.year
     cur.execute("SELECT datum FROM tekma ORDER BY datum DESC LIMIT 1")
     zadnja = cur.fetchone()[0]
-    zadnja = zadnja.year
+    if zadnja.month in {11, 12}:
+        zadnja = int(zadnja.year) + 1
+    else:
+        zadnja = int(zadnja.year)
     sezone = []
-    for i in range(int(prva)+1,int(zadnja)+1):
+    for i in range(int(prva)+1,zadnja+1):
         sezone.append(i)
     return sezone
 
@@ -591,13 +594,17 @@ def dodaj_tekmo_post():
     except Exception as ex:
         return template('dodaj_tekmo.html', id=id, kraj=kraj, datum=datum, drzave=drzave, tip_tekme=tip_tekme, napakaO=None,
                         napaka = 'Zgodila se je napaka: %s' % ex, sezone=sezone(), username = username, admin=admin)
-    redirect("/")
+    redirect("/dodaj_rezultat/{}/".format(id))
 
 
 @get('/dodaj_rezultat/:x/')
 def dodaj_rezultat(x):
     username = get_user()
     admin = is_admin(username)
+    cur.execute("SELECT kraj FROM tekma WHERE id = %s", [int(x)])
+    kraj = cur.fetchone()[0]
+    cur.execute("SELECT datum FROM tekma WHERE id = %s", [int(x)])
+    datum = cur.fetchone()[0]
     cur.execute("SELECT kratica,ime FROM drzava")
     drzave=cur.fetchall()
     cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
@@ -608,11 +615,11 @@ def dodaj_rezultat(x):
     else:
         ekipna = True
     if not ekipna:
-        return template('dodaj_rezultat.html', napakaO=None, x=x, id=x, ranki='', startna_stevilka='', fis_code='', drzava='',
+        return template('dodaj_rezultat.html', napakaO=None, x=x, id=x, kraj=kraj, datum=datum, ranki='', startna_stevilka='', fis_code='', drzava='',
                         skoki1='', tocke1='', skoki2='', tocke2='', drzave=drzave, vsi_tekmovalci=vsi_tekmovalci, ekipna=ekipna,
                         sezone=sezone(), napaka=None, username=username, admin=admin)
     else:
-        return template('dodaj_rezultat.html', napakaO=None, x=x, id=x, ranki='', startna_stevilka='', fis_code='',
+        return template('dodaj_rezultat.html', napakaO=None, x=x, id=x, kraj=kraj, datum=datum, ranki='', startna_stevilka='', fis_code='',
                         drzava='', skoki1='', tocke1='', skoki2='', tocke2='', mesto_v_ekipi = '', drzave=drzave, vsi_tekmovalci=vsi_tekmovalci, ekipna=ekipna,
                         sezone=sezone(), napaka=None, username=username, admin=admin)
 
@@ -624,6 +631,10 @@ def dodaj_tekmo_post(x):
 
     username = get_user()
     admin = is_admin(username)
+    cur.execute("SELECT kraj FROM tekma WHERE id = %s", [int(x)])
+    kraj = cur.fetchone()[0]
+    cur.execute("SELECT datum FROM tekma WHERE id = %s", [int(x)])
+    datum = cur.fetchone()[0]
     cur.execute("SELECT kratica,ime FROM drzava")
     drzave = cur.fetchall()
     cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
@@ -634,43 +645,121 @@ def dodaj_tekmo_post(x):
     else:
         ekipna = True
     ranki = request.forms.ranki
-    startna_stevilka = request.forms.startna_stevilka
-    fis_code = request.forms.fis_code.split(' ')[0]
+    if not ekipna:
+        startna_stevilka = request.forms.startna_stevilka
+        fis_code = request.forms.fis_code.split(' ')[0]
+    else:
+        fis_code1 = request.forms.fis_code1.split(' ')[0]
+        fis_code2 = request.forms.fis_code2.split(' ')[0]
+        fis_code3 = request.forms.fis_code3.split(' ')[0]
+        fis_code4 = request.forms.fis_code4.split(' ')[0]
     drzava = request.forms.drzava
-    skoki1 = request.forms.skoki1
-    tocke1 = request.forms.tocke1
-    skoki2 = request.forms.skoki2
-    tocke2 = request.forms.tocke2
-    if ekipna:
-        mesto_v_ekipi = request.forms.mesto_v_ekipi
+    if not ekipna:
+        skoki1 = request.forms.skoki1
+        tocke1 = request.forms.tocke1
+        skoki2 = request.forms.skoki2
+        tocke2 = request.forms.tocke2
+    else:
+        skoki11 = request.forms.skoki11
+        tocke11 = request.forms.tocke11
+        skoki21 = request.forms.skoki21
+        tocke21 = request.forms.tocke21
+        skoki12 = request.forms.skoki12
+        tocke12 = request.forms.tocke12
+        skoki22 = request.forms.skoki22
+        tocke22 = request.forms.tocke22
+        skoki13 = request.forms.skoki13
+        tocke13 = request.forms.tocke13
+        skoki23 = request.forms.skoki23
+        tocke23 = request.forms.tocke23
+        skoki14 = request.forms.skoki14
+        tocke14 = request.forms.tocke14
+        skoki24 = request.forms.skoki24
+        tocke24 = request.forms.tocke24
     try:
         if ekipna:
             cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                        (x, ranki, startna_stevilka, fis_code, drzava, skoki1, tocke1, 1, mesto_v_ekipi))
+                        (x, ranki, 0, fis_code1, drzava, skoki11, tocke11, 1, 1))
             conn.commit()
+            if skoki21 and tocke21:
+                cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                            (x, ranki, 0, fis_code1, drzava, skoki21, tocke21, 2, 1))
+                conn.commit()
+            else:
+                cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                            (x, ranki, 0, fis_code1, drzava, 0, 0, 2, 1))
+                conn.commit()
+
             cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                        (x, ranki, startna_stevilka, fis_code, drzava, skoki2, tocke2, 2, mesto_v_ekipi))
+                        (x, ranki, 0, fis_code2, drzava, skoki12, tocke12, 1, 2))
             conn.commit()
+            if skoki22 and tocke22:
+                cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                            (x, ranki, 0, fis_code2, drzava, skoki22, tocke22, 2, 2))
+                conn.commit()
+            else:
+                cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                            (x, ranki, 0, fis_code2, drzava, 0, 0, 2, 2))
+                conn.commit()
+
+            cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                        (x, ranki, 0, fis_code3, drzava, skoki13, tocke13, 1, 3))
+            conn.commit()
+            if skoki23 and tocke23:
+                cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                            (x, ranki, 0, fis_code3, drzava, skoki23, tocke23, 2, 3))
+                conn.commit()
+            else:
+                cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                            (x, ranki, 0, fis_code3, drzava, 0, 0, 2, 3))
+                conn.commit()
+
+            cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                        (x, ranki, 0, fis_code4, drzava, skoki14, tocke14, 1, 4))
+            conn.commit()
+            if skoki24 and tocke24:
+                cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                            (x, ranki, 0, fis_code4, drzava, skoki24, tocke24, 2, 4))
+                conn.commit()
+            else:
+                cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                            (x, ranki, 0, fis_code4, drzava, 0, 0, 2, 4))
+                conn.commit()
+
         else:
             cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
                         (x, ranki, startna_stevilka, fis_code, drzava, skoki1, tocke1, 1, 0))
             conn.commit()
-            cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                        (x, ranki, startna_stevilka, fis_code, drzava, skoki2, tocke2, 2, 0))
-            conn.commit()
+            if skoki2 and tocke2:
+                cur.execute("INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                            (x, ranki, startna_stevilka, fis_code, drzava, skoki2, tocke2, 2, 0))
+                conn.commit()
+            else:
+                cur.execute(
+                    "INSERT INTO rezultat (id, ranki, startna_stevilka, fis_code, drzava, skoki, tocke, serija, mesto_v_ekipi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    (x, ranki, startna_stevilka, fis_code, drzava, 0, 0, 2, 0))
+                conn.commit()
     except Exception as ex:
         if not ekipna:
-            return template('dodaj_rezultat.html', sezone=sezone(), napakaO=None, x=x, id=x, ranki=ranki,
+            return template('dodaj_rezultat.html', sezone=sezone(), napakaO=None, x=x, id=x, kraj=kraj, datum=datum, ranki=ranki,
                             startna_stevilka=startna_stevilka, fis_code=fis_code,
                             drzava=drzava, skoki1=skoki1, tocke1=tocke1, skoki2=skoki2, tocke2=tocke2, drzave=drzave,
                             vsi_tekmovalci=vsi_tekmovalci, ekipna=ekipna,
                             napaka='Zgodila se je napaka: %s' % ex, username=username, admin=admin)
         else:
-            return template('dodaj_rezultat.html', sezone=sezone(), napakaO=None, x=x, id=x, ranki=ranki, startna_stevilka=startna_stevilka, fis_code=fis_code,
-                            drzava=drzava, skoki1=skoki1, tocke1=tocke1, skoki2=skoki2, tocke2=tocke2, mesto_v_ekipi=mesto_v_ekipi, drzave=drzave,
-                            vsi_tekmovalci=vsi_tekmovalci, ekipna=ekipna,
+            return template('dodaj_rezultat.html', sezone=sezone(), napakaO=None, x=x, id=x, kraj=kraj, datum=datum, ranki=ranki,
+                            fis_code1=fis_code1, fis_code2=fis_code2, fis_code3=fis_code3, fis_code4=fis_code4, drzava=drzava,
+                            skoki11=skoki11, tocke11=tocke11, skoki21=skoki21, tocke21=tocke21,
+                            skoki12=skoki12, tocke12=tocke12, skoki22=skoki22, tocke22=tocke22,
+                            skoki13=skoki13, tocke13=tocke13, skoki23=skoki23, tocke23=tocke23,
+                            skoki14=skoki14, tocke14=tocke14, skoki24=skoki24, tocke24=tocke24,
+                            drzave=drzave, vsi_tekmovalci=vsi_tekmovalci, ekipna=ekipna,
                             napaka='Zgodila se je napaka: %s' % ex, username=username, admin=admin)
-    redirect("/")
+    zakljuci = request.forms.zakljuci
+    if zakljuci == "ne":
+        redirect("/dodaj_rezultat/{}/".format(x))
+    else:
+        redirect("/")
 
 
 @get('/zanimivosti/:x')
