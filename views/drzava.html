@@ -14,12 +14,15 @@
     float:right;
     width:700px;
     height:500px;
+    padding: 20px;
+    margin-bottom: 20px;
     }
 
     #levi{
     float:left;
     width:300px;
-    height:1500px;
+    height:1050px;
+    padding: 20px;
     }
 
     #tabela{
@@ -39,7 +42,7 @@
 
 <h1> {{ime}} ({{x}})</h1>
 <div id="zunanji">
-    <div id="levi">
+    <div id="levi" class="no-gutters border rounded shadow-sm">
          <h3>Število doseženih mest na posamičnih tekmah v sezonah 2009-2019.</h3>
          <p>Če je pred vami prazna tabela, to pomeni, da tekmovalci iz te države, še nimajo uvrstitve na posamičnih tekmah.</p>
          <div id="tabela_pokoncna">
@@ -62,7 +65,7 @@
          </div>
     </div>
 
-    <div id="desni">
+    <div id="desni" class="no-gutters border rounded shadow-sm" style="height:525px;">
         <h3>Vsi tekmovalci, ki so že zastopali svojo državo v svetovnem pokalu.</h3>
         <div id="tabela">
             <table class="table table-bordered table-hover">
@@ -94,7 +97,7 @@
         </div>
     </div>
 
-    <div id="desni">
+    <div id="desni" class="no-gutters border rounded shadow-sm">
         <h3>Zadnja ekipna tekma: {{kraj}}, {{datum}}</h3>
         <div id="tabela">
              <table class="table table-bordered table-hover">

@@ -73,6 +73,17 @@ def sezone():
         sezone.append(i)
     return sezone
 
+def najljubsi(username):
+    cur.execute("SELECT najljubsi_tekmovalci FROM uporabnik WHERE username = %s", [username])
+    najljubsi = cur.fetchone()[0]
+    if najljubsi == '':
+        return []
+    else:
+        najljubsi = najljubsi.split(',')
+        najljubsi = najljubsi[:-1]
+        return list(map(int, najljubsi))
+
+
 # Pomožne funkcije
 ######################################################################
 
@@ -272,7 +283,7 @@ def tekmovalec(x,y):
     else:
         cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t."+ y.replace('-', ' '), [int(x)])
     tekme = cur.fetchall()
-    return template('tekmovalec.html', x=x, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(), napakaO=None, napaka=None, username=username, admin=admin)
+    return template('tekmovalec.html', x=x, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(), najljubsi=najljubsi(username), napakaO=None, napaka=None, username=username, admin=admin)
 
 
 @post('/tekmovalec/:x/:y')
@@ -307,7 +318,7 @@ def tekmovalci(x,y):
                     "GROUP BY t.id, r.fis_code, r.ranki" + "ORDER BY " + y.replace('-', ' '),
                     [int(x),'%' + search + '%','%' + search + '%','%' + search + '%','%' + search + '%','%' + search + '%'])
     tekme = cur.fetchall()
-    return template('tekmovalec.html',x=x, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(), napakaO=None, napaka=napaka, username=username, admin=admin)
+    return template('tekmovalec.html',x=x, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(), najljubsi=najljubsi(username), napakaO=None, napaka=napaka, username=username, admin=admin)
 
 
 @get('/tekme/:x/:y')
@@ -462,6 +473,7 @@ def drzava(x):
 def zadnja_tekma():
     cur.execute("SELECT id FROM tekma WHERE datum <= date('now') ORDER BY datum DESC LIMIT 1")
     id = cur.fetchone()[0]
+    print(id)
     return tekma(id,'ranki-ASC')
 
 
@@ -923,8 +935,7 @@ def najljubsi_post():
     try:
         if len(cur.fetchone()) > 0:
             username = get_user()
-            cur.execute("SELECT najljubsi_tekmovalci FROM uporabnik WHERE username = %s", [username])
-            stringFC = cur.fetchone()[0]
+            stringFC = najljubsi(username)
             if stringFC is None:
                 stringFC = ''
             cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [stringFC + dodaj + ',', username])
@@ -934,6 +945,21 @@ def najljubsi_post():
 
     najljubsi_get(napaka)
     redirect('/najljubsi')
+
+@post('/dodaj/:x/')
+def dodaj(x):
+    x = int(x)
+    username = get_user()
+    dodaj = request.forms.dodaj
+    naj = najljubsi(username)
+    if dodaj == "ne":
+        i = naj.index(x)
+        naj.pop(i)
+        naj_str = ','.join(map(str,naj)) + ','
+    else:
+        naj_str = ','.join(map(str,naj)) + ',' + str(x) + ','
+    cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [naj_str, username])
+    redirect("/tekmovalec/{}/Datum-DESC".format(x))
 
 
 ######################################################################
