@@ -874,7 +874,7 @@ def zanimivosti_post_3():
     dolzina = request.forms.dolzina
     cur.execute("WITH umesna AS (SELECT fis_code, count(*) AS stevilo FROM rezultat WHERE skoki >= %s GROUP BY fis_code)"
                 "SELECT fis_code, status, ime, priimek, drzava, rojstvo, klub, smucke, stevilo FROM umesna "
-                "JOIN tekmovalec USING (fis_code) ORDER BY stevilo DESC",[int(dolzina)])
+                "JOIN tekmovalec USING (fis_code) ORDER BY stevilo DESC",[float(dolzina)])
     tekmovalci_dolzina = cur.fetchall()
     return template('zanimivosti.html', tekmovalci_dolzina=tekmovalci_dolzina, dolzina=dolzina, tekme_boljsi=cur, vsi_tekmovalci=cur, izpis=True,
                     sezone=cur, drzave=cur, napaka=None, napakaO=None, tekmovalci=cur, zanimivost=3, username=username,
