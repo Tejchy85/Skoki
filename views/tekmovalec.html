@@ -19,18 +19,20 @@
     <div class="row">
         <div class="col">
           <h1 style="display:inline-block">{{ime}} {{priimek}}</h1>
-          % if admin:
+          % if username:
             <div class="row float-right">
-                <form action="/dodaj/{{fis_code}}/" method="POST">
-                % if fis_code in najljubsi:
-                    <button type="submit" name="dodaj" value="ne" class="btn btn-dark btn-md active">Odstrani iz priljubljenih</button>
-                % else:
-                    <button type="submit" name="dodaj" value="ja" class="btn btn-dark btn-md active">Dodaj v priljubljene</button>
+                % if admin:
+                    <a href="/uredi_tekmovalca/{{x}}/" class="btn btn-dark btn-md active" role="button" aria-pressed="true" style="margin-right: 5px;">Uredi</a>
                 % end
+                <form action="/dodaj/{{fis_code}}/" method="POST">
+                   % if fis_code in najljubsi:
+                       <button type="submit" name="dodaj" value="ne" class="btn btn-dark btn-md active">Odstrani iz priljubljenih</button>
+                   % else:
+                       <button type="submit" name="dodaj" value="ja" class="btn btn-dark btn-md active">Dodaj v priljubljene</button>
+                   % end
                 </form>
-                <a href="/uredi_tekmovalca/{{x}}/" class="btn btn-dark btn-md active" role="button" aria-pressed="true" style="margin-left: 5px;">Uredi</a>
             </div>
-          % end
+          %end
         </div>
     </div>
     <div class="container rounded shadow" style="background-color: #f2f2f2;margin-bottom:20px">

@@ -74,9 +74,11 @@ def sezone():
     return sezone
 
 def najljubsi(username):
+    if username==None:
+        return []
     cur.execute("SELECT najljubsi_tekmovalci FROM uporabnik WHERE username = %s", [username])
     najljubsi = cur.fetchone()[0]
-    if najljubsi == '':
+    if najljubsi == None:
         return []
     else:
         najljubsi = najljubsi.split(',')
@@ -912,16 +914,13 @@ def najljubsi_get(napaka=None):
     username = get_user()
     admin = is_admin(username)
 
-    cur.execute("SELECT najljubsi_tekmovalci FROM uporabnik WHERE username = %s", [username])
+    list_najljubsih = najljubsi(username)
 
-    list_najljubsih = cur.fetchone()[0]
-
-    if list_najljubsih is None:
+    if list_najljubsih == []:
         napaka = 'Nimate še dodanih najljubših tekmovalcev.'
         cur.execute("SELECT * FROM tekmovalec")
     else:
-        list_najljubsih = list_najljubsih.split(',')[:-1]
-        stringFC = ', '.join(list_najljubsih)
+        stringFC = ','.join(map(str,list_najljubsih))
         cur.execute("SELECT * FROM tekmovalec WHERE fis_code IN (" + stringFC + ")")
     tekmovalci = cur.fetchall()
     return template('najljubsi.html', tekmovalci=tekmovalci, sezone=sezone(), napakaO=None, napaka=napaka, username=username,
@@ -936,9 +935,11 @@ def najljubsi_post():
         if len(cur.fetchone()) > 0:
             username = get_user()
             stringFC = najljubsi(username)
-            if stringFC is None:
-                stringFC = ''
-            cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [stringFC + dodaj + ',', username])
+            if stringFC != []:
+                cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s",
+                            [','.join(map(str, stringFC)) + ',' + dodaj + ',', username])
+            else:
+                cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [str(dodaj) + ',', username])
             napaka = 'Tekmovalec je bil uspešno dodan med najljubše'
     except:
         napaka = 'Ne obstaja tekmovalec z to fis kodo'
@@ -955,10 +956,17 @@ def dodaj(x):
     if dodaj == "ne":
         i = naj.index(x)
         naj.pop(i)
-        naj_str = ','.join(map(str,naj)) + ','
+        if len(naj)==0:
+            cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = NULL WHERE username=%s",[username])
+        else:
+            naj_str = ','.join(map(str,naj)) + ','
+            cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [naj_str, username])
     else:
-        naj_str = ','.join(map(str,naj)) + ',' + str(x) + ','
-    cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [naj_str, username])
+        if len(naj)==0:
+            naj_str = str(x) + ','
+        else:
+            naj_str = ','.join(map(str,naj)) + ',' + str(x) + ','
+        cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [naj_str, username])
     redirect("/tekmovalec/{}/Datum-DESC".format(x))
 
 
