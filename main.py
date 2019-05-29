@@ -114,23 +114,35 @@ def postani_admin():
     adminPassword = request.forms.adminPassword
     password = request.forms.password
 
+    #za začetno stran potrebuješ skupni seštevek:
+    sezone_seznam = sezone()
+    sezona = sezone_seznam[-1]
+    cur.execute(
+        "WITH umesna3 AS (WITH umesna2 AS (WITH umesna AS (SELECT id, ranki, fis_code FROM rezultat JOIN tekma USING (id) "
+        "WHERE datum BETWEEN %s AND %s AND tip_tekme = 'posamicna' GROUP BY id, ranki, fis_code ORDER BY id,ranki)"
+        "SELECT tocke,fis_code, count(*) AS stevilo FROM umesna JOIN tocke USING(ranki) GROUP BY tocke,fis_code)"
+        "SELECT fis_code, sum(stevilo*tocke) AS sestevek FROM umesna2 GROUP BY fis_code)"
+        "SELECT fis_code, ime, priimek, sestevek FROM umesna3 JOIN tekmovalec USING(fis_code) ORDER BY sestevek DESC",
+        [datetime.date(int(sezona) - 1, 11, 1), datetime.date(int(sezona), 3, 31)])
+    skupni_sestevek = cur.fetchall()
+
     if password == "":
         if adminPassword == adminGeslo:
             cur.execute("UPDATE uporabnik SET isadmin = True WHERE username=%s", [username])
             admin = is_admin(username)
-            return template('zacetna_stran.html', sezone=sezone(), napakaO=None, username=username, admin=admin)
+            return template('zacetna_stran.html', skupni_sestevek=skupni_sestevek, sezone=sezone_seznam, napakaO=None, username=username, admin=admin)
         else:
             admin = is_admin(username)
-            return template('zacetna_stran.html', sezone=sezone(), napakaO="Vnesili ste napačno admin geslo.", username=username, admin=admin)
+            return template('zacetna_stran.html', skupni_sestevek=skupni_sestevek, sezone=sezone_seznam, napakaO="Vnesili ste napačno admin geslo.", username=username, admin=admin)
     else:
         cur.execute("SELECT password FROM uporabnik WHERE username=%s", [username])
         if cur.fetchone()[0] == password_md5(password):
             cur.execute("DELETE FROM uporabnik WHERE username=%s", [username])
             response.delete_cookie('username')
-            return template('zacetna_stran.html', sezone=sezone(), napakaO=None, username=None, admin=None)
+            return template('zacetna_stran.html', skupni_sestevek=skupni_sestevek, sezone=sezone_seznam, napakaO=None, username=None, admin=None)
         else:
             admin = is_admin(username)
-            return template('zacetna_stran.html', sezone=sezone(), napakaO="Vnesili ste napačno geslo.", username=username,
+            return template('zacetna_stran.html', skupni_sestevek=skupni_sestevek, sezone=sezone_seznam, napakaO="Vnesili ste napačno geslo.", username=username,
                             admin=admin)
 
 
