@@ -930,12 +930,14 @@ def najljubsi_get(napaka=None):
 
     if list_najljubsih == []:
         napaka = 'Nimate še dodanih najljubših tekmovalcev.'
+        izrisi = False
         cur.execute("SELECT * FROM tekmovalec")
     else:
         stringFC = ','.join(map(str,list_najljubsih))
         cur.execute("SELECT * FROM tekmovalec WHERE fis_code IN (" + stringFC + ")")
+        izrisi = True
     tekmovalci = cur.fetchall()
-    return template('najljubsi.html', tekmovalci=tekmovalci, sezone=sezone(), napakaO=None, napaka=napaka, username=username,
+    return template('najljubsi.html', tekmovalci=tekmovalci, sezone=sezone(), izrisi = izrisi, napakaO=None, napaka=napaka, username=username,
                     admin=admin)
 
 
