@@ -549,7 +549,7 @@ def dodaj_tekmovalca_post():
     except Exception as ex:
         return template('dodaj_tekmovalca.html', sezone=sezone(), napakaO=None, fis_code=fis_code, ime=ime, priimek=priimek, drzave=drzave, rojstvo=rojstvo, klub=klub, smucke=smucke, status=status,
                         napaka = 'Zgodila se je napaka: %s' % ex, username=username, admin=admin)
-    redirect("/")
+    redirect("/tekmovalec/{}/Datum-DESC".format(fis_code))
 
 
 @get('/uredi_tekmovalca/:x/')
@@ -790,7 +790,7 @@ def dodaj_tekmo_post(x):
     if zakljuci == "ne":
         redirect("/dodaj_rezultat/{}/".format(x))
     else:
-        redirect("/")
+        redirect("/tekma/{}/ranki-ASC".format(x))
 
 
 @get('/zanimivosti/:x')
