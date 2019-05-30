@@ -1,5 +1,6 @@
 # Skoki
-##Projekt pri predmetu Osnove podatkovnih baz na Fakulteti za matematiko in fiziko: Martin Dolenc, Petra Podlogar, Teja Škvarč
+## Projekt pri predmetu Osnove podatkovnih baz na Fakulteti za matematiko in fiziko.
+### Avtorji: Martin Dolenc, Petra Podlogar, Teja Škvarč
 
 Na repozitoriju se nahaja enostavna spletna aplikacija, ki je namenjena pregledu rezultatov tekem, tekmovalcev, držav in njihovih uspehov med sezonami 2009 in 2019.
 
@@ -11,15 +12,18 @@ Prijavljeni obiskovalec ima možnost dodajanja priljubljenih tekmovalcev.
 
 Primeri uporabniških imen ter gesel: 
 
+```
 (navadni uporabnik) <br />
 upo. ime: navadni <br />
 geslo: NaVaDnI
+```
 
+```
 (administrator) <br />
 upo. ime: admin <br />
 geslo: AdMiN <br />
 admin geslo: 1111
-
+```
 
 Prilagamo še sliko ER-diagrama, na podlagi katerega smo oblikovali našo podatkovno bazo.
 ![alt text](ER-diagram.png)
