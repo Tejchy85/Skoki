@@ -61,9 +61,9 @@
                 %end
             </select>
         </div>
-        <button type="submit" class="btn btn-primary">Išči</button>
+        <button type="submit" class="btn btn-primary" style="height:39px; margin-top: 32px; width: 60px; margin-left:15px;">Išči</button>
         %if izpis:
-          <button type="button" data-toggle="modal" data-target="#exampleModal11">
+          <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#exampleModal11" style="height:39px; margin-top: 32px; width: 72px; margin-left:10px;">
               Prikaži
           </button>
         %end
@@ -136,10 +136,10 @@
                     %end
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary">Išči</button>
+            <button type="submit" class="btn btn-primary" style="height:39px; margin-top: 32px; width: 60px; margin-left:15px;">Išči</button>
             %if izpis:
-              <button type="button" data-toggle="modal" data-target="#exampleModal2">
-                  Prikaži
+              <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#exampleModal2" style="height:39px; margin-top: 32px; width: 72px; margin-left:10px;">
+                Prikaži
               </button>
             %end
           </div>
@@ -196,9 +196,9 @@ ki so preskočili 200.5 m. V stolpcu "Število skokov", pa je zapisano, kolikokr
         <label>Dolžina skoka</label>
         <input type="decimal" name="dolzina" value="{{dolzina}}" class="form-control" placeholder="Primer: 200.5" required="true">
         </div>
-        <button type="submit" class="btn btn-primary">Išči</button>
+        <button type="submit" class="btn btn-primary" style="height:39px; margin-top: 32px; width: 60px; margin-left:15px;">Išči</button>
         %if izpis:
-          <button type="button" data-toggle="modal" data-target="#exampleModal3">
+          <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#exampleModal3" style="height:39px; margin-top: 32px; width: 72px; margin-left:10px;">
               Prikaži
           </button>
         %end
@@ -281,9 +281,9 @@ ki so preskočili 200.5 m. V stolpcu "Število skokov", pa je zapisano, kolikokr
                 %end
             </select>
         </div>
-        <button type="submit" class="btn btn-primary">Išči</button>
+        <button type="submit" class="btn btn-primary" style="height:39px; margin-top: 32px; width: 60px; margin-left:15px;">Išči</button>
         %if izpis:
-          <button type="button" data-toggle="modal" data-target="#exampleModal4">
+          <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#exampleModal4" style="height:39px; margin-top: 32px; width: 72px; margin-left:10px;">
               Prikaži
           </button>
         %end
@@ -327,7 +327,8 @@ ki so preskočili 200.5 m. V stolpcu "Število skokov", pa je zapisano, kolikokr
 <h1>Skupni seštevek.</h1>
 <p>Izbira "2018" bo vrnila skupni seštevek za sezono 2018.</p>
   <form action="/zanimivosti/5" method="POST">
-        <div class="form-group">
+      <div class="form-row">
+        <div class="form-group col-md-4">
         <label>Sezona</label>
             <select type="integer" name="sezona_skupni" value="" class="form-control" required="true">
                 %for (sezona) in sezone:
@@ -335,9 +336,9 @@ ki so preskočili 200.5 m. V stolpcu "Število skokov", pa je zapisano, kolikokr
                 %end
             </select>
         </div>
-        <button type="submit" class="btn btn-primary">Išči</button>
+        <button type="submit" class="btn btn-primary" style="height:39px; margin-top: 32px; width: 60px; margin-left:15px;">Išči</button>
         %if izpis:
-          <button type="button" data-toggle="modal" data-target="#exampleModal5">
+          <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#exampleModal5" style="height:39px; margin-top: 32px; width: 72px; margin-left:10px;">
               Prikaži
           </button>
         %end
