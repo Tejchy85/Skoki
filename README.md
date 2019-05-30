@@ -26,4 +26,5 @@ admin geslo: 1111
 ```
 
 Prilagamo še sliko ER-diagrama, na podlagi katerega smo oblikovali našo podatkovno bazo.
+
 ![alt text](ER-diagram.png)
