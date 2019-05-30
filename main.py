@@ -251,7 +251,10 @@ def tekmovalci_post():
     sezR = raz.split('-')
     asc = ['naraščajoče', 'od A do Ž', 'Starejši prej']
 
-    if sezR[1].strip() in asc:
+    if sezR == ['']:
+        print(1)
+        y = 'fis_code ASC'
+    elif sezR[1].strip() in asc:
         y = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z') + ' ASC'
     else:
         y = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z') + ' DESC'
@@ -956,7 +959,7 @@ def najljubsi_post():
                 cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [str(dodaj) + ',', username])
             napaka = 'Tekmovalec je bil uspešno dodan med najljubše'
     except:
-        napaka = 'Ne obstaja tekmovalec z to fis kodo'
+        napaka = 'Ne obstaja tekmovalec s to fis kodo'
 
     najljubsi_get(napaka)
     redirect('/najljubsi')
