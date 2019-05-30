@@ -22,18 +22,18 @@
 <h2>Seznam zanimivosti</h2>
 
 <ul style="list-style-type:circle;">
-    <li><a href="/zanimivosti/1">Tekmovalci, ki so zastopali izbrano državo v izbranem obdobju.</a></li>
-    <li><a href="/zanimivosti/2">Primerjava rezultatov dveh poljubnih tekmovalcev.</a></li>
-    <li><a href="/zanimivosti/3">Število skokov preko določene dolžine.</a></li>
-    <li><a href="/zanimivosti/4">Število posameznih mest.</a></li>
-    <li><a href="/zanimivosti/5">Skupni sestevek.</a></li>
+    <li><a href="/zanimivosti/1">Tekmovalci, ki so zastopali izbrano državo v izbranem obdobju</a></li>
+    <li><a href="/zanimivosti/2">Primerjava rezultatov dveh poljubnih tekmovalcev</a></li>
+    <li><a href="/zanimivosti/3">Število skokov preko določene dolžine</a></li>
+    <li><a href="/zanimivosti/4">Število posameznih mest</a></li>
+    <li><a href="/zanimivosti/5">Skupni sestevek</a></li>
 </ul>
 
 % if username:
 
 
 %if zanimivost == 1:
-<h1>Tekmovalci, ki so zastopali izbrano državo v svetovnem pokalu v izbranem obdobju.</h1>
+<h1>Tekmovalci, ki so zastopali izbrano državo v svetovnem pokalu v izbranem obdobju</h1>
 <p>Izbira "SLO 2018 2019" bo vrnila tabelo, v kateri bodo zapisani vsi tekmovalci, ki so zastopali Slovenijo v svetovnem pokalu vsaj na eni tekmi, ki je potekala v sezoni 2018 ali v sezoni 2019.</p>
   <form action="/zanimivosti/1" method="POST">
       <div class="form-row">
@@ -116,7 +116,7 @@
 %end
 
 %if zanimivost == 2:
-    <h1>Izberi si dva tekmovalca in primerjaj njune uvrstitve.</h1>
+    <h1>Primerjava rezultatov dveh poljubnih tekmovalcev</h1>
     <p>Pri določeni izbiri bo izpisalo tabelo, v kateri bodo tekme in dodaten stolpec s tekmovalcem, ki je na tej tekmi imel boljši rezultat.</p>
       <form action="/zanimivosti/2" method="POST">
           <div class="form-row">
@@ -187,9 +187,9 @@
 %end
 
 %if zanimivost == 3:
-<h1>Število skokov preko določene dolžine.</h1>
-<p>Če te zanima kdo je največkrat preskočil oznako 200.5 m, vnesi številko "200.5". Kot rezultat boš dobil tabelo z vsemi tekmovalci,
-ki so preskočili 200.5 m. V stolpcu "Število skokov", pa je zapisano, kolikokrat je tekmovalec preskočil 200.5 metersko oznako.</p>
+<h1>Število skokov preko določene dolžine</h1>
+<p>Če te zanima, kdo je največkrat preskočil oznako 200.5 m, vnesi številko "200.5". Kot rezultat boš dobil tabelo z vsemi tekmovalci,
+ki so preskočili 200.5 m. V stolpcu "Število skokov" pa je zapisano, kolikokrat je tekmovalec preskočil 200.5 metrsko oznako.</p>
   <form action="/zanimivosti/3" method="POST">
       <div class="form-row">
         <div class="form-group">
@@ -253,7 +253,7 @@ ki so preskočili 200.5 m. V stolpcu "Število skokov", pa je zapisano, kolikokr
 %end
 
 %if zanimivost == 4:
-<h1>Število posameznih mest.</h1>
+<h1>Število posameznih mest</h1>
 <p>Izbira "5658 - PREVC Peter 2015 2019" bo vrnila tabelo, v kateri bodo zapisana vsa mesta, ki jih je Peter Prevec dosegel v sezonah 2015 - 2019, ter koliko le-teh je dosegel.</p>
   <form action="/zanimivosti/4" method="POST">
       <div class="form-row">
@@ -324,7 +324,7 @@ ki so preskočili 200.5 m. V stolpcu "Število skokov", pa je zapisano, kolikokr
 %end
 
 %if zanimivost == 5:
-<h1>Skupni seštevek.</h1>
+<h1>Skupni seštevek</h1>
 <p>Izbira "2018" bo vrnila skupni seštevek za sezono 2018.</p>
   <form action="/zanimivosti/5" method="POST">
       <div class="form-row">
