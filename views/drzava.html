@@ -43,8 +43,8 @@
 <h1> {{ime}} ({{x}})</h1>
 <div id="zunanji">
     <div id="levi" class="no-gutters border rounded shadow-sm">
-         <h3>Število doseženih mest na posamičnih tekmah v sezonah 2009-2019.</h3>
-         <p>Če je pred vami prazna tabela, to pomeni, da tekmovalci iz te države, še nimajo uvrstitve na posamičnih tekmah.</p>
+         <h3>Število doseženih mest na posamičnih tekmah v sezonah {{prva}}-{{zadnja}}.</h3>
+         <p>Če je pred vami prazna tabela, to pomeni, da tekmovalci iz te države še nimajo uvrstitve na posamičnih tekmah.</p>
          <div id="tabela_pokoncna">
             <table class="table table-bordered table-hover">
              <thead class="thead-light">
@@ -83,7 +83,7 @@
                   <tbody>
                   %for (fis_code,status,ime,priimek,drzava,rojstvo,klub,smucke) in tekmovalci:
                     <tr>
-                       <td><a href="/tekmovalec/{{fis_code}}/Datum-DESC">{{fis_code}}</a></td>
+                       <td><a href="/tekmovalec/{{fis_code}}/">{{fis_code}}</a></td>
                        <td>{{status}}</td>
                        <td>{{ime}}</td>
                        <td>{{priimek}}</td>
@@ -125,7 +125,7 @@
                         <tr>
                             <td>{{ranki}}</td>
                             <td>{{mesto_v_ekipi}}</td>
-                            <td><a href="/tekmovalec/{{fis_code}}/Datum-DESC">{{fis_code}}</a></td>
+                            <td><a href="/tekmovalec/{{fis_code}}/">{{fis_code}}</a></td>
                             <td>{{ime}}</td>
                             <td>{{priimek}}</td>
                             <td><a href="/drzava/{{drzava}}"><p><img class="imageWithText" src="/static/flags/{{drzava}}.png">{{drzava}}</p></a></td>
@@ -140,7 +140,7 @@
                         <tr>
                             <td>{{ranki}}</td>
                             <td>{{mesto_v_ekipi}}</td>
-                            <td><a href="/tekmovalec/{{fis_code}}/Datum-DESC">{{fis_code}}</a></td>
+                            <td><a href="/tekmovalec/{{fis_code}}/">{{fis_code}}</a></td>
                             <td>{{ime}}</td>
                             <td>{{priimek}}</td>
                             <td><a href="/drzava/{{drzava}}"><p><img class="imageWithText" src="/static/flags/{{drzava}}.png">{{drzava}}</p></a></td>

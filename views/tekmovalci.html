@@ -3,8 +3,11 @@
 <h1>Tekmovalci</h1>
 
 <body>
+
 %if napaka:
-        <div class="alert alert-warning">{{napaka}}</div>
+    <div class="alert alert-warning">
+        <strong>Pozor!</strong> {{napaka}}
+    </div>
 %end
 
 <!-- Search form -->
@@ -61,7 +64,7 @@
   <tbody>
   %for (fis_code,status,ime,priimek,drzava,rojstvo,klub,smucke) in tekmovalci:
     <tr>
-       <td><a href="/tekmovalec/{{fis_code}}/Datum-DESC">{{fis_code}}</a></td>
+       <td><a href="/tekmovalec/{{fis_code}}/">{{fis_code}}</a></td>
        <td>{{status}}</td>
        <td>{{ime}}</td>
        <td>{{priimek}}</td>

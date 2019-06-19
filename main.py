@@ -234,7 +234,7 @@ def register_post():
 def tekmovalci_get():
     username = get_user()
     admin = is_admin(username)
-    cur.execute("SELECT * FROM tekmovalec")
+    cur.execute("SELECT * FROM tekmovalec ORDER BY priimek ASC")
     tekmovalci = cur.fetchall()
     return template('tekmovalci.html', tekmovalci=tekmovalci, sezone=sezone(), napakaO=None, napaka=None, username=username, admin=admin)
 
@@ -252,7 +252,6 @@ def tekmovalci_post():
     asc = ['naraščajoče', 'od A do Ž', 'Starejši prej']
 
     if sezR == ['']:
-        print(1)
         y = 'fis_code ASC'
     elif sezR[1].strip() in asc:
         y = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z') + ' ASC'
@@ -274,7 +273,7 @@ def tekmovalci_post():
         elif sez[0].strip() in head_list:
             cur.execute("SELECT * FROM tekmovalec WHERE LOWER(" + sez[0] + ") LIKE %s" + "ORDER BY " + y.replace('-', ' '), ['%' + search + '%'])
         else:
-            napaka = "ne sam ne"
+            napaka = "Neveljavno iskanje."
     else:
         cur.execute("SELECT * FROM tekmovalec WHERE CAST(fis_code AS varchar(10)) LIKE %s"
                     "OR LOWER(status) LIKE %s"
@@ -289,53 +288,98 @@ def tekmovalci_post():
     return template('tekmovalci.html', tekmovalci=tekmovalci, sezone=sezone(), napakaO=None, napaka=napaka, username=username, admin=admin)
 
 
-@get('/tekmovalec/:x/:y')
-def tekmovalec(x,y):
+@get('/tekmovalec/:x/')
+def tekmovalec(x):
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [int(x)])
     tekmovalec = cur.fetchall()
-    if 'Ranki' in y.split("-"):
-        cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY r."+ y.replace('-', ' '), [int(x)])
-    else:
-        cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t."+ y.replace('-', ' '), [int(x)])
+    cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t.datum DESC", [int(x)])
     tekme = cur.fetchall()
     return template('tekmovalec.html', x=x, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(), najljubsi=najljubsi(username), napakaO=None, napaka=None, username=username, admin=admin)
 
 
-@post('/tekmovalec/:x/:y')
-def tekmovalci(x,y):
+@post('/tekmovalec/:x/')
+def tekmovalec_post(x):
     if (request.forms.adminPassword != "") or (request.forms.password != ""):
         postani_admin()
 
-    search = request.forms.search.lower()
+    search = request.forms.search.lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [int(x)])
     tekmovalec = cur.fetchall()
+    raz = request.forms.razvrscanje
+
+    sezR = raz.split('-')
+    asc = ['naraščajoče', 'od A do Ž', 'Starejši prej']
+
+    slovar = {'rank': 'ranki'}
+
+    if sezR == ['']:
+        y = 'datum DESC'
+    elif sezR[1].strip() in asc:
+        z = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
+        if z in slovar:
+            z = slovar.get(z)
+        y = z + ' ASC'
+    else:
+        z = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
+        if z in slovar:
+            z = slovar.get(z)
+        y = z + ' DESC'
+
+    if search == "":
+        if 'ranki' in y:
+            cur.execute(
+                "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY r." + y.replace(
+                    '-', ' '), [int(x)])
+        else:
+            cur.execute(
+                "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t." + y.replace(
+                    '-', ' '), [int(x)])
+        tekme = cur.fetchall()
+        return template('tekmovalec.html', x=x, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(),
+                        najljubsi=najljubsi(username), napakaO=None, napaka=None, username=username, admin=admin)
+
     napaka = None
-    head_list = ['datum', 'kraj', 'drzava', 'tip tekme', 'rank']
+    head_list = ['datum', 'kraj', 'drzava', 'tip_tekme', 'ranki']
     sez = search.split(':')
+    sez[0] = sez[0].replace('č', 'c').replace('š', 's').replace('ž', 'z').strip()
+    if sez[0] == 'rank':
+        sez[0] = 'ranki'
+
     if len(sez) > 1:
         search = sez[1].strip()
         if sez[0].replace(' ', '') == 'tiptekme':
-            cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(t.tip_tekme AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + "ORDER BY " + y.replace('-', ' '), [int(x),'%' + search + '%'])
-        elif sez[0].lower() =='rank':
-            cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(r.ranki AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + "ORDER BY " + y.replace('-', ' '), [int(x),'%' + search + '%'])
-        elif sez[0].strip() in head_list:
-            cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(t." + sez[0] + " AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + "ORDER BY " + y.replace('-', ' '), [int(x),'%' + search + '%'])
+            cur.execute(
+                "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(t.tip_tekme AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + " ORDER BY " + y.replace(
+                    '-', ' '), [int(x), '%' + search + '%'])
+        elif sez[0].lower() == 'ranki':
+            cur.execute(
+                "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(r.ranki AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + " ORDER BY " + y.replace(
+                    '-', ' '), [int(x), '%' + search + '%'])
+        elif sez[0] in head_list:
+            cur.execute(
+                "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(t." +
+                sez[0] + " AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + " ORDER BY " + y.replace('-',
+                                                                                                                 ' '),
+                [int(x), '%' + search + '%'])
         else:
-            napaka = "ne sam ne"
+            napaka = "Neveljavno iskanje."
     else:
-        cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND (LOWER(tip_tekme) LIKE %s"
-                    "OR CAST(datum AS varchar(10)) LIKE %s"
-                    "OR LOWER(kraj) LIKE %s"
-                    "OR LOWER(t.drzava) LIKE %s"
-                    "OR CAST(ranki AS varchar(10)) LIKE %s)"
-                    "GROUP BY t.id, r.fis_code, r.ranki" + "ORDER BY " + y.replace('-', ' '),
-                    [int(x),'%' + search + '%','%' + search + '%','%' + search + '%','%' + search + '%','%' + search + '%'])
+        cur.execute(
+            "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND (LOWER(tip_tekme) LIKE %s"
+            "OR CAST(datum AS varchar(10)) LIKE %s"
+            "OR LOWER(kraj) LIKE %s"
+            "OR LOWER(t.drzava) LIKE %s"
+            "OR CAST(ranki AS varchar(10)) LIKE %s)"
+            "GROUP BY t.id, r.fis_code, r.ranki" + " ORDER BY " + y.replace('-', ' '),
+            [int(x), '%' + search + '%', '%' + search + '%', '%' + search + '%', '%' + search + '%',
+             '%' + search + '%'])
     tekme = cur.fetchall()
-    return template('tekmovalec.html',x=x, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(), najljubsi=najljubsi(username), napakaO=None, napaka=napaka, username=username, admin=admin)
+    return template('tekmovalec.html', x=x, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(),
+                    najljubsi=najljubsi(username), napakaO=None, napaka=napaka, username=username, admin=admin)
 
 
 @get('/tekme/:x/:y')
@@ -348,8 +392,8 @@ def tekme(x,y):
     return template('tekme_sezona.html', sezone=sezone(), napakaO=None, x=x, tekme=tekme, username = username, admin=admin)
 
 
-@get('/tekma/:x/:y')
-def tekma(x,y):
+@get('/tekma/:x/')
+def tekma(x):
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT kraj, datum FROM tekma WHERE id = %s", [int(x)])
@@ -364,17 +408,17 @@ def tekma(x,y):
     cur.execute("SELECT serija FROM rezultat WHERE id = %s ORDER BY serija DESC LIMIT 1", [int(x)])
     serija = cur.fetchone()[0]
     if serija == 2:
-        cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,skoki1,tocke1,skoki2,tocke2,tocke,mesto_v_ekipi FROM dve_seriji WHERE id = %s ORDER BY " + y.replace('-', ' '),[int(x)])
+        cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,skoki1,tocke1,skoki2,tocke2,tocke,mesto_v_ekipi FROM dve_seriji WHERE id = %s ORDER BY ranki ASC",[int(x)])
         serija_bool = True
     else:
-        cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,tocke,mesto_v_ekipi FROM ena_serija WHERE id=%s ORDER BY " + y.replace('-', ' '),[int(x)])
+        cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,tocke,mesto_v_ekipi FROM ena_serija WHERE id=%s ORDER BY ranki ASC",[int(x)])
         serija_bool = False
     tekma = cur.fetchall()
     return template('tekma.html', napakaO=None, sezone=sezone(), x = x, tekma = tekma, kraj=kraj_datum[0], datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija_bool, napaka=None)
 
 
-@post('/tekma/:x/:y')
-def tekma_post(x,y):
+@post('/tekma/:x/')
+def tekma_post(x):
     if (request.forms.adminPassword != "") or (request.forms.password != ""):
         postani_admin()
 
@@ -427,16 +471,19 @@ def tekma_post(x,y):
     text_list = ['ime', 'priimek', 'drzava']
     sez = search.split(':')
     sez[0] = sez[0].replace('č', 'c').replace('š', 's').replace('ž', 'z')
+    sez[0] = sez[0].strip().replace(' ', '_')
+    if sez[0] == 'rank':
+        sez[0] = 'ranki'
 
     if len(sez) > 1:
-        if sez[0].strip().replace(' ', '_') in head_list:
+        if sez[0] in head_list:
             cur.execute("SELECT " + ','.join(head_list[:3]) + ',' + ','.join(text_list) + ',' + ','.join(head_list[3:]) + ' FROM ' + string + " WHERE id = %s AND CAST(" + sez[0] + " AS varchar(10)) LIKE %s" + "ORDER BY " + y.replace('-', ' '),
             [int(x)] + ['%' + sez[1].strip() + '%'])
-        elif sez[0].strip().replace(' ', '_') in text_list:
+        elif sez[0] in text_list:
             cur.execute("SELECT " + ','.join(head_list[:3]) + ',' + ','.join(text_list) + ',' + ','.join(head_list[3:]) + ' FROM ' + string + " WHERE id = %s AND LOWER(" + sez[0] + ") LIKE %s" + "ORDER BY " + y.replace('-', ' '),
             [int(x)] + ['%' + sez[1].strip() + '%'])
         else:
-            napaka = "ne sam ne"
+            napaka = "Neveljavno iskanje."
     else:
         cur.execute("SELECT " + ','.join(head_list[:3]) + ',' + ','.join(text_list) + ',' + ','.join(head_list[3:]) + ' FROM ' + string + " WHERE id = %s AND (CAST("
                     + ' AS varchar(10)) LIKE %s OR CAST('.join(head_list) + " AS varchar(10)) LIKE %s"
@@ -483,16 +530,21 @@ def drzava(x):
         "WITH zdruzena AS (SELECT * FROM rezultat JOIN tekma ON rezultat.id = tekma.id WHERE rezultat.drzava = %s) "
         "SELECT ranki, count(*) AS stevilo FROM zdruzena WHERE tip_tekme <> 'ekipna' GROUP BY ranki ORDER BY ranki",[x])
     mesta = cur.fetchall()
-    return template('drzava.html', sezone=sezone(), napakaO=None, x=x, ime=ime,tekmovalci=tekmovalci,kraj=kraj,datum=datum, tekma=tekma, serija=True, ekipna=True, mesta=mesta, username = username, admin=admin )
+
+    return template('drzava.html', sezone=sezone(), prva=sezone()[0], zadnja=sezone()[-1], napakaO=None, x=x, ime=ime,tekmovalci=tekmovalci,kraj=kraj,datum=datum, tekma=tekma, serija=True, ekipna=True, mesta=mesta, username = username, admin=admin )
 
 
 @get('/zadnja_tekma')
 def zadnja_tekma():
     cur.execute("SELECT id FROM tekma WHERE datum <= date('now') ORDER BY datum DESC LIMIT 1")
     id = cur.fetchone()[0]
-    print(id)
-    return tekma(id,'ranki-ASC')
+    return tekma(id)
 
+@post('/zadnja_tekma')
+def zadnja_tekma_post():
+    cur.execute("SELECT id FROM tekma WHERE datum <= date('now') ORDER BY datum DESC LIMIT 1")
+    id = cur.fetchone()[0]
+    return tekma_post(id)
 
 @get('/dodaj_drzavo')
 def dodaj_drzavo():
@@ -552,7 +604,7 @@ def dodaj_tekmovalca_post():
     except Exception as ex:
         return template('dodaj_tekmovalca.html', sezone=sezone(), napakaO=None, fis_code=fis_code, ime=ime, priimek=priimek, drzave=drzave, rojstvo=rojstvo, klub=klub, smucke=smucke, status=status,
                         napaka = 'Zgodila se je napaka: %s' % ex, username=username, admin=admin)
-    redirect("/tekmovalec/{}/Datum-DESC".format(fis_code))
+    redirect("/tekmovalec/{}/".format(fis_code))
 
 
 @get('/uredi_tekmovalca/:x/')
@@ -590,7 +642,7 @@ def uredi_tekmovalca_post(x):
     except Exception as ex:
         return template('uredi_tekmovalca.html', fis_code=x, status=status, ime=ime, priimek=priimek, drzava=drzava, drzave=drzave, rojstvo=rojstvo, klub=klub,
                         smucke=smucke, x=x, sezone=sezone(), napakaO=None, napaka = 'Zgodila se je napaka: %s' % ex, username=username, admin=admin)
-    redirect("/")
+    redirect("/tekmovalec/{}/".format(x))
 
 
 @get('/dodaj_tekmo')
@@ -623,7 +675,11 @@ def dodaj_tekmo_post():
     except Exception as ex:
         return template('dodaj_tekmo.html', id=id, kraj=kraj, datum=datum, drzave=drzave, tip_tekme=tip_tekme, napakaO=None,
                         napaka = 'Zgodila se je napaka: %s' % ex, sezone=sezone(), username = username, admin=admin)
-    redirect("/dodaj_rezultat/{}/".format(id))
+    zakljuci = request.forms.zakljuci
+    if zakljuci == "ne":
+        redirect("/dodaj_rezultat/{}/".format(id))
+    else:
+        redirect("/tekma/{}/".format(id))
 
 
 @get('/dodaj_rezultat/:x/')
@@ -793,7 +849,7 @@ def dodaj_tekmo_post(x):
     if zakljuci == "ne":
         redirect("/dodaj_rezultat/{}/".format(x))
     else:
-        redirect("/tekma/{}/ranki-ASC".format(x))
+        redirect("/tekma/{}/".format(x))
 
 
 @get('/zanimivosti/:x')
@@ -984,7 +1040,7 @@ def dodaj(x):
         else:
             naj_str = ','.join(map(str,naj)) + ',' + str(x) + ','
         cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [naj_str, username])
-    redirect("/tekmovalec/{}/Datum-DESC".format(x))
+    redirect("/tekmovalec/{}/".format(x))
 
 
 ######################################################################

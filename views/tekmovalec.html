@@ -9,9 +9,10 @@
     }
 </style>
 
-
 %if napaka:
-    <div class="alert alert-warning">{{napaka}}</div>
+    <div class="alert alert-warning">
+        <strong>Pozor!</strong> {{napaka}}
+    </div>
 %end
 
 
@@ -65,36 +66,35 @@
 
 <!-- Search form -->
 <form class="form-inline" method="post">
-    <input class="form-control form-control-sm mr-3 w-25" type="text" placeholder="Išči" aria-label="Search" name="search">
+    <input class="form-control form-control-sm mr-3 w-25" type="text" placeholder="Išči" aria-label="Search" name="search" style="height:37px;">
     <i class="fas fa-search" aria-hidden="true"></i>
+    <div class="dropdown">
+        <div class="form-group col-md-3">
+            <select type="text" name="razvrscanje" value="" class="form-control" required="true">
+                <option selected disabled hidden>Izberi razvrščanje</option>
+                <option>Datum - padajoče</option>
+                <option>Datum - naraščajoče</option>
+                <option>Kraj - od A do Ž</option>
+                <option>Kraj - od Ž do A</option>
+                <option>Država - od A do Ž</option>
+                <option>Država - od Ž do A</option>
+                <option>Tip tekme - od A do Ž</option>
+                <option>Tip tekme - od Ž do A</option>
+                <option>Rank - padajoče</option>
+                <option>Rank - naraščajoče</option>
+            </select>
+        </div>
+    </div>
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Najdi in razvrsti</button>
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="mx-3" role="img" viewBox="0 0 24 24" focusable="false"
          data-toggle="popover" data-trigger="hover" data-placement="right" data-html="true"
          data-content="Napredno iskanje:
          <br/>'Ime stolpca' : 'iskalni parameter'
          <br/>Na primer:
-         <br/>Fis code : 5658
-         <br/>Ime : Peter">
+         <br/>Država : SLO
+         <br/>Kraj : Planica">
         <circle cx="10.5" cy="10.5" r="7.5"/><path d="M21 21l-5.2-5.2"/></svg>
 </form>
-
-<div class="dropdown" style="float:right; margin-top:20px;">
-  <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" align="right">
-    Razvrščanje
-  </button>
-  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-    <a class="dropdown-item" href="/tekmovalec/{{x}}/Datum-ASC">Datum - Starejše prej</a>
-    <a class="dropdown-item" href="/tekmovalec/{{x}}/Datum-DESC">Datum - Novejše prej</a>
-    <a class="dropdown-item" href="/tekmovalec/{{x}}/Kraj-ASC">Kraj - od A do Ž</a>
-    <a class="dropdown-item" href="/tekmovalec/{{x}}/Kraj-DESC">Kraj - od Ž do A</a>
-    <a class="dropdown-item" href="/tekmovalec/{{x}}/Drzava-ASC">Država - od A do Ž</a>
-    <a class="dropdown-item" href="/tekmovalec/{{x}}/Drzava-DESC">Država - od Ž do A</a>
-    <a class="dropdown-item" href="/tekmovalec/{{x}}/Tip_tekme-ASC">Tip tekme - od A do Ž</a>
-    <a class="dropdown-item" href="/tekmovalec/{{x}}/Tip_tekme-DESC">Tip tekme - od Ž do A</a>
-    <a class="dropdown-item" href="/tekmovalec/{{x}}/Ranki-DESC">Rank - padajoče</a>
-    <a class="dropdown-item" href="/tekmovalec/{{x}}/Ranki-ASC">Rank - naraščajoče</a>
-  </div>
-</div>
-
 
 <table class="table table-bordered table-hover" style="margin-top:30px;">
  <thead class="thead-light">
