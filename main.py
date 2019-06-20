@@ -426,21 +426,27 @@ def tekma(x):
     else:
         ekipna = True
     cur.execute("SELECT serija FROM rezultat WHERE id = %s ORDER BY serija DESC LIMIT 1", [int(x)])
-    serija = cur.fetchone()[0]
-    if serija == 2:
-        cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,skoki1,tocke1,skoki2,tocke2,tocke,mesto_v_ekipi FROM dve_seriji WHERE id = %s ORDER BY ranki ASC",[int(x)])
+    serija = cur.fetchone()
+    if serija is None:
+        velikost = False
         serija_bool = True
+        tekma = []
     else:
-        cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,tocke,mesto_v_ekipi FROM ena_serija WHERE id=%s ORDER BY ranki ASC",[int(x)])
-        serija_bool = False
-    tekma = cur.fetchall()
+        velikost = True
+        if serija[0] == 2:
+            cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,skoki1,tocke1,skoki2,tocke2,tocke,mesto_v_ekipi FROM dve_seriji WHERE id = %s ORDER BY ranki ASC",[int(x)])
+            serija_bool = True
+        else:
+            cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,tocke,mesto_v_ekipi FROM ena_serija WHERE id=%s ORDER BY ranki ASC",[int(x)])
+            serija_bool = False
+        tekma = cur.fetchall()
 
     moznosti = ['Rank - padajoče', 'Rank - naraščajoče']
     if ekipna:
         moznosti += ['Mesto v ekipi - padajoče', 'Mesto v ekipi - naraščajoče']
     else:
         moznosti += ['Startna številka - padajoče', 'Startna številka - naraščajoče']
-    moznosti += ['Fis code - padajoče', 'Fis code - naraščajoče', 'Ime - od A do Ž', 'Ime - od Ž do A', 'Priimek - od A do Ž', 'Priimek - od Ž do A', 'Država - od A do Ž', 'Država - od Ž do A']
+    moznosti += ['FIS code - padajoče', 'FIS code - naraščajoče', 'Ime - od A do Ž', 'Ime - od Ž do A', 'Priimek - od A do Ž', 'Priimek - od Ž do A', 'Država - od A do Ž', 'Država - od Ž do A']
     if serija_bool:
         moznosti += ['1. skok - padajoče', '1. skok - naraščajoče', '1. točke - padajoče', '1. točke - naraščajoče', '2. skok - padajoče', '2. skok - naraščajoče', '2. točke - padajoče', '2. točke - naraščajoče']
         if not ekipna:
@@ -448,7 +454,7 @@ def tekma(x):
     else:
         moznosti += ['Točke - padajoče', 'Točke - naraščajoče']
 
-    return template('tekma.html', napakaO=None, razvrscanje='Ranki - naraščajoče', moznosti=moznosti, sezone=sezone(), x = x, tekma = tekma, kraj=kraj_datum[0], datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija_bool, napaka=None)
+    return template('tekma.html', napakaO=None, razvrscanje='Ranki - naraščajoče', moznosti=moznosti, sezone=sezone(), x = x, tekma = tekma, velikost=velikost, kraj=kraj_datum[0], datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija_bool, napaka=None)
 
 
 @post('/tekma/:x/')
@@ -492,15 +498,23 @@ def tekma_post(x):
     else:
         ekipna = True
     cur.execute("SELECT serija FROM rezultat WHERE id = %s ORDER BY serija DESC LIMIT 1", [int(x)])
-    serija = cur.fetchone()[0]
-    if serija == 2:
+    serija = cur.fetchone()
+    if serija is None:
+        velikost = False
         serija_bool = True
-        head_list = ['ranki', 'startna_stevilka', 'fis_code', 'skoki1', 'tocke1', 'skoki2', 'tocke2', 'tocke', 'mesto_v_ekipi']
+        head_list = ['ranki', 'startna_stevilka', 'fis_code', 'skoki1', 'tocke1', 'skoki2', 'tocke2', 'tocke',
+                     'mesto_v_ekipi']
         string = 'dve_seriji'
     else:
-        serija_bool = False
-        head_list = ['ranki', 'startna_stevilka', 'fis_code', 'tocke', 'mesto_v_ekipi']
-        string = 'ena_serija'
+        velikost = True
+        if serija[0] == 2:
+            serija_bool = True
+            head_list = ['ranki', 'startna_stevilka', 'fis_code', 'skoki1', 'tocke1', 'skoki2', 'tocke2', 'tocke', 'mesto_v_ekipi']
+            string = 'dve_seriji'
+        else:
+            serija_bool = False
+            head_list = ['ranki', 'startna_stevilka', 'fis_code', 'tocke', 'mesto_v_ekipi']
+            string = 'ena_serija'
 
     moznosti = ['Rank - padajoče', 'Rank - naraščajoče']
     if ekipna:
@@ -539,7 +553,7 @@ def tekma_post(x):
                     + " OR LOWER(" + ') LIKE %s OR LOWER('.join(text_list) + ") LIKE %s)" + "ORDER BY " + y.replace('-', ' '),
                     [int(x)] + (len(head_list) + len(text_list)) * ['%' + search + '%'])
     tekma = cur.fetchall()
-    return template('tekma.html', razvrscanje=raz, moznosti=moznosti, napakaO=None, x=x, tekma=tekma, kraj=kraj_datum[0], datum=datum, username=username,
+    return template('tekma.html', razvrscanje=raz, moznosti=moznosti, velikost=velikost, napakaO=None, x=x, tekma=tekma, kraj=kraj_datum[0], datum=datum, username=username,
                     admin=admin, ekipna=ekipna, serija=serija_bool, sezone=sezone(), napaka=napaka)
 
 
