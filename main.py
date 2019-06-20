@@ -359,11 +359,17 @@ def tekmovalec_post(x):
             cur.execute(
                 "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(r.ranki AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + " ORDER BY " + y.replace(
                     '-', ' '), [int(x), '%' + search + '%'])
+        elif sez[0] in ['kraj', 'drzava']:
+            cur.execute(
+                "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND LOWER(t." +
+                sez[0] + ") LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + " ORDER BY " + y.replace('-',
+                                                                                                                  ' '),
+                [int(x), '%' + search + '%'])
         elif sez[0] in head_list:
             cur.execute(
                 "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(t." +
                 sez[0] + " AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + " ORDER BY " + y.replace('-',
-                                                                                                                 ' '),
+                                                                                                                  ' '),
                 [int(x), '%' + search + '%'])
         else:
             napaka = "Neveljavno iskanje."
