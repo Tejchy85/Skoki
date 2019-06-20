@@ -71,17 +71,12 @@
     <div class="dropdown">
         <div class="form-group col-md-3">
             <select type="text" name="razvrscanje" value="" class="form-control" required="true">
-                <option selected disabled hidden>Izberi razvrščanje</option>
-                <option>Datum - padajoče</option>
-                <option>Datum - naraščajoče</option>
-                <option>Kraj - od A do Ž</option>
-                <option>Kraj - od Ž do A</option>
-                <option>Država - od A do Ž</option>
-                <option>Država - od Ž do A</option>
-                <option>Tip tekme - od A do Ž</option>
-                <option>Tip tekme - od Ž do A</option>
-                <option>Rank - padajoče</option>
-                <option>Rank - naraščajoče</option>
+                <option>{{razvrscanje}}</option>
+                %for (raz) in moznosti:
+                    % if raz != razvrscanje:
+                        <option>{{raz}}</option>
+                    % end
+                %end
             </select>
         </div>
     </div>

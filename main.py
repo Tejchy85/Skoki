@@ -236,7 +236,11 @@ def tekmovalci_get():
     admin = is_admin(username)
     cur.execute("SELECT * FROM tekmovalec ORDER BY priimek ASC")
     tekmovalci = cur.fetchall()
-    return template('tekmovalci.html', tekmovalci=tekmovalci, sezone=sezone(), napakaO=None, napaka=None, username=username, admin=admin)
+    moznosti = ['FIS code - padajoče', 'FIS code - naraščajoče', 'Status - od A do Ž', 'Status - od Ž do A',
+                'Ime - od A do Ž', 'Ime - od Ž do A', 'Priimek - od A do Ž', 'Priimek - od Ž do A',
+                'Država - od A do Ž', 'Država - od Ž do A', 'Rojstvo - Starejši prej', 'Rojstvo - Mlajši prej',
+                'Klub - od A do Ž', 'Klub - od Ž do A', 'Smučke - od A do Ž', 'Smučke - od Ž do A']
+    return template('tekmovalci.html', tekmovalci=tekmovalci, razvrscanje='Priimek - od A do Ž', moznosti=moznosti, sezone=sezone(), napakaO=None, napaka=None, username=username, admin=admin)
 
 @post('/tekmovalci')
 def tekmovalci_post():
@@ -248,11 +252,16 @@ def tekmovalci_post():
     admin = is_admin(username)
     raz = request.forms.razvrscanje
 
+    moznosti = ['FIS code - padajoče', 'FIS code - naraščajoče', 'Status - od A do Ž', 'Status - od Ž do A',
+                'Ime - od A do Ž', 'Ime - od Ž do A', 'Priimek - od A do Ž', 'Priimek - od Ž do A',
+                'Država - od A do Ž', 'Država - od Ž do A', 'Rojstvo - Starejši prej', 'Rojstvo - Mlajši prej',
+                'Klub - od A do Ž', 'Klub - od Ž do A', 'Smučke - od A do Ž', 'Smučke - od Ž do A']
+
     sezR = raz.split('-')
     asc = ['naraščajoče', 'od A do Ž', 'Starejši prej']
 
     if sezR == ['']:
-        y = 'fis_code ASC'
+        y = 'priimek ASC'
     elif sezR[1].strip() in asc:
         y = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z') + ' ASC'
     else:
@@ -261,7 +270,7 @@ def tekmovalci_post():
     if search == "":
         cur.execute("SELECT * FROM tekmovalec ORDER BY " + y.replace('-', ' '))
         tekmovalci = cur.fetchall()
-        return template('tekmovalci.html', tekmovalci=tekmovalci, sezone=sezone(), napakaO=None, napaka=None, username=username,
+        return template('tekmovalci.html', tekmovalci=tekmovalci, razvrscanje=raz, moznosti=moznosti, sezone=sezone(), napakaO=None, napaka=None, username=username,
                         admin=admin)
     napaka = None
     head_list = ['status', 'ime', 'priimek', 'drzava', 'rojstvo', 'klub', 'smucke']
@@ -285,7 +294,7 @@ def tekmovalci_post():
                     "OR LOWER(smucke) LIKE %s" + "ORDER BY " + y.replace('-', ' '),
                     8*['%' + search + '%'])
     tekmovalci = cur.fetchall()
-    return template('tekmovalci.html', tekmovalci=tekmovalci, sezone=sezone(), napakaO=None, napaka=napaka, username=username, admin=admin)
+    return template('tekmovalci.html', tekmovalci=tekmovalci, razvrscanje=raz, moznosti=moznosti, sezone=sezone(), napakaO=None, napaka=napaka, username=username, admin=admin)
 
 
 @get('/tekmovalec/:x/')
@@ -296,7 +305,9 @@ def tekmovalec(x):
     tekmovalec = cur.fetchall()
     cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t.datum DESC", [int(x)])
     tekme = cur.fetchall()
-    return template('tekmovalec.html', x=x, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(), najljubsi=najljubsi(username), napakaO=None, napaka=None, username=username, admin=admin)
+    moznosti = ['Datum - padajoče', 'Datum - naraščajoče', 'Kraj - od A do Ž', 'Kraj - od Ž do A',
+                'Tip tekme - od A do Ž', 'Tip tekme - od Ž do A', 'Rank - padajoče', 'Rank - naraščajoče']
+    return template('tekmovalec.html', x=x, razvrscanje='Datum - padajoče', moznosti=moznosti, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(), najljubsi=najljubsi(username), napakaO=None, napaka=None, username=username, admin=admin)
 
 
 @post('/tekmovalec/:x/')
@@ -310,6 +321,9 @@ def tekmovalec_post(x):
     cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [int(x)])
     tekmovalec = cur.fetchall()
     raz = request.forms.razvrscanje
+
+    moznosti = ['Datum - padajoče', 'Datum - naraščajoče', 'Kraj - od A do Ž', 'Kraj - od Ž do A',
+                'Tip tekme - od A do Ž', 'Tip tekme - od Ž do A', 'Rank - padajoče', 'Rank - naraščajoče']
 
     sezR = raz.split('-')
     asc = ['naraščajoče', 'od A do Ž', 'Starejši prej']
@@ -339,7 +353,7 @@ def tekmovalec_post(x):
                 "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t." + y.replace(
                     '-', ' '), [int(x)])
         tekme = cur.fetchall()
-        return template('tekmovalec.html', x=x, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(),
+        return template('tekmovalec.html', x=x, razvrscanje=raz, moznosti=moznosti, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(),
                         najljubsi=najljubsi(username), napakaO=None, napaka=None, username=username, admin=admin)
 
     napaka = None
@@ -384,7 +398,7 @@ def tekmovalec_post(x):
             [int(x), '%' + search + '%', '%' + search + '%', '%' + search + '%', '%' + search + '%',
              '%' + search + '%'])
     tekme = cur.fetchall()
-    return template('tekmovalec.html', x=x, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(),
+    return template('tekmovalec.html', x=x, razvrscanje=raz, moznosti=moznosti, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(),
                     najljubsi=najljubsi(username), napakaO=None, napaka=napaka, username=username, admin=admin)
 
 
@@ -420,7 +434,21 @@ def tekma(x):
         cur.execute("SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,tocke,mesto_v_ekipi FROM ena_serija WHERE id=%s ORDER BY ranki ASC",[int(x)])
         serija_bool = False
     tekma = cur.fetchall()
-    return template('tekma.html', napakaO=None, sezone=sezone(), x = x, tekma = tekma, kraj=kraj_datum[0], datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija_bool, napaka=None)
+
+    moznosti = ['Rank - padajoče', 'Rank - naraščajoče']
+    if ekipna:
+        moznosti += ['Mesto v ekipi - padajoče', 'Mesto v ekipi - naraščajoče']
+    else:
+        moznosti += ['Startna številka - padajoče', 'Startna številka - naraščajoče']
+    moznosti += ['Fis code - padajoče', 'Fis code - naraščajoče', 'Ime - od A do Ž', 'Ime - od Ž do A', 'Priimek - od A do Ž', 'Priimek - od Ž do A', 'Država - od A do Ž', 'Država - od Ž do A']
+    if serija_bool:
+        moznosti += ['1. skok - padajoče', '1. skok - naraščajoče', '1. točke - padajoče', '1. točke - naraščajoče', '2. skok - padajoče', '2. skok - naraščajoče', '2. točke - padajoče', '2. točke - naraščajoče']
+        if not ekipna:
+            moznosti += ['Skupne točke - padajoče', 'Skupne točke - naraščajoče']
+    else:
+        moznosti += ['Točke - padajoče', 'Točke - naraščajoče']
+
+    return template('tekma.html', napakaO=None, razvrscanje='Ranki - naraščajoče', moznosti=moznosti, sezone=sezone(), x = x, tekma = tekma, kraj=kraj_datum[0], datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija_bool, napaka=None)
 
 
 @post('/tekma/:x/')
@@ -474,6 +502,21 @@ def tekma_post(x):
         head_list = ['ranki', 'startna_stevilka', 'fis_code', 'tocke', 'mesto_v_ekipi']
         string = 'ena_serija'
 
+    moznosti = ['Rank - padajoče', 'Rank - naraščajoče']
+    if ekipna:
+        moznosti += ['Mesto v ekipi - padajoče', 'Mesto v ekipi - naraščajoče']
+    else:
+        moznosti += ['Startna številka - padajoče', 'Startna številka - naraščajoče']
+    moznosti += ['Fis code - padajoče', 'Fis code - naraščajoče', 'Ime - od A do Ž', 'Ime - od Ž do A',
+                 'Priimek - od A do Ž', 'Priimek - od Ž do A', 'Država - od A do Ž', 'Država - od Ž do A']
+    if serija_bool:
+        moznosti += ['1. skok - padajoče', '1. skok - naraščajoče', '1. točke - padajoče', '1. točke - naraščajoče',
+                     '2. skok - padajoče', '2. skok - naraščajoče', '2. točke - padajoče', '2. točke - naraščajoče']
+        if not ekipna:
+            moznosti += ['Skupne točke - padajoče', 'Skupne točke - naraščajoče']
+    else:
+        moznosti += ['Točke - padajoče', 'Točke - naraščajoče']
+
     text_list = ['ime', 'priimek', 'drzava']
     sez = search.split(':')
     sez[0] = sez[0].replace('č', 'c').replace('š', 's').replace('ž', 'z')
@@ -496,7 +539,7 @@ def tekma_post(x):
                     + " OR LOWER(" + ') LIKE %s OR LOWER('.join(text_list) + ") LIKE %s)" + "ORDER BY " + y.replace('-', ' '),
                     [int(x)] + (len(head_list) + len(text_list)) * ['%' + search + '%'])
     tekma = cur.fetchall()
-    return template('tekma.html', napakaO=None, x=x, tekma=tekma, kraj=kraj_datum[0], datum=datum, username=username,
+    return template('tekma.html', razvrscanje=raz, moznosti=moznosti, napakaO=None, x=x, tekma=tekma, kraj=kraj_datum[0], datum=datum, username=username,
                     admin=admin, ekipna=ekipna, serija=serija_bool, sezone=sezone(), napaka=napaka)
 
 

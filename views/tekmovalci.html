@@ -17,23 +17,12 @@
     <div class="dropdown">
         <div class="form-group col-md-3">
             <select type="text" name="razvrscanje" value="" class="form-control" required="true">
-                <option selected disabled hidden>Izberi razvrščanje</option>
-                <option>FIS code - padajoče</option>
-                <option>FIS code - naraščajoče</option>
-                <option>Status - od A do Ž</option>
-                <option>Status - od Ž do A</option>
-                <option>Ime - od A do Ž</option>
-                <option>Ime - od Ž do A</option>
-                <option>Priimek - od A do Ž</option>
-                <option>Priimek - od Ž do A</option>
-                <option>Država - od A do Ž</option>
-                <option>Država - od Ž do A</option>
-                <option>Rojstvo - Starejši prej</option>
-                <option>Rojstvo - Mlajši prej</option>
-                <option>Klub - od A do Ž</option>
-                <option>Klub - od Ž do A</option>
-                <option>Smučke - od A do Ž</option>
-                <option>Smučke - od Ž do A</option>
+                <option>{{razvrscanje}}</option>
+                %for (raz) in moznosti:
+                    % if raz != razvrscanje:
+                        <option>{{raz}}</option>
+                    % end
+                %end
             </select>
         </div>
     </div>

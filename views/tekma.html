@@ -15,40 +15,11 @@
     <div class="dropdown">
         <div class="form-group col-md-3">
             <select type="text" name="razvrscanje" value="" class="form-control" required="true">
-                <option selected disabled hidden>Izberi razvrščanje</option>
-                <option>Rank - padajoče</option>
-                <option>Rank - naraščajoče</option>
-                %if ekipna:
-                    <option>Mesto v ekipi - padajoče</option>
-                    <option>Mesto v ekipi - naraščajoče</option>
-                %else:
-                    <option>Startna številka - padajoče</option>
-                    <option>Startna številka - naraščajoče</option>
-                %end
-                <option>Fis code - padajoče</option>
-                <option>Fis code - naraščajoče</option>
-                <option>Ime - od A do Ž</option>
-                <option>Ime - od Ž do A</option>
-                <option>Priimek - od A do Ž</option>
-                <option>Priimek - od Ž do A</option>
-                <option>Država - od A do Ž</option>
-                <option>Država - od Ž do A</option>
-                %if serija:
-                    <option>1. skok - padajoče</option>
-                    <option>1. skok - naraščajoče</option>
-                    <option>1. točke - padajoče</option>
-                    <option>1. točke - naraščajoče</option>
-                    <option>2. skok - padajoče</option>
-                    <option>2. skok - naraščajoče</option>
-                    <option>2. točke - padajoče</option>
-                    <option>2. točke - naraščajoče</option>
-                        %if not ekipna:
-                            <option>Skupne točke - padajoče</option>
-                            <option>Skupne točke - naraščajoče</option>
-                        %end
-                %else:
-                    <option>Točke - padajoče</option>
-                    <option>Točke - naraščajoče</option>
+                <option>{{razvrscanje}}</option>
+                %for (raz) in moznosti:
+                    % if raz != razvrscanje:
+                        <option>{{raz}}</option>
+                    % end
                 %end
             </select>
         </div>
