@@ -1048,6 +1048,9 @@ def najljubsi_get(napaka=None):
     username = get_user()
     admin = is_admin(username)
 
+    cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
+    vsi_tekmovalci = cur.fetchall()
+
     list_najljubsih = najljubsi(username)
 
     if list_najljubsih == []:
@@ -1060,28 +1063,33 @@ def najljubsi_get(napaka=None):
         izrisi = True
     tekmovalci = cur.fetchall()
     return template('najljubsi.html', tekmovalci=tekmovalci, sezone=sezone(), izrisi = izrisi, napakaO=None, napaka=napaka, username=username,
-                    admin=admin)
+                    admin=admin, vsi_tekmovalci=vsi_tekmovalci)
 
 
 @post('/najljubsi')
 def najljubsi_post():
-    dodaj = request.forms.dodaj
+    dodaj = request.forms.tekmovalec
     if dodaj != '':
+        dodaj = dodaj.split('-')
+        dodaj = int(dodaj[0])
         cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [dodaj])
         try:
             if len(cur.fetchone()) > 0:
                 username = get_user()
                 stringFC = najljubsi(username)
-                if stringFC != []:
-                    cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s",
-                                [','.join(map(str, stringFC)) + ',' + dodaj + ',', username])
+                if dodaj not in stringFC:
+                    if stringFC != []:
+                        cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s",
+                                    [','.join(map(str, stringFC)) + ',' + str(dodaj) + ',', username])
+                    else:
+                        cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [str(dodaj) + ',', username])
+                    napaka = 'Tekmovalec je bil uspešno dodan med najljubše'
                 else:
-                    cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [str(dodaj) + ',', username])
-                napaka = 'Tekmovalec je bil uspešno dodan med najljubše'
+                    napaka = 'Ta tekmovalec je že med tvojimi priljubljenimi.'
         except:
             napaka = 'Ne obstaja tekmovalec s to fis kodo'
     else:
-        napaka = 'Vneside FIS kodo tekmovalca.'
+        napaka = 'Izberite tekmovalca.'
 
     najljubsi_get(napaka)
     redirect('/najljubsi')

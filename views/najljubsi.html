@@ -7,12 +7,20 @@
         <div class="alert alert-warning">{{napaka}}</div>
 %end
 
-<!-- Search form -->
-<form class="form-inline" method="post">
-    <input class="form-control form-control-sm mr-3 w-25" type="text" placeholder="Vnesite FIS kodo tekmovalca" aria-label="Search" name="dodaj">
-    <i class="fas fa-search" aria-hidden="true"></i>
-    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Dodaj tekmovalca</button>
+<form action="/najljubsi" method="post">
+  <div class="form-row">
+    <div class="form-group col-md-3">
+        <label>Dodaj tekmovalca med priljubljene</label>
+        <select type="text" name="tekmovalec" value="" class="form-control" required="true">
+            %for (id,ime,priimek) in vsi_tekmovalci:
+                <option>{{id}} - {{priimek}} {{ime}}</option>
+            %end
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary" style="height:39px; margin-top: 32px; width: 150px; margin-left:15px;">Dodaj tekmovalca</button>
+  </div>
 </form>
+
 
 %if izrisi:
 <table class="table table-bordered table-hover">
