@@ -1066,19 +1066,22 @@ def najljubsi_get(napaka=None):
 @post('/najljubsi')
 def najljubsi_post():
     dodaj = request.forms.dodaj
-    cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [dodaj])
-    try:
-        if len(cur.fetchone()) > 0:
-            username = get_user()
-            stringFC = najljubsi(username)
-            if stringFC != []:
-                cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s",
-                            [','.join(map(str, stringFC)) + ',' + dodaj + ',', username])
-            else:
-                cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [str(dodaj) + ',', username])
-            napaka = 'Tekmovalec je bil uspešno dodan med najljubše'
-    except:
-        napaka = 'Ne obstaja tekmovalec s to fis kodo'
+    if dodaj != '':
+        cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [dodaj])
+        try:
+            if len(cur.fetchone()) > 0:
+                username = get_user()
+                stringFC = najljubsi(username)
+                if stringFC != []:
+                    cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s",
+                                [','.join(map(str, stringFC)) + ',' + dodaj + ',', username])
+                else:
+                    cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [str(dodaj) + ',', username])
+                napaka = 'Tekmovalec je bil uspešno dodan med najljubše'
+        except:
+            napaka = 'Ne obstaja tekmovalec s to fis kodo'
+    else:
+        napaka = 'Vneside FIS kodo tekmovalca.'
 
     najljubsi_get(napaka)
     redirect('/najljubsi')
