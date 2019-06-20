@@ -97,7 +97,7 @@
                   <tbody>
                   %for (fis_code,status,ime,priimek,drzava,rojstvo,klub,smucke) in tekmovalci:
                     <tr>
-                       <td><a href="/tekmovalec/{{fis_code}}/Datum-DESC">{{fis_code}}</a></td>
+                       <td><a href="/tekmovalec/{{fis_code}}/">{{fis_code}}</a></td>
                        <td>{{status}}</td>
                        <td>{{ime}}</td>
                        <td>{{priimek}}</td>
@@ -233,7 +233,7 @@ ki so preskočili 200.5 m. V stolpcu "Število skokov" pa je zapisano, kolikokra
                   <tbody>
                   %for (fis_code,status,ime,priimek,drzava,rojstvo,klub,smucke,stevilo) in tekmovalci_dolzina:
                     <tr>
-                       <td><a href="/tekmovalec/{{fis_code}}/Datum-DESC">{{fis_code}}</a></td>
+                       <td><a href="/tekmovalec/{{fis_code}}/">{{fis_code}}</a></td>
                        <td>{{status}}</td>
                        <td>{{ime}}</td>
                        <td>{{priimek}}</td>
@@ -368,7 +368,7 @@ ki so preskočili 200.5 m. V stolpcu "Število skokov" pa je zapisano, kolikokra
                   <tbody>
                   %for (fis_code,ime,priimek,stevilo) in skupni_sestevek:
                     <tr>
-                       <td><a href="/tekmovalec/{{fis_code}}/Datum-DESC">{{fis_code}}</a></td>
+                       <td><a href="/tekmovalec/{{fis_code}}/">{{fis_code}}</a></td>
                        <td>{{ime}}</td>
                        <td>{{priimek}}</td>
                        <td>{{stevilo}}</td>
