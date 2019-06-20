@@ -26,7 +26,7 @@
     <li><a href="/zanimivosti/2">Primerjava rezultatov dveh poljubnih tekmovalcev</a></li>
     <li><a href="/zanimivosti/3">Število skokov preko določene dolžine</a></li>
     <li><a href="/zanimivosti/4">Število posameznih mest</a></li>
-    <li><a href="/zanimivosti/5">Skupni sestevek</a></li>
+    <li><a href="/zanimivosti/5">Skupni seštevek</a></li>
 </ul>
 
 % if username:
@@ -40,24 +40,54 @@
         <div class="form-group col-md-3">
             <label>Izberi državo</label>
             <select type="text" name="drzava" value="" class="form-control" required="true">
-                %for (kratica,ime) in drzave:
-                    <option>{{kratica}}</option>
+                %if izbrana:
+                    <option>{{drzava}}</option>
+                    %for (kratica,ime) in drzave:
+                        %if kratica != drzava:
+                            <option>{{kratica}}</option>
+                        %end
+                    %end
+                %else:
+                    <option value="" selected disabled hidden>Država</option>
+                    %for (kratica,ime) in drzave:
+                        <option>{{kratica}}</option>
+                    %end
                 %end
             </select>
         </div>
         <div class="form-group col-md-3">
             <label>Začetna sezona</label>
             <select type="integer" name="sezona1" value="" class="form-control" required="true">
-                %for (sezona) in sezone:
-                    <option>{{sezona}}</option>
+                %if izbrana:
+                    <option>{{sezona1}}</option>
+                    %for (sezona) in sezone:
+                        %if sezona != sezona1:
+                            <option>{{sezona}}</option>
+                        %end
+                    %end
+                %else:
+                    <option value="" selected disabled hidden>Začetek</option>
+                    %for (sezona) in sezone:
+                        <option>{{sezona}}</option>
+                    %end
                 %end
             </select>
         </div>
         <div class="form-group col-md-3">
             <label>Končna sezona</label>
             <select type="integer" name="sezona2" value="" class="form-control" required="true">
-                %for (sezona) in sezone:
-                    <option>{{sezona}}</option>
+                %if izbrana:
+                    <option>{{sezona2}}</option>
+                    %for (sezona) in sezone:
+                        %if sezona != sezona2:
+                            <option>{{sezona}}</option>
+                        %end
+                    %end
+                %else:
+                    <option value="" selected disabled hidden>Konec</option>
+                    %for (sezona) in sezone:
+                        <option>{{sezona}}</option>
+                    %end
                 %end
             </select>
         </div>
@@ -76,7 +106,7 @@
           <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content" style="overflow-x: auto; overflow-y:auto;width:800px;height:500px;">
               <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">REZULTAT:</h5>
+                  <h5 class="modal-title" id="exampleModalLabel"><strong>{{drzava}} ({{sezona1}}-{{sezona2}})</strong></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
@@ -123,16 +153,36 @@
             <div class="form-group col-md-3">
                 <label>Tekmovalec 1</label>
                 <select type="text" name="tekmovalec1" value="" class="form-control" required="true">
-                    %for (id,ime,priimek) in vsi_tekmovalci:
-                        <option>{{id}} - {{priimek}} {{ime}}</option>
+                    %if izbrana:
+                        <option>{{tekmovalec1}}</option>
+                        %for (id,ime,priimek) in vsi_tekmovalci:
+                            %if id != id_1:
+                                <option>{{id}} - {{priimek}} {{ime}}</option>
+                            %end
+                        %end
+                    %else:
+                        <option value="" selected disabled hidden>Tekmovalec</option>
+                        %for (id,ime,priimek) in vsi_tekmovalci:
+                            <option>{{id}} - {{priimek}} {{ime}}</option>
+                        %end
                     %end
                 </select>
             </div>
             <div class="form-group col-md-3">
                 <label>Tekmovalec 2</label>
                 <select type="text" name="tekmovalec2" value="" class="form-control" required="true">
-                    %for (id,ime,priimek) in vsi_tekmovalci:
-                        <option>{{id}} - {{priimek}} {{ime}}</option>
+                    %if izbrana:
+                        <option>{{tekmovalec2}}</option>
+                        %for (id,ime,priimek) in vsi_tekmovalci:
+                            %if id != id_2:
+                                <option>{{id}} - {{priimek}} {{ime}}</option>
+                            %end
+                        %end
+                    %else:
+                        <option value="" selected disabled hidden>Tekmovalec</option>
+                        %for (id,ime,priimek) in vsi_tekmovalci:
+                            <option>{{id}} - {{priimek}} {{ime}}</option>
+                        %end
                     %end
                 </select>
             </div>
@@ -151,7 +201,7 @@
               <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content" style="overflow-x: auto; overflow-y:auto;width:800px;height:500px;">
                   <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">REZULTAT:</h5>
+                      <h5 class="modal-title" id="exampleModalLabel"><strong>{{ime1}}  in  {{ime2}}</strong></h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                       <span aria-hidden="true">&times;</span>
                     </button>
@@ -188,8 +238,8 @@
 
 %if zanimivost == 3:
 <h1>Število skokov preko določene dolžine</h1>
-<p>Če te zanima, kdo je največkrat preskočil oznako 200.5 m, vnesi številko "200.5". Kot rezultat boš dobil tabelo z vsemi tekmovalci,
-ki so preskočili 200.5 m. V stolpcu "Število skokov" pa je zapisano, kolikokrat je tekmovalec preskočil 200.5 metrsko oznako.</p>
+<p>Če te zanima, kdo je največkrat preskočil oznako 200.5m, vnesi številko "200.5". Kot rezultat boš dobil tabelo z vsemi tekmovalci,
+ki so preskočili 200.5m. V stolpcu "Število skokov" pa je zapisano, kolikokrat je tekmovalec preskočil 200.5 metrsko oznako.</p>
   <form action="/zanimivosti/3" method="POST">
       <div class="form-row">
         <div class="form-group">
@@ -211,7 +261,7 @@ ki so preskočili 200.5 m. V stolpcu "Število skokov" pa je zapisano, kolikokra
           <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content" style="overflow-x: auto; overflow-y:auto;width:800px;height:500px;">
               <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">REZULTAT:</h5>
+                <h5 class="modal-title" id="exampleModalLabel"><strong>Skoki preko {{dolzina}}m</strong></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
@@ -260,24 +310,54 @@ ki so preskočili 200.5 m. V stolpcu "Število skokov" pa je zapisano, kolikokra
         <div class="form-group col-md-3">
             <label>Izberi tekmovalca</label>
             <select type="text" name="tekmovalec" value="" class="form-control" required="true">
-                    %for (id,ime,priimek) in vsi_tekmovalci:
-                        <option>{{id}} - {{priimek}} {{ime}}</option>
+                    %if izbrana:
+                        <option>{{tekmovalec}}</option>
+                        %for (id_1,ime,priimek) in vsi_tekmovalci:
+                            %if id_1 != id:
+                                <option>{{id_1}} - {{priimek}} {{ime}}</option>
+                            %end
+                        %end
+                    %else:
+                        <option value="" selected disabled hidden>Tekmovalec</option>
+                        %for (id,ime,priimek) in vsi_tekmovalci:
+                            <option>{{id}} - {{priimek}} {{ime}}</option>
+                        %end
                     %end
             </select>
         </div>
         <div class="form-group col-md-3">
             <label>Začetna sezona</label>
             <select type="integer" name="sezona41" value="" class="form-control" required="true">
-                %for (sezona) in sezone:
-                    <option>{{sezona}}</option>
+                %if izbrana:
+                    <option>{{zacetna}}</option>
+                    %for (sezona) in sezone:
+                        %if sezona != zacetna:
+                            <option>{{sezona}}</option>
+                        %end
+                    %end
+                %else:
+                    <option value="" selected disabled hidden>Začetek</option>
+                    %for (sezona) in sezone:
+                        <option>{{sezona}}</option>
+                    %end
                 %end
             </select>
         </div>
         <div class="form-group col-md-3">
             <label>Končna sezona</label>
             <select type="integer" name="sezona42" value="" class="form-control" required="true">
-                %for (sezona) in sezone:
-                    <option>{{sezona}}</option>
+                %if izbrana:
+                    <option>{{koncna}}</option>
+                    %for (sezona) in sezone:
+                        %if sezona != koncna:
+                            <option>{{sezona}}</option>
+                        %end
+                    %end
+                %else:
+                    <option value="" selected disabled hidden>Konec</option>
+                    %for (sezona) in sezone:
+                        <option>{{sezona}}</option>
+                    %end
                 %end
             </select>
         </div>
@@ -296,7 +376,7 @@ ki so preskočili 200.5 m. V stolpcu "Število skokov" pa je zapisano, kolikokra
           <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content" style="overflow-x: auto; overflow-y:auto;width:800px;height:500px;">
               <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">REZULTAT:</h5>
+                  <h5 class="modal-title" id="exampleModalLabel"><strong>{{ime3}} ({{zacetna}}-{{koncna}})</strong></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
@@ -331,8 +411,18 @@ ki so preskočili 200.5 m. V stolpcu "Število skokov" pa je zapisano, kolikokra
         <div class="form-group col-md-4">
         <label>Sezona</label>
             <select type="integer" name="sezona_skupni" value="" class="form-control" required="true">
-                %for (sezona) in sezone:
+                %if izbrana:
                     <option>{{sezona}}</option>
+                    %for (sezona_1) in sezone:
+                        %if sezona_1 != sezona:
+                            <option>{{sezona_1}}</option>
+                        %end
+                    %end
+                %else:
+                    <option value="" selected disabled hidden>Sezona</option>
+                    %for (sezona) in sezone:
+                        <option>{{sezona}}</option>
+                    %end
                 %end
             </select>
         </div>
@@ -351,7 +441,7 @@ ki so preskočili 200.5 m. V stolpcu "Število skokov" pa je zapisano, kolikokra
           <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content" style="overflow-x: auto; overflow-y:auto;width:800px;height:500px;">
               <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">REZULTAT:</h5>
+                <h5 class="modal-title" id="exampleModalLabel"><strong>Sezona {{sezona}}</strong></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>

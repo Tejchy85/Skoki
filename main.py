@@ -923,7 +923,7 @@ def zanimivosti(x):
     drzave = cur.fetchall()
     cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
     vsi_tekmovalci = cur.fetchall()
-    return template('zanimivosti.html',sezone=sezone(),drzave=drzave,napaka=None, zanimivost=int(x),
+    return template('zanimivosti.html',sezone=sezone(),drzave=drzave,drzava='',sezona1='',sezona2='',ime1='',ime2='',ime3='',zacetna='',koncna='',izbrana=False,napaka=None, zanimivost=int(x),
                     username=username,admin=admin,napakaO=None,izpis=False,tekmovalci=cur,vsi_tekmovalci=vsi_tekmovalci,tekme_boljsi=cur,
                     tekmovalci_dolzina=cur, ranki=cur, dolzina='',skupni_sestevek=cur)
 
@@ -943,7 +943,7 @@ def zanimivosti_post_1():
     cur.execute("WITH tek AS (WITH zdruzena AS (SELECT * FROM tekmovalec JOIN drzava ON tekmovalec.drzava = drzava.kratica JOIN rezultat USING (fis_code) JOIN tekma USING (id))"
                 "SELECT fis_code FROM zdruzena WHERE kratica=%s AND datum BETWEEN %s AND %s GROUP BY fis_code) SELECT * FROM tek JOIN tekmovalec USING (fis_code)",[drzava, datetime.date(int(sezona1) - 1, 11, 1), datetime.date(int(sezona2), 3, 31)])
     tekmovalci_drzave = cur.fetchall()
-    return template('zanimivosti.html',sezone=sezone(),drzave=drzave,napaka=None,tekmovalci=tekmovalci_drzave, zanimivost=1,
+    return template('zanimivosti.html',sezone=sezone(),drzave=drzave,drzava=drzava,sezona1=sezona1,sezona2=sezona2,izbrana=True,napaka=None,tekmovalci=tekmovalci_drzave, zanimivost=1,
                     username=username,admin=admin,napakaO=None,izpis=True,vsi_tekmovalci=cur,tekme_boljsi=cur,tekmovalci_dolzina=cur,dolzina='',
                     ranki=cur,skupni_sestevek=cur)
 
@@ -981,7 +981,9 @@ def zanimivosti_post_2():
                 " join tekmovalec using(fis_code)"
                 " where (serija = 1 or serija = 3) and (fis_code = %s or fis_code = %s)", 3 * [id_1, id_2])
     tekme_boljsi = cur.fetchall()
-    return template('zanimivosti.html', tekme_boljsi=tekme_boljsi, vsi_tekmovalci=vsi_tekmovalci, izpis=True,
+    ime1 = tekmovalec1.split('-')[1]
+    ime2 = tekmovalec2.split('-')[1]
+    return template('zanimivosti.html', tekmovalec1=tekmovalec1, tekmovalec2=tekmovalec2, id_1=id_1, id_2=id_2, ime1=ime1, ime2=ime2, izbrana=True, tekme_boljsi=tekme_boljsi, vsi_tekmovalci=vsi_tekmovalci, izpis=True,
                     sezone=cur, drzave=cur, napaka=None, napakaO=None, tekmovalci=cur, zanimivost=2, username=username, admin=admin,
                     tekmovalci_dolzina=cur,dolzina='',ranki=cur,skupni_sestevek=cur)
 
@@ -1021,7 +1023,9 @@ def zanimivosti_post_4():
                                                                                    datetime.date(int(zacetna) - 1, 11, 1),
                                                                                    datetime.date(int(koncna), 3, 31)])
     ranki=cur.fetchall()
-    return template('zanimivosti.html',ranki=ranki,izpis=True,zanimivost=4,napaka=None,napakaO=None,admin=admin,username=username,
+    ime3 = tekmovalec.split('-')[1]
+    id = int(tekmovalec.split('-')[0])
+    return template('zanimivosti.html',tekmovalec=tekmovalec,id=id,ime3=ime3,zacetna=zacetna,koncna=koncna,izbrana=True,ranki=ranki,izpis=True,zanimivost=4,napaka=None,napakaO=None,admin=admin,username=username,
                     tekmovalci_dolzina=cur,dolzina='',tekme_boljsi=cur,vsi_tekmovalci=vsi_tekmovalci,sezone=sezone(),drzave=cur,tekmovalci=cur,skupni_sestevek=cur)
 
 @post('/zanimivosti/5')
@@ -1039,7 +1043,7 @@ def zanimivosti_post_5():
                 "SELECT fis_code, ime, priimek, sestevek FROM umesna3 JOIN tekmovalec USING(fis_code) ORDER BY sestevek DESC",
                 [datetime.date(int(sezona) - 1, 11, 1), datetime.date(int(sezona), 3, 31)])
     skupni_sestevek = cur.fetchall()
-    return template('zanimivosti.html', skupni_sestevek=skupni_sestevek,sezone=sezone(),izpis=True,zanimivost=5,napaka=None,
+    return template('zanimivosti.html',sezona=sezona,izbrana=True,skupni_sestevek=skupni_sestevek,sezone=sezone(),izpis=True,zanimivost=5,napaka=None,
                     napakaO=None,admin=admin,username=username,ranki=cur,tekmovalci_dolzina=cur,dolzina='',tekme_boljsi=cur,
                     vsi_tekmovalci=cur,drzave=cur,tekmovalci=cur)
 
