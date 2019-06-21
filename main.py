@@ -85,6 +85,45 @@ def najljubsi(username):
         najljubsi = najljubsi[:-1]
         return list(map(int, najljubsi))
 
+def postani_admin():
+    username = get_user()
+    adminPassword = request.forms.adminPassword
+    password = request.forms.password
+
+    # za začetno stran potrebuješ skupni seštevek:
+    sezone_seznam = sezone()
+    sezona = sezone_seznam[-1]
+    cur.execute(
+        "WITH umesna3 AS (WITH umesna2 AS (WITH umesna AS (SELECT id, ranki, fis_code FROM rezultat JOIN tekma USING (id) "
+        "WHERE datum BETWEEN %s AND %s AND tip_tekme = 'posamicna' GROUP BY id, ranki, fis_code ORDER BY id,ranki)"
+        "SELECT tocke,fis_code, count(*) AS stevilo FROM umesna JOIN tocke USING(ranki) GROUP BY tocke,fis_code)"
+        "SELECT fis_code, sum(stevilo*tocke) AS sestevek FROM umesna2 GROUP BY fis_code)"
+        "SELECT fis_code, ime, priimek, sestevek FROM umesna3 JOIN tekmovalec USING(fis_code) ORDER BY sestevek DESC",
+        [datetime.date(int(sezona) - 1, 11, 1), datetime.date(int(sezona), 3, 31)])
+    skupni_sestevek = cur.fetchall()
+
+    if password == "":
+        if adminPassword == adminGeslo:
+            cur.execute("UPDATE uporabnik SET isadmin = True WHERE username=%s", [username])
+            admin = is_admin(username)
+            return template('zacetna_stran.html', skupni_sestevek=skupni_sestevek, sezone=sezone_seznam,
+                            napakaO=None, username=username, admin=admin)
+        else:
+            admin = is_admin(username)
+            return template('zacetna_stran.html', skupni_sestevek=skupni_sestevek, sezone=sezone_seznam,
+                            napakaO="Vnesili ste napačno admin geslo.", username=username, admin=admin)
+    else:
+        cur.execute("SELECT password FROM uporabnik WHERE username=%s", [username])
+        if cur.fetchone()[0] == password_md5(password):
+            cur.execute("DELETE FROM uporabnik WHERE username=%s", [username])
+            response.delete_cookie('username')
+            return template('zacetna_stran.html', skupni_sestevek=skupni_sestevek, sezone=sezone_seznam,
+                            napakaO=None, username=None, admin=None)
+        else:
+            admin = is_admin(username)
+            return template('zacetna_stran.html', skupni_sestevek=skupni_sestevek, sezone=sezone_seznam,
+                            napakaO="Vnesili ste napačno geslo.", username=username,
+                            admin=admin)
 
 # Pomožne funkcije
 ######################################################################
@@ -108,43 +147,10 @@ def index():
     skupni_sestevek = cur.fetchall()
     return template('zacetna_stran.html', sezone=sezone_seznam, skupni_sestevek=skupni_sestevek, napakaO=None, username=username, admin=admin)
 
-@post('/')
-def postani_admin():
-    username = get_user()
-    adminPassword = request.forms.adminPassword
-    password = request.forms.password
-
-    #za začetno stran potrebuješ skupni seštevek:
-    sezone_seznam = sezone()
-    sezona = sezone_seznam[-1]
-    cur.execute(
-        "WITH umesna3 AS (WITH umesna2 AS (WITH umesna AS (SELECT id, ranki, fis_code FROM rezultat JOIN tekma USING (id) "
-        "WHERE datum BETWEEN %s AND %s AND tip_tekme = 'posamicna' GROUP BY id, ranki, fis_code ORDER BY id,ranki)"
-        "SELECT tocke,fis_code, count(*) AS stevilo FROM umesna JOIN tocke USING(ranki) GROUP BY tocke,fis_code)"
-        "SELECT fis_code, sum(stevilo*tocke) AS sestevek FROM umesna2 GROUP BY fis_code)"
-        "SELECT fis_code, ime, priimek, sestevek FROM umesna3 JOIN tekmovalec USING(fis_code) ORDER BY sestevek DESC",
-        [datetime.date(int(sezona) - 1, 11, 1), datetime.date(int(sezona), 3, 31)])
-    skupni_sestevek = cur.fetchall()
-
-    if password == "":
-        if adminPassword == adminGeslo:
-            cur.execute("UPDATE uporabnik SET isadmin = True WHERE username=%s", [username])
-            admin = is_admin(username)
-            return template('zacetna_stran.html', skupni_sestevek=skupni_sestevek, sezone=sezone_seznam, napakaO=None, username=username, admin=admin)
-        else:
-            admin = is_admin(username)
-            return template('zacetna_stran.html', skupni_sestevek=skupni_sestevek, sezone=sezone_seznam, napakaO="Vnesili ste napačno admin geslo.", username=username, admin=admin)
-    else:
-        cur.execute("SELECT password FROM uporabnik WHERE username=%s", [username])
-        if cur.fetchone()[0] == password_md5(password):
-            cur.execute("DELETE FROM uporabnik WHERE username=%s", [username])
-            response.delete_cookie('username')
-            return template('zacetna_stran.html', skupni_sestevek=skupni_sestevek, sezone=sezone_seznam, napakaO=None, username=None, admin=None)
-        else:
-            admin = is_admin(username)
-            return template('zacetna_stran.html', skupni_sestevek=skupni_sestevek, sezone=sezone_seznam, napakaO="Vnesili ste napačno geslo.", username=username,
-                            admin=admin)
-
+@post('/postani_admin')
+def postani_admin_post():
+    postani_admin()
+    redirect('/')
 
 @get('/Login')
 def login():
@@ -249,9 +255,6 @@ def tekmovalci_get():
 
 @post('/tekmovalci')
 def tekmovalci_post():
-    if (request.forms.adminPassword != "") or (request.forms.password != ""):
-        postani_admin()
-
     search = request.forms.search.lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
     username = get_user()
     admin = is_admin(username)
@@ -332,9 +335,6 @@ def tekmovalec(x):
 
 @post('/tekmovalec/:x/')
 def tekmovalec_post(x):
-    if (request.forms.adminPassword != "") or (request.forms.password != ""):
-        postani_admin()
-
     search = request.forms.search.lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
     username = get_user()
     admin = is_admin(username)
@@ -440,8 +440,6 @@ def tekme(x):
 
 @post('/tekme/:x/')
 def tekme_post(x):
-    if (request.forms.adminPassword != "") or (request.forms.password != ""):
-        postani_admin()
 
     moznosti = ['ID - padajoče', 'ID - naraščajoče', 'Kraj - od A do Ž', 'Kraj - od Ž do A', 'Datum - starejši prej',
                 'Datum - novejši prej', 'Država - od A do Ž', 'Država - od Ž do A', 'Tip tekme - ekipne tekme prej',
@@ -523,9 +521,6 @@ def tekma(x):
 
 @post('/tekma/:x/')
 def tekma_post(x):
-    if (request.forms.adminPassword != "") or (request.forms.password != ""):
-        postani_admin()
-
     search = request.forms.search.lower()
     username = get_user()
     admin = is_admin(username)
@@ -692,9 +687,6 @@ def dodaj_drzavo():
 
 @post('/dodaj_drzavo')
 def dodaj_drzavo_post():
-    if (request.forms.adminPassword != "") or (request.forms.password != ""):
-        postani_admin()
-
     username = get_user()
     admin=is_admin(username)
     kratica = request.forms.kratica
@@ -719,9 +711,6 @@ def dodaj_tekmovalca():
 
 @post('/dodaj_tekmovalca')
 def dodaj_tekmovalca_post():
-    if (request.forms.adminPassword != "") or (request.forms.password != ""):
-        postani_admin()
-
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT kratica,ime FROM drzava ORDER BY kratica ASC")
@@ -766,9 +755,6 @@ def uredi_tekmovalca(x):
 
 @post('/uredi_tekmovalca/:x/')
 def uredi_tekmovalca_post(x):
-    if (request.forms.adminPassword != "") or (request.forms.password != ""):
-        postani_admin()
-
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT kratica,ime FROM drzava ORDER BY kratica ASC")
@@ -806,9 +792,6 @@ def dodaj_tekmo():
 
 @post('/dodaj_tekmo')
 def dodaj_tekmo_post():
-    if (request.forms.adminPassword != "") or (request.forms.password != ""):
-        postani_admin()
-
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT kratica,ime FROM drzava ORDER BY kratica ASC")
@@ -868,9 +851,6 @@ def dodaj_rezultat(x):
 
 @post('/dodaj_rezultat/:x/')
 def dodaj_tekmo_post(x):
-    if (request.forms.adminPassword != "") or (request.forms.password != ""):
-        postani_admin()
-
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT kraj FROM tekma WHERE id = %s", [int(x)])
@@ -1021,9 +1001,6 @@ def zanimivosti(x):
 
 @post('/zanimivosti/1')
 def zanimivosti_post_1():
-    if (request.forms.adminPassword != "") or (request.forms.password != ""):
-        postani_admin()
-
     username=get_user()
     admin=is_admin(username)
     cur.execute("SELECT * FROM drzava ORDER BY kratica")
@@ -1046,9 +1023,6 @@ def zanimivosti_post_1():
 
 @post('/zanimivosti/2')
 def zanimivosti_post_2():
-    if (request.forms.adminPassword != "") or (request.forms.password != ""):
-        postani_admin()
-
     username=get_user()
     admin=is_admin(username)
     cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
@@ -1086,9 +1060,6 @@ def zanimivosti_post_2():
 
 @post('/zanimivosti/3')
 def zanimivosti_post_3():
-    if (request.forms.adminPassword != "") or (request.forms.password != ""):
-        postani_admin()
-
     username = get_user()
     admin = is_admin(username)
     dolzina = request.forms.dolzina
@@ -1108,9 +1079,6 @@ def zanimivosti_post_3():
 
 @post('/zanimivosti/4')
 def zanimivosti_post_4():
-    if (request.forms.adminPassword != "") or (request.forms.password != ""):
-        postani_admin()
-
     username = get_user()
     admin = is_admin(username)
     cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
@@ -1131,9 +1099,6 @@ def zanimivosti_post_4():
 
 @post('/zanimivosti/5')
 def zanimivosti_post_5():
-    if (request.forms.adminPassword != "") or (request.forms.password != ""):
-        postani_admin()
-
     username = get_user()
     admin = is_admin(username)
     sezona = request.forms.sezona_skupni
