@@ -234,8 +234,13 @@ def register_post():
 def tekmovalci_get():
     username = get_user()
     admin = is_admin(username)
-    cur.execute("SELECT * FROM tekmovalec ORDER BY priimek ASC")
+    cur.execute("SELECT * FROM tekmovalec ORDER BY priimek,ime ASC")
     tekmovalci = cur.fetchall()
+    for tekmovalec in tekmovalci:
+        if tekmovalec[-1] == 'NE':
+            datum = tekmovalec[5]
+            datum = datum.year
+            tekmovalec[5] = datum
     moznosti = ['FIS code - padajoče', 'FIS code - naraščajoče', 'Status - od A do Ž', 'Status - od Ž do A',
                 'Ime - od A do Ž', 'Ime - od Ž do A', 'Priimek - od A do Ž', 'Priimek - od Ž do A',
                 'Država - od A do Ž', 'Država - od Ž do A', 'Rojstvo - starejši prej', 'Rojstvo - mlajši prej',
@@ -270,6 +275,11 @@ def tekmovalci_post():
     if search == "":
         cur.execute("SELECT * FROM tekmovalec ORDER BY " + y.replace('-', ' '))
         tekmovalci = cur.fetchall()
+        for tekmovalec in tekmovalci:
+            if tekmovalec[-1] == 'NE':
+                datum = tekmovalec[5]
+                datum = datum.year
+                tekmovalec[5] = datum
         return template('tekmovalci.html', tekmovalci=tekmovalci, razvrscanje=raz, moznosti=moznosti, sezone=sezone(), napakaO=None, napaka=None, username=username,
                         admin=admin)
     napaka = None
@@ -289,11 +299,16 @@ def tekmovalci_post():
                     "OR LOWER(ime) LIKE %s"
                     "OR LOWER(priimek) LIKE %s"
                     "OR LOWER(drzava) LIKE %s"
-                    "OR LOWER(rojstvo) LIKE %s"
+                    "OR CAST(rojstvo AS varchar(10)) LIKE %s"
                     "OR LOWER(klub) LIKE %s"
                     "OR LOWER(smucke) LIKE %s" + "ORDER BY " + y.replace('-', ' '),
                     8*['%' + search + '%'])
     tekmovalci = cur.fetchall()
+    for tekmovalec in tekmovalci:
+        if tekmovalec[-1] == 'NE':
+            datum = tekmovalec[5]
+            datum = datum.year
+            tekmovalec[5] = datum
     return template('tekmovalci.html', tekmovalci=tekmovalci, razvrscanje=raz, moznosti=moznosti, sezone=sezone(), napakaO=None, napaka=napaka, username=username, admin=admin)
 
 
@@ -303,6 +318,11 @@ def tekmovalec(x):
     admin = is_admin(username)
     cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [int(x)])
     tekmovalec = cur.fetchall()
+    if tekmovalec[-1] == 'NE':
+        datum = tekmovalec[5]
+        datum = datum.year
+        tekmovalec[5] = datum
+
     cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t.datum DESC", [int(x)])
     tekme = cur.fetchall()
     moznosti = ['Datum - padajoče', 'Datum - naraščajoče', 'Kraj - od A do Ž', 'Kraj - od Ž do A',
@@ -320,6 +340,11 @@ def tekmovalec_post(x):
     admin = is_admin(username)
     cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [int(x)])
     tekmovalec = cur.fetchall()
+    if tekmovalec[-1] == 'NE':
+        datum = tekmovalec[5]
+        datum = datum.year
+        tekmovalec[5] = datum
+
     raz = request.forms.razvrscanje
 
     moznosti = ['Datum - padajoče', 'Datum - naraščajoče', 'Kraj - od A do Ž', 'Kraj - od Ž do A',
@@ -613,6 +638,11 @@ def drzava(x):
     admin = is_admin(username)
     cur.execute("SELECT * FROM tekmovalec WHERE drzava=%s ORDER BY priimek,ime",[x])
     tekmovalci=cur.fetchall()
+    for tekmovalec in tekmovalci:
+        if tekmovalec[-1] == 'NE':
+            datum = tekmovalec[5]
+            datum = datum.year
+            tekmovalec[5] = datum
 
     cur.execute("SELECT id FROM tekma WHERE tip_tekme = 'ekipna' AND datum <= date('now') ORDER BY datum DESC LIMIT 1")
     id = cur.fetchone()[0]
@@ -707,8 +737,8 @@ def dodaj_tekmovalca_post():
     smucke = request.forms.smucke
     status = request.forms.status
     try:
-        cur.execute("INSERT INTO tekmovalec (fis_code, ime, priimek, drzava, rojstvo, klub, smucke, status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-                    (fis_code, ime, priimek, drzava, rojstvo, klub, smucke, status))
+        cur.execute("INSERT INTO tekmovalec (fis_code, ime, priimek, drzava, rojstvo, klub, smucke, status,izpisi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    (fis_code, ime, priimek, drzava, rojstvo, klub, smucke, status,'DA'))
         conn.commit()
     except Exception as ex:
         return template('dodaj_tekmovalca.html', sezone=sezone(), napakaO=None, fis_code=fis_code, ime=ime, priimek=priimek, drzave=drzave, rojstvo=rojstvo, klub=klub, smucke=smucke, status=status,
@@ -726,6 +756,10 @@ def uredi_tekmovalca(x):
     ime_drzave = cur.fetchone()[0]
     cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [int(x)])
     podatki = cur.fetchone()
+    if podatki[-1] == 'NE':
+        datum = tekmovalec[5]
+        datum = datum.year
+        podatki[5] = datum
     return template('uredi_tekmovalca.html', ime_drzave=ime_drzave, fis_code=x, status=podatki[1], ime=podatki[2], priimek=podatki[3], drzava=podatki[4], drzave=drzave, rojstvo=podatki[5], klub=podatki[6],
                         smucke=podatki[7], x=x, sezone=sezone(), napakaO=None, napaka=None, username=username, admin=admin)
 
@@ -1000,6 +1034,11 @@ def zanimivosti_post_1():
     cur.execute("WITH tek AS (WITH zdruzena AS (SELECT * FROM tekmovalec JOIN drzava ON tekmovalec.drzava = drzava.kratica JOIN rezultat USING (fis_code) JOIN tekma USING (id))"
                 "SELECT fis_code FROM zdruzena WHERE kratica=%s AND datum BETWEEN %s AND %s GROUP BY fis_code) SELECT * FROM tek JOIN tekmovalec USING (fis_code)",[drzava, datetime.date(int(sezona1) - 1, 11, 1), datetime.date(int(sezona2), 3, 31)])
     tekmovalci_drzave = cur.fetchall()
+    for tekmovalec in tekmovalci_drzave:
+        if tekmovalec[-1] == 'NE':
+            datum = tekmovalec[5]
+            datum = datum.year
+            tekmovalec[5] = datum
     return template('zanimivosti.html',sezone=sezone(),drzave=drzave,drzava=drzava,sezona1=sezona1,sezona2=sezona2,izbrana=True,napaka=None,tekmovalci=tekmovalci_drzave, zanimivost=1,
                     username=username,admin=admin,napakaO=None,izpis=True,vsi_tekmovalci=cur,tekme_boljsi=cur,tekmovalci_dolzina=cur,dolzina='',
                     ranki=cur,skupni_sestevek=cur)
@@ -1054,9 +1093,14 @@ def zanimivosti_post_3():
     admin = is_admin(username)
     dolzina = request.forms.dolzina
     cur.execute("WITH umesna AS (SELECT fis_code, count(*) AS stevilo FROM rezultat WHERE skoki >= %s GROUP BY fis_code)"
-                "SELECT fis_code, status, ime, priimek, drzava, rojstvo, klub, smucke, stevilo FROM umesna "
+                "SELECT fis_code, status, ime, priimek, drzava, rojstvo, klub, smucke, stevilo, izpisi FROM umesna "
                 "JOIN tekmovalec USING (fis_code) ORDER BY stevilo DESC",[float(dolzina)])
     tekmovalci_dolzina = cur.fetchall()
+    for tekmovalec in tekmovalci_dolzina:
+        if tekmovalec[-1] == 'NE':
+            datum = tekmovalec[5]
+            datum = datum.year
+            tekmovalec[5] = datum
     return template('zanimivosti.html', tekmovalci_dolzina=tekmovalci_dolzina, dolzina=dolzina, tekme_boljsi=cur, vsi_tekmovalci=cur, izpis=True,
                     sezone=cur, drzave=cur, napaka=None, napakaO=None, tekmovalci=cur, zanimivost=3, username=username,
                     admin=admin,ranki=cur,skupni_sestevek=cur)
@@ -1123,6 +1167,11 @@ def najljubsi_get(napaka=None):
         cur.execute("SELECT * FROM tekmovalec WHERE fis_code IN (" + stringFC + ")")
         izrisi = True
     tekmovalci = cur.fetchall()
+    for tekmovalec in tekmovalci:
+        if tekmovalec[-1] == 'NE':
+            datum = tekmovalec[5]
+            datum = datum.year
+            tekmovalec[5] = datum
     return template('najljubsi.html', tekmovalci=tekmovalci, sezone=sezone(), izrisi = izrisi, napakaO=None, napaka=napaka, username=username,
                     admin=admin, vsi_tekmovalci=vsi_tekmovalci)
 
@@ -1177,6 +1226,35 @@ def dodaj(x):
         cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [naj_str, username])
     redirect("/tekmovalec/{}/".format(x))
 
+def prekopiri():
+    cur.execute("SELECT fis_code,status,ime,priimek,drzava,rojstvo,klub,smucke,izpisi FROM tekmovalec1")
+    tekmovalci = cur.fetchall()
+    for vrstica in tekmovalci:
+        datum = vrstica[5]
+        print(datum)
+        datum = datum.split('-')
+        datum = datetime.date(int(datum[0]), int(datum[1]), int(datum[2]))
+        vrstica[5] = datum
+        cur.execute("INSERT INTO tekmovalec2(fis_code,status,ime,priimek,drzava,rojstvo,klub,smucke,izpisi)"
+                    "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",vrstica)
+
+def prekopiri1():
+    cur.execute("SELECT fis_code,status,ime,priimek,drzava,rojstvo,klub,smucke,izpisi FROM tekmovalec")
+    tekmovalci = cur.fetchall()
+    for vrstica in tekmovalci:
+        cur.execute("INSERT INTO tekmovalec1(fis_code,status,ime,priimek,drzava,rojstvo,klub,smucke,izpisi)"
+                    "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)", vrstica)
+def preuredi():
+    cur.execute("SELECT fis_code,rojstvo,izpisi FROM tekmovalec1")
+    tekmovalci = cur.fetchall()
+    for vrstica in tekmovalci:
+        rojstvo = vrstica[1].split('-')
+        if len(rojstvo) == 1:
+            rojstvo = ''.join(rojstvo) + '-01-01'
+            cur.execute("UPDATE tekmovalec1 SET izpisi = %s WHERE fis_code =%s", ['NE', vrstica[0]])
+            cur.execute("UPDATE tekmovalec1 SET rojstvo = %s WHERE fis_code = %s",[rojstvo,vrstica[0]])
+        else:
+            cur.execute("UPDATE tekmovalec1 SET izpisi = %s WHERE fis_code =%s", ['DA',vrstica[0]])
 
 ######################################################################
 # Glavni program

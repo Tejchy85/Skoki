@@ -1,4 +1,4 @@
--- Table: tekmovalec
+﻿-- Table: tekmovalec
 DROP TABLE IF EXISTS tekmovalec;
 
 CREATE TABLE tekmovalec (
@@ -10,7 +10,8 @@ CREATE TABLE tekmovalec (
                      NOT NULL,
     rojstvo  TEXT,
     klub     TEXT,
-    smucke   TEXT
+    smucke   TEXT,
+    izpisi   TEXT	
 );
 
 INSERT INTO tekmovalec (
