@@ -1226,35 +1226,6 @@ def dodaj(x):
         cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [naj_str, username])
     redirect("/tekmovalec/{}/".format(x))
 
-def prekopiri():
-    cur.execute("SELECT fis_code,status,ime,priimek,drzava,rojstvo,klub,smucke,izpisi FROM tekmovalec1")
-    tekmovalci = cur.fetchall()
-    for vrstica in tekmovalci:
-        datum = vrstica[5]
-        print(datum)
-        datum = datum.split('-')
-        datum = datetime.date(int(datum[0]), int(datum[1]), int(datum[2]))
-        vrstica[5] = datum
-        cur.execute("INSERT INTO tekmovalec2(fis_code,status,ime,priimek,drzava,rojstvo,klub,smucke,izpisi)"
-                    "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",vrstica)
-
-def prekopiri1():
-    cur.execute("SELECT fis_code,status,ime,priimek,drzava,rojstvo,klub,smucke,izpisi FROM tekmovalec")
-    tekmovalci = cur.fetchall()
-    for vrstica in tekmovalci:
-        cur.execute("INSERT INTO tekmovalec1(fis_code,status,ime,priimek,drzava,rojstvo,klub,smucke,izpisi)"
-                    "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)", vrstica)
-def preuredi():
-    cur.execute("SELECT fis_code,rojstvo,izpisi FROM tekmovalec1")
-    tekmovalci = cur.fetchall()
-    for vrstica in tekmovalci:
-        rojstvo = vrstica[1].split('-')
-        if len(rojstvo) == 1:
-            rojstvo = ''.join(rojstvo) + '-01-01'
-            cur.execute("UPDATE tekmovalec1 SET izpisi = %s WHERE fis_code =%s", ['NE', vrstica[0]])
-            cur.execute("UPDATE tekmovalec1 SET rojstvo = %s WHERE fis_code = %s",[rojstvo,vrstica[0]])
-        else:
-            cur.execute("UPDATE tekmovalec1 SET izpisi = %s WHERE fis_code =%s", ['DA',vrstica[0]])
 
 ######################################################################
 # Glavni program
