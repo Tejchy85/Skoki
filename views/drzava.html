@@ -44,25 +44,30 @@
 <div id="zunanji">
     <div id="levi" class="no-gutters border rounded shadow-sm">
          <h3>Število doseženih mest na posamičnih tekmah v sezonah {{prva}}-{{zadnja}}.</h3>
-         <p>Če je pred vami prazna tabela, to pomeni, da tekmovalci iz te države še nimajo uvrstitve na posamičnih tekmah.</p>
-         <div id="tabela_pokoncna">
-            <table class="table table-bordered table-hover">
-             <thead class="thead-light">
-              <tr>
-                 <th>Mesto</th>
-                 <th>Število doseženih</th>
-              </tr>
-             </thead>
-             <tbody>
-              %for (mesto,stevilo) in mesta:
+         % if not prazna:
+            <div id="tabela_pokoncna">
+                <table class="table table-bordered table-hover">
+                <thead class="thead-light">
                 <tr>
-                   <td>{{mesto}}</td>
-                   <td>{{stevilo}}</td>
+                     <th>Mesto</th>
+                    <th>Število doseženih</th>
                 </tr>
-              %end
-             </tbody>
-         </table>
-         </div>
+                </thead>
+                <tbody>
+                %for (mesto,stevilo) in mesta:
+                    <tr>
+                        <td>{{mesto}}</td>
+                        <td>{{stevilo}}</td>
+                    </tr>
+                %end
+                </tbody>
+            </table>
+            </div>
+         % else:
+            <div class="alert alert-warning">
+                Tekmovalci te države še nimajo uvrstitve na posamičnih tekmah.
+            </div>
+         % end
     </div>
 
     <div id="desni" class="no-gutters border rounded shadow-sm" style="height:525px;">

@@ -2,23 +2,21 @@
 
 <h1>Tekme v sezoni {{x}}</h1>
 
-<div class="dropdown" style="float:right;">
-  <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" align="right">
-    Razvrščanje
-  </button>
-  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-    <a class="dropdown-item" href="/tekme/{{x}}/ID-DESC">ID - padajoče</a>
-    <a class="dropdown-item" href="/tekme/{{x}}/ID-ASC">ID - naraščajoče</a>
-    <a class="dropdown-item" href="/tekme/{{x}}/Kraj-ASC">Kraj - od A do Ž</a>
-    <a class="dropdown-item" href="/tekme/{{x}}/Kraj-DESC">Kraj - od Ž do A</a>
-    <a class="dropdown-item" href="/tekme/{{x}}/Datum-ASC">Datum - Starejši naprej</a>
-    <a class="dropdown-item" href="/tekme/{{x}}/Datum-DESC">Datum- Novejši naprej</a>
-    <a class="dropdown-item" href="/tekme/{{x}}/Drzava-ASC">Država - od A do Ž</a>
-    <a class="dropdown-item" href="/tekme/{{x}}/Drzava-DESC">Država - od Ž do A</a>
-    <a class="dropdown-item" href="/tekme/{{x}}/Tip_tekme-ASC">Ekipne tekme naprej</a>
-    <a class="dropdown-item" href="/tekme/{{x}}/Tip_tekme-DESC">Posamične tekme naprej</a>
-  </div>
-</div>
+<form class="form-inline" method="post">
+    <div class="dropdown">
+        <div class="form-group form-group-sm mr-3 w-35">
+            <select type="text" name="razvrscanje" value="" class="form-control" required="true">
+                <option>{{razvrscanje}}</option>
+                %for (raz) in moznosti:
+                    % if raz != razvrscanje:
+                        <option>{{raz}}</option>
+                    % end
+                %end
+            </select>
+        </div>
+    </div>
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Razvrsti</button>
+</form>
 
  <table class="table table-bordered table-hover">
  <thead class="thead-light">

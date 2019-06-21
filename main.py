@@ -195,13 +195,13 @@ def register_post():
         # Uporabnik že obstaja
         return template("Register.html",
                                username=username,
-                               napaka='To uporabniško ime je že zavzeto')
+                               napaka='To uporabniško ime je že zasedeno.')
     elif not password1 == password2:
         print('gesli se ne ujemata')
         # Geslo se ne ujemata
         return template("Register.html",
                                username=username,
-                               napaka='Gesli se ne ujemata')
+                               napaka='Gesli se ne ujemata.')
     else:
         # Vse je v redu, vstavi novega uporabnika v bazo
         print('ustvarjamo novega uporabnika')
@@ -219,7 +219,7 @@ def register_post():
             else:
                 return template("Register.html",
                                 username=username,
-                                napaka='Admin geslo ni pravilno')
+                                napaka='Admin geslo ni pravilno.')
         else:
             print('ustvarimo navadnega uporabnika')
 
@@ -238,7 +238,7 @@ def tekmovalci_get():
     tekmovalci = cur.fetchall()
     moznosti = ['FIS code - padajoče', 'FIS code - naraščajoče', 'Status - od A do Ž', 'Status - od Ž do A',
                 'Ime - od A do Ž', 'Ime - od Ž do A', 'Priimek - od A do Ž', 'Priimek - od Ž do A',
-                'Država - od A do Ž', 'Država - od Ž do A', 'Rojstvo - Starejši prej', 'Rojstvo - Mlajši prej',
+                'Država - od A do Ž', 'Država - od Ž do A', 'Rojstvo - starejši prej', 'Rojstvo - mlajši prej',
                 'Klub - od A do Ž', 'Klub - od Ž do A', 'Smučke - od A do Ž', 'Smučke - od Ž do A']
     return template('tekmovalci.html', tekmovalci=tekmovalci, razvrscanje='Priimek - od A do Ž', moznosti=moznosti, sezone=sezone(), napakaO=None, napaka=None, username=username, admin=admin)
 
@@ -254,11 +254,11 @@ def tekmovalci_post():
 
     moznosti = ['FIS code - padajoče', 'FIS code - naraščajoče', 'Status - od A do Ž', 'Status - od Ž do A',
                 'Ime - od A do Ž', 'Ime - od Ž do A', 'Priimek - od A do Ž', 'Priimek - od Ž do A',
-                'Država - od A do Ž', 'Država - od Ž do A', 'Rojstvo - Starejši prej', 'Rojstvo - Mlajši prej',
+                'Država - od A do Ž', 'Država - od Ž do A', 'Rojstvo - starejši prej', 'Rojstvo - mlajši prej',
                 'Klub - od A do Ž', 'Klub - od Ž do A', 'Smučke - od A do Ž', 'Smučke - od Ž do A']
 
     sezR = raz.split('-')
-    asc = ['naraščajoče', 'od A do Ž', 'Starejši prej']
+    asc = ['naraščajoče', 'od A do Ž', 'starejši prej']
 
     if sezR == ['']:
         y = 'priimek ASC'
@@ -306,7 +306,7 @@ def tekmovalec(x):
     cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t.datum DESC", [int(x)])
     tekme = cur.fetchall()
     moznosti = ['Datum - padajoče', 'Datum - naraščajoče', 'Kraj - od A do Ž', 'Kraj - od Ž do A',
-                'Tip tekme - od A do Ž', 'Tip tekme - od Ž do A', 'Rank - padajoče', 'Rank - naraščajoče']
+                'Tip tekme - ekipne tekme prej', 'Tip tekme - posamične tekme prej', 'Rank - padajoče', 'Rank - naraščajoče']
     return template('tekmovalec.html', x=x, razvrscanje='Datum - padajoče', moznosti=moznosti, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(), najljubsi=najljubsi(username), napakaO=None, napaka=None, username=username, admin=admin)
 
 
@@ -323,10 +323,10 @@ def tekmovalec_post(x):
     raz = request.forms.razvrscanje
 
     moznosti = ['Datum - padajoče', 'Datum - naraščajoče', 'Kraj - od A do Ž', 'Kraj - od Ž do A',
-                'Tip tekme - od A do Ž', 'Tip tekme - od Ž do A', 'Rank - padajoče', 'Rank - naraščajoče']
+                'Tip tekme - ekipne tekme prej', 'Tip tekme - posamične tekme prej', 'Rank - padajoče', 'Rank - naraščajoče']
 
     sezR = raz.split('-')
-    asc = ['naraščajoče', 'od A do Ž', 'Starejši prej']
+    asc = ['naraščajoče', 'od A do Ž', 'ekipne tekme prej']
 
     slovar = {'rank': 'ranki'}
 
@@ -402,15 +402,54 @@ def tekmovalec_post(x):
                     najljubsi=najljubsi(username), napakaO=None, napaka=napaka, username=username, admin=admin)
 
 
-@get('/tekme/:x/:y')
-def tekme(x,y):
+@get('/tekme/:x/')
+def tekme(x):
     username = get_user()
     admin = is_admin(username)
+    cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY datum DESC",
+                [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
+    tekme = cur.fetchall()
+    moznosti = ['ID - padajoče', 'ID - naraščajoče', 'Kraj - od A do Ž', 'Kraj - od Ž do A', 'Datum - starejši prej',
+                'Datum - novejši prej', 'Država - od A do Ž', 'Država - od Ž do A', 'Tip tekme - ekipne tekme prej', 'Tip tekme - posamične tekme prej']
+    return template('tekme_sezona.html', moznosti=moznosti, razvrscanje='Datum - novejši prej', sezone=sezone(), napakaO=None, x=x, tekme=tekme, username = username, admin=admin)
+
+@post('/tekme/:x/')
+def tekme_post(x):
+    if (request.forms.adminPassword != "") or (request.forms.password != ""):
+        postani_admin()
+
+    moznosti = ['ID - padajoče', 'ID - naraščajoče', 'Kraj - od A do Ž', 'Kraj - od Ž do A', 'Datum - starejši prej',
+                'Datum - novejši prej', 'Država - od A do Ž', 'Država - od Ž do A', 'Tip tekme - ekipne tekme prej',
+                'Tip tekme - posamične tekme prej']
+
+    search = request.forms.search.lower()
+    username = get_user()
+    admin = is_admin(username)
+
+    raz = request.forms.razvrscanje
+
+    sezR = raz.split('-')
+    asc = ['naraščajoče', 'od A do Ž', 'starejši prej', 'ekipne tekme prej']
+
+    if sezR[1].strip() in asc:
+        z = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
+        if z == 'tip_tekme':
+            z = '(tip_tekme, datum)'
+        y = z + ' ASC'
+    else:
+        z = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
+        if z == 'tip_tekme':
+            z = '(tip_tekme, datum)'
+        y = z + ' DESC'
+
+    print(y)
+
     cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY " + y.replace('-', ' '),
                 [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
     tekme = cur.fetchall()
-    return template('tekme_sezona.html', sezone=sezone(), napakaO=None, x=x, tekme=tekme, username = username, admin=admin)
 
+    return template('tekme_sezona.html', moznosti=moznosti, razvrscanje=raz, sezone=sezone(),
+                    napakaO=None, x=x, tekme=tekme, username=username, admin=admin)
 
 @get('/tekma/:x/')
 def tekma(x):
@@ -594,7 +633,12 @@ def drzava(x):
         "SELECT ranki, count(*) AS stevilo FROM zdruzena WHERE tip_tekme <> 'ekipna' GROUP BY ranki ORDER BY ranki",[x])
     mesta = cur.fetchall()
 
-    return template('drzava.html', sezone=sezone(), prva=sezone()[0], zadnja=sezone()[-1], napakaO=None, x=x, ime=ime,tekmovalci=tekmovalci,kraj=kraj,datum=datum, tekma=tekma, serija=True, ekipna=True, mesta=mesta, username = username, admin=admin )
+    if mesta == []:
+        prazna = True
+    else:
+        prazna = False
+
+    return template('drzava.html', sezone=sezone(), prva=sezone()[0], zadnja=sezone()[-1], napakaO=None, prazna=prazna, x=x, ime=ime,tekmovalci=tekmovalci,kraj=kraj,datum=datum, tekma=tekma, serija=True, ekipna=True, mesta=mesta, username = username, admin=admin )
 
 
 @get('/zadnja_tekma')
@@ -637,7 +681,7 @@ def dodaj_drzavo_post():
 def dodaj_tekmovalca():
     username = get_user()
     admin = is_admin(username)
-    cur.execute("SELECT kratica,ime FROM drzava")
+    cur.execute("SELECT kratica,ime FROM drzava ORDER BY kratica ASC")
     drzave = cur.fetchall()
     return template('dodaj_tekmovalca.html', fis_code='', ime='', priimek='', drzave=drzave, rojstvo='', klub='',
                         smucke='', status='', sezone=sezone(), napakaO=None, napaka=None, username=username, admin=admin)
@@ -650,7 +694,7 @@ def dodaj_tekmovalca_post():
 
     username = get_user()
     admin = is_admin(username)
-    cur.execute("SELECT kratica,ime FROM drzava")
+    cur.execute("SELECT kratica,ime FROM drzava ORDER BY kratica ASC")
     drzave = cur.fetchall()
     fis_code = request.forms.fis_code
     ime = request.forms.ime
@@ -674,7 +718,7 @@ def dodaj_tekmovalca_post():
 def uredi_tekmovalca(x):
     username = get_user()
     admin = is_admin(username)
-    cur.execute("SELECT kratica,ime FROM drzava")
+    cur.execute("SELECT kratica,ime FROM drzava ORDER BY kratica ASC")
     drzave = cur.fetchall()
     cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [int(x)])
     podatki = cur.fetchone()
@@ -689,7 +733,7 @@ def uredi_tekmovalca_post(x):
 
     username = get_user()
     admin = is_admin(username)
-    cur.execute("SELECT kratica,ime FROM drzava")
+    cur.execute("SELECT kratica,ime FROM drzava ORDER BY kratica ASC")
     drzave = cur.fetchall()
     status=request.forms.status
     ime=request.forms.ime
@@ -712,7 +756,7 @@ def uredi_tekmovalca_post(x):
 def dodaj_tekmo():
     username = get_user()
     admin = is_admin(username)
-    cur.execute("SELECT kratica,ime FROM drzava")
+    cur.execute("SELECT kratica,ime FROM drzava ORDER BY kratica ASC")
     drzave = cur.fetchall()
     return template('dodaj_tekmo.html', sezone=sezone(), napakaO=None, id='', kraj='', drzave=drzave, datum='', tip_tekme='', napaka=None, username = username, admin=admin)
 
@@ -724,7 +768,7 @@ def dodaj_tekmo_post():
 
     username = get_user()
     admin = is_admin(username)
-    cur.execute("SELECT kratica,ime FROM drzava")
+    cur.execute("SELECT kratica,ime FROM drzava ORDER BY kratica ASC")
     drzave = cur.fetchall()
     id = request.forms.id
     kraj = request.forms.kraj
@@ -753,7 +797,7 @@ def dodaj_rezultat(x):
     kraj = cur.fetchone()[0]
     cur.execute("SELECT datum FROM tekma WHERE id = %s", [int(x)])
     datum = cur.fetchone()[0]
-    cur.execute("SELECT kratica,ime FROM drzava")
+    cur.execute("SELECT kratica,ime FROM drzava ORDER BY kratica ASC")
     drzave=cur.fetchall()
     cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
     vsi_tekmovalci = cur.fetchall()
@@ -788,7 +832,7 @@ def dodaj_tekmo_post(x):
     kraj = cur.fetchone()[0]
     cur.execute("SELECT datum FROM tekma WHERE id = %s", [int(x)])
     datum = cur.fetchone()[0]
-    cur.execute("SELECT kratica,ime FROM drzava")
+    cur.execute("SELECT kratica,ime FROM drzava ORDER BY kratica ASC")
     drzave = cur.fetchall()
     cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
     vsi_tekmovalci = cur.fetchall()
