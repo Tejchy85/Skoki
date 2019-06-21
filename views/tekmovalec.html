@@ -26,7 +26,7 @@
                     <a href="/uredi_tekmovalca/{{x}}/" class="btn btn-dark btn-md active" role="button" aria-pressed="true" style="margin-right: 5px; height: 39px;">Uredi</a>
                 % end
                 <form action="/dodaj/{{fis_code}}/" method="POST">
-                   % if fis_code in najljubsi:
+                   % if najljubsi:
                        <button type="submit" name="dodaj" value="ne" class="btn btn-dark btn-md active">Odstrani iz priljubljenih</button>
                    % else:
                        <button type="submit" name="dodaj" value="ja" class="btn btn-dark btn-md active">Dodaj med priljubljene</button>

@@ -73,18 +73,6 @@ def sezone():
         sezone.append(i)
     return sezone
 
-def najljubsi(username):
-    if username==None:
-        return []
-    cur.execute("SELECT najljubsi_tekmovalci FROM uporabnik WHERE username = %s", [username])
-    najljubsi = cur.fetchone()[0]
-    if najljubsi == None:
-        return []
-    else:
-        najljubsi = najljubsi.split(',')
-        najljubsi = najljubsi[:-1]
-        return list(map(int, najljubsi))
-
 def postani_admin():
     username = get_user()
     adminPassword = request.forms.adminPassword
@@ -330,7 +318,14 @@ def tekmovalec(x):
     tekme = cur.fetchall()
     moznosti = ['Datum - padajoče', 'Datum - naraščajoče', 'Kraj - od A do Ž', 'Kraj - od Ž do A',
                 'Tip tekme - ekipne tekme prej', 'Tip tekme - posamične tekme prej', 'Rank - padajoče', 'Rank - naraščajoče']
-    return template('tekmovalec.html', x=x, razvrscanje='Datum - padajoče', moznosti=moznosti, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(), najljubsi=najljubsi(username), napakaO=None, napaka=None, username=username, admin=admin)
+
+    cur.execute("SELECT * FROM najljubsi WHERE fis_code = %s", [int(x)])
+    najljubsi = cur.fetchall()
+    if najljubsi == []:
+        najljubsi = False
+    else:
+        najljubsi = True
+    return template('tekmovalec.html', x=x, razvrscanje='Datum - padajoče', moznosti=moznosti, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(), najljubsi=najljubsi, napakaO=None, napaka=None, username=username, admin=admin)
 
 
 @post('/tekmovalec/:x/')
@@ -423,8 +418,15 @@ def tekmovalec_post(x):
             [int(x), '%' + search + '%', '%' + search + '%', '%' + search + '%', '%' + search + '%',
              '%' + search + '%'])
     tekme = cur.fetchall()
+    cur.execute("SELECT * FROM najljubsi WHERE fis_code = %s", [int(x)])
+
+    najljubsi = cur.fetchall()
+    if najljubsi == []:
+        najljubsi = False
+    else:
+        najljubsi = True
     return template('tekmovalec.html', x=x, razvrscanje=raz, moznosti=moznosti, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(),
-                    najljubsi=najljubsi(username), napakaO=None, napaka=napaka, username=username, admin=admin)
+                    najljubsi=najljubsi, napakaO=None, napaka=napaka, username=username, admin=admin)
 
 
 @get('/tekme/:x/')
@@ -1114,29 +1116,32 @@ def zanimivosti_post_5():
                     vsi_tekmovalci=cur,drzave=cur,tekmovalci=cur)
 
 @get('/najljubsi')
-def najljubsi_get(napaka=None):
+def najljubsi_get():
     username = get_user()
     admin = is_admin(username)
 
     cur.execute("SELECT fis_code,ime,priimek FROM tekmovalec ORDER BY priimek,ime")
     vsi_tekmovalci = cur.fetchall()
 
-    list_najljubsih = najljubsi(username)
+    cur.execute("SELECT * FROM najljubsi WHERE uporabnik = %s", [username])
+    naj = cur.fetchall()
 
-    if list_najljubsih == []:
+    if naj == []:
         napaka = 'Nimate še dodanih najljubših tekmovalcev.'
         izrisi = False
-        cur.execute("SELECT * FROM tekmovalec")
+        tekmovalci = []
     else:
-        stringFC = ','.join(map(str,list_najljubsih))
-        cur.execute("SELECT * FROM tekmovalec WHERE fis_code IN (" + stringFC + ")")
+        napaka = None
         izrisi = True
-    tekmovalci = cur.fetchall()
+        cur.execute("SELECT t.fis_code,t.status,t.ime,t.priimek,t.drzava,t.rojstvo,t.klub,t.smucke,t.izpisi FROM tekmovalec AS t JOIN najljubsi AS n ON (t.fis_code = n.fis_code) WHERE n.uporabnik = %s", [username])
+        tekmovalci = cur.fetchall()
+
     for tekmovalec in tekmovalci:
         if tekmovalec[-1] == 'NE':
             datum = tekmovalec[5]
             datum = datum.year
             tekmovalec[5] = datum
+
     return template('najljubsi.html', tekmovalci=tekmovalci, sezone=sezone(), izrisi = izrisi, napakaO=None, napaka=napaka, username=username,
                     admin=admin, vsi_tekmovalci=vsi_tekmovalci)
 
@@ -1147,48 +1152,34 @@ def najljubsi_post():
     if dodaj != '':
         dodaj = dodaj.split('-')
         dodaj = int(dodaj[0])
+        print(dodaj)
         cur.execute("SELECT * FROM tekmovalec WHERE fis_code = %s", [dodaj])
         try:
             if len(cur.fetchone()) > 0:
                 username = get_user()
-                stringFC = najljubsi(username)
-                if dodaj not in stringFC:
-                    if stringFC != []:
-                        cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s",
-                                    [','.join(map(str, stringFC)) + ',' + str(dodaj) + ',', username])
-                    else:
-                        cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [str(dodaj) + ',', username])
-                    napaka = 'Tekmovalec je bil uspešno dodan med najljubše'
+
+                cur.execute("SELECT * FROM najljubsi WHERE fis_code = %s", [dodaj])
+                najljubsi = cur.fetchall()
+                if najljubsi == []:
+                    cur.execute("INSERT INTO najljubsi (uporabnik, fis_code) VALUES (%s, %s)", [username, dodaj])
                 else:
                     napaka = 'Ta tekmovalec je že med tvojimi priljubljenimi.'
         except:
-            napaka = 'Ne obstaja tekmovalec s to fis kodo'
+            napaka = 'Ne obstaja tekmovalec s to FIS kodo.'
     else:
         napaka = 'Izberite tekmovalca.'
 
-    najljubsi_get(napaka)
+    najljubsi_get()
     redirect('/najljubsi')
 
 @post('/dodaj/:x/')
 def dodaj(x):
-    x = int(x)
     username = get_user()
     dodaj = request.forms.dodaj
-    naj = najljubsi(username)
     if dodaj == "ne":
-        i = naj.index(x)
-        naj.pop(i)
-        if len(naj)==0:
-            cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = NULL WHERE username=%s",[username])
-        else:
-            naj_str = ','.join(map(str,naj)) + ','
-            cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [naj_str, username])
+        cur.execute("DELETE FROM najljubsi WHERE fis_code = %s", [int(x)])
     else:
-        if len(naj)==0:
-            naj_str = str(x) + ','
-        else:
-            naj_str = ','.join(map(str,naj)) + ',' + str(x) + ','
-        cur.execute("UPDATE uporabnik SET najljubsi_tekmovalci = %s WHERE username = %s", [naj_str, username])
+        cur.execute("INSERT INTO najljubsi (uporabnik, fis_code) VALUES (%s, %s)", [username, int(x)])
     redirect("/tekmovalec/{}/".format(x))
 
 
