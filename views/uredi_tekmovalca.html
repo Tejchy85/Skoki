@@ -21,11 +21,11 @@
       </div>
       <div class="form-group">
             <label>Država</label>
-            <select type="text" name="drzava" value="{{drzava}}" class="form-control" required="true">
-                <option>{{drzava}}</option>
+            <select type="text" name="drzava" value="{{drzava}} - {{ime_drzave}}" class="form-control" required="true">
+                <option>{{drzava}} - {{ime_drzave}}</option>
                 %for (kratica,ime) in drzave:
                     % if kratica != drzava:
-                        <option>{{kratica}}</option>
+                        <option>{{kratica}} - {{ime}}</option>
                     % end
                 %end
             </select>

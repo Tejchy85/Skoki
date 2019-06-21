@@ -19,7 +19,7 @@
             <select type="text" name="drzava" value="" class="form-control" required="true">
                 <option value="" selected disabled hidden>Država</option>
                 %for (kratica,ime) in drzave:
-                    <option>{{kratica}}</option>
+                    <option>{{kratica}} - {{ime}}</option>
                 %end
             </select>
             <p><a class="form-text text-muted small" href="/dodaj_drzavo">Če želene države še ni med možnostmi, najprej izpolni obrazec in jo dodaj.</a></p>
