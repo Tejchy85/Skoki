@@ -113,6 +113,24 @@ def postani_admin():
                             napakaO="Vnesili ste napačno geslo.", username=username,
                             admin=admin)
 
+#definiramo sezname z vsemi možnostmi razvrščanja:
+moznosti_tekmovalci = [('FIS code - padajoče', 'fis_code DESC'),
+                       ('FIS code - naraščajoče', 'fis_code ASC'),
+                       ('Status - od A do Ž', 'status ASC'),
+                       ('Status - od Ž do A', 'status DESC'),
+                       ('Ime - od A do Ž', 'ime ASC'),
+                       ('Ime - od Ž do A', 'ime DESC'),
+                       ('Priimek - od A do Ž', 'priimek ASC'),
+                       ('Priimek - od Ž do A', 'priimek DESC'),
+                       ('Država - od A do Ž', 'drzava ASC'),
+                       ('Država - od Ž do A', 'drzava DESC'),
+                       ('Rojstvo - starejši prej', 'rojstvo ASC'),
+                       ('Rojstvo - mlajši prej', 'rojstvo DESC'),
+                       ('Klub - od A do Ž', 'klub ASC'),
+                       ('Klub - od Ž do A', 'klub DESC'),
+                       ('Smučke - od A do Ž', 'smucke ASC'),
+                       ('Smučke - od Ž do A', 'smucke DESC')]
+
 # Pomožne funkcije
 ######################################################################
 
@@ -235,43 +253,24 @@ def tekmovalci_get():
             datum = tekmovalec[5]
             datum = datum.year
             tekmovalec[5] = datum
-    moznosti = ['FIS code - padajoče', 'FIS code - naraščajoče', 'Status - od A do Ž', 'Status - od Ž do A',
-                'Ime - od A do Ž', 'Ime - od Ž do A', 'Priimek - od A do Ž', 'Priimek - od Ž do A',
-                'Država - od A do Ž', 'Država - od Ž do A', 'Rojstvo - starejši prej', 'Rojstvo - mlajši prej',
-                'Klub - od A do Ž', 'Klub - od Ž do A', 'Smučke - od A do Ž', 'Smučke - od Ž do A']
-    return template('tekmovalci.html', tekmovalci=tekmovalci, razvrscanje='Priimek - od A do Ž', moznosti=moznosti, sezone=sezone(), napakaO=None, napaka=None, username=username, admin=admin)
+    return template('tekmovalci.html', tekmovalci=tekmovalci, razvrscanje=7, moznosti=moznosti_tekmovalci, sezone=sezone(), napakaO=None, napaka=None, username=username, admin=admin)
 
 @post('/tekmovalci')
 def tekmovalci_post():
     search = request.forms.search.lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
     username = get_user()
     admin = is_admin(username)
-    raz = request.forms.razvrscanje
-
-    moznosti = ['FIS code - padajoče', 'FIS code - naraščajoče', 'Status - od A do Ž', 'Status - od Ž do A',
-                'Ime - od A do Ž', 'Ime - od Ž do A', 'Priimek - od A do Ž', 'Priimek - od Ž do A',
-                'Država - od A do Ž', 'Država - od Ž do A', 'Rojstvo - starejši prej', 'Rojstvo - mlajši prej',
-                'Klub - od A do Ž', 'Klub - od Ž do A', 'Smučke - od A do Ž', 'Smučke - od Ž do A']
-
-    sezR = raz.split('-')
-    asc = ['naraščajoče', 'od A do Ž', 'starejši prej']
-
-    if sezR == ['']:
-        y = 'priimek ASC'
-    elif sezR[1].strip() in asc:
-        y = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z') + ' ASC'
-    else:
-        y = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z') + ' DESC'
+    raz = int(request.forms.razvrscanje)
 
     if search == "":
-        cur.execute("SELECT * FROM tekmovalec ORDER BY " + y.replace('-', ' '))
+        cur.execute("SELECT * FROM tekmovalec ORDER BY " + moznosti_tekmovalci[raz][1])
         tekmovalci = cur.fetchall()
         for tekmovalec in tekmovalci:
             if tekmovalec[-1] == 'NE':
                 datum = tekmovalec[5]
                 datum = datum.year
                 tekmovalec[5] = datum
-        return template('tekmovalci.html', tekmovalci=tekmovalci, razvrscanje=raz, moznosti=moznosti, sezone=sezone(), napakaO=None, napaka=None, username=username,
+        return template('tekmovalci.html', tekmovalci=tekmovalci, razvrscanje=raz, moznosti=moznosti_tekmovalci, sezone=sezone(), napakaO=None, napaka=None, username=username,
                         admin=admin)
     napaka = None
     head_list = ['status', 'ime', 'priimek', 'drzava', 'rojstvo', 'klub', 'smucke']
@@ -279,9 +278,9 @@ def tekmovalci_post():
     if len(sez) > 1:
         search = sez[1].strip()
         if sez[0].replace(' ', '') == 'fiscode':
-            cur.execute("SELECT * FROM tekmovalec WHERE CAST(fis_code AS varchar(10)) LIKE %s" + "ORDER BY " + y.replace('-', ' '), ['%' + search + '%'])
+            cur.execute("SELECT * FROM tekmovalec WHERE CAST(fis_code AS varchar(10)) LIKE %s" + "ORDER BY " + moznosti_tekmovalci[raz][1] , ['%' + search + '%'])
         elif sez[0].strip() in head_list:
-            cur.execute("SELECT * FROM tekmovalec WHERE LOWER(" + sez[0] + ") LIKE %s" + "ORDER BY " + y.replace('-', ' '), ['%' + search + '%'])
+            cur.execute("SELECT * FROM tekmovalec WHERE LOWER(" + sez[0] + ") LIKE %s" + "ORDER BY " + moznosti_tekmovalci[raz][1] , ['%' + search + '%'])
         else:
             napaka = "Neveljavno iskanje."
     else:
@@ -292,7 +291,7 @@ def tekmovalci_post():
                     "OR LOWER(drzava) LIKE %s"
                     "OR CAST(rojstvo AS varchar(10)) LIKE %s"
                     "OR LOWER(klub) LIKE %s"
-                    "OR LOWER(smucke) LIKE %s" + "ORDER BY " + y.replace('-', ' '),
+                    "OR LOWER(smucke) LIKE %s" + "ORDER BY " + moznosti_tekmovalci[raz][1],
                     8*['%' + search + '%'])
     tekmovalci = cur.fetchall()
     for tekmovalec in tekmovalci:
@@ -300,7 +299,7 @@ def tekmovalci_post():
             datum = tekmovalec[5]
             datum = datum.year
             tekmovalec[5] = datum
-    return template('tekmovalci.html', tekmovalci=tekmovalci, razvrscanje=raz, moznosti=moznosti, sezone=sezone(), napakaO=None, napaka=napaka, username=username, admin=admin)
+    return template('tekmovalci.html', tekmovalci=tekmovalci, razvrscanje=raz, moznosti=moznosti_tekmovalci, sezone=sezone(), napakaO=None, napaka=napaka, username=username, admin=admin)
 
 
 @get('/tekmovalec/:x/')
