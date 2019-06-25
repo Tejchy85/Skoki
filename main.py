@@ -131,6 +131,8 @@ moznosti_tekmovalci = [('FIS code - padajoče', 'fis_code DESC'),
                        ('Smučke - od A do Ž', 'smucke ASC'),
                        ('Smučke - od Ž do A', 'smucke DESC')]
 
+
+
 # Pomožne funkcije
 ######################################################################
 
@@ -273,12 +275,15 @@ def tekmovalci_post():
         return template('tekmovalci.html', tekmovalci=tekmovalci, razvrscanje=raz, moznosti=moznosti_tekmovalci, sezone=sezone(), napakaO=None, napaka=None, username=username,
                         admin=admin)
     napaka = None
-    head_list = ['status', 'ime', 'priimek', 'drzava', 'rojstvo', 'klub', 'smucke']
+    head_list = ['status', 'ime', 'priimek', 'drzava', 'klub', 'smucke']
     sez = search.split(':')
     if len(sez) > 1:
         search = sez[1].strip()
         if sez[0].replace(' ', '') == 'fiscode':
             cur.execute("SELECT * FROM tekmovalec WHERE CAST(fis_code AS varchar(10)) LIKE %s" + "ORDER BY " + moznosti_tekmovalci[raz][1] , ['%' + search + '%'])
+        elif sez[0].strip() == 'rojstvo':
+            cur.execute("SELECT * FROM tekmovalec WHERE CAST(rojstvo AS varchar(10)) LIKE %s" + "ORDER BY " +
+                        moznosti_tekmovalci[raz][1], ['%' + search + '%'])
         elif sez[0].strip() in head_list:
             cur.execute("SELECT * FROM tekmovalec WHERE LOWER(" + sez[0] + ") LIKE %s" + "ORDER BY " + moznosti_tekmovalci[raz][1] , ['%' + search + '%'])
         else:
