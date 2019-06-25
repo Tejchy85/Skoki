@@ -131,6 +131,17 @@ moznosti_tekmovalci = [('FIS code - padajoče', 'fis_code DESC'),
                        ('Smučke - od A do Ž', 'smucke ASC'),
                        ('Smučke - od Ž do A', 'smucke DESC')]
 
+moznosti_tekme = [('ID - padajoče', 'id DESC'),
+                  ('ID - naraščajoče', 'id ASC'),
+                  ('Kraj - od A do Ž', 'kraj ASC'),
+                  ('Kraj - od Ž do A', 'kraj DESC'),
+                  ('Datum - starejši prej', 'datum ASC'),
+                  ('Datum - novejši prej', 'datum DESC'),
+                  ('Država - od A do Ž', 'drzava ASC'),
+                  ('Država - od Ž do A', 'drzava DESC'),
+                  ('Tip tekme - ekipne tekme prej', 'tip_tekme ASC'),
+                  ('Tip tekme - posamične tekme prej', 'tip_tekme DESC')]
+
 
 
 # Pomožne funkcije
@@ -440,44 +451,19 @@ def tekme(x):
     cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY datum DESC",
                 [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
     tekme = cur.fetchall()
-    moznosti = ['ID - padajoče', 'ID - naraščajoče', 'Kraj - od A do Ž', 'Kraj - od Ž do A', 'Datum - starejši prej',
-                'Datum - novejši prej', 'Država - od A do Ž', 'Država - od Ž do A', 'Tip tekme - ekipne tekme prej', 'Tip tekme - posamične tekme prej']
-    return template('tekme_sezona.html', moznosti=moznosti, razvrscanje='Datum - novejši prej', sezone=sezone(), napakaO=None, x=x, tekme=tekme, username = username, admin=admin)
+    return template('tekme_sezona.html', moznosti=moznosti_tekme, razvrscanje=5, sezone=sezone(), napakaO=None, x=x, tekme=tekme, username = username, admin=admin)
 
 @post('/tekme/:x/')
 def tekme_post(x):
-
-    moznosti = ['ID - padajoče', 'ID - naraščajoče', 'Kraj - od A do Ž', 'Kraj - od Ž do A', 'Datum - starejši prej',
-                'Datum - novejši prej', 'Država - od A do Ž', 'Država - od Ž do A', 'Tip tekme - ekipne tekme prej',
-                'Tip tekme - posamične tekme prej']
-
-    search = request.forms.search.lower()
     username = get_user()
     admin = is_admin(username)
 
-    raz = request.forms.razvrscanje
-
-    sezR = raz.split('-')
-    asc = ['naraščajoče', 'od A do Ž', 'starejši prej', 'ekipne tekme prej']
-
-    if sezR[1].strip() in asc:
-        z = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
-        if z == 'tip_tekme':
-            z = '(tip_tekme, datum)'
-        y = z + ' ASC'
-    else:
-        z = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
-        if z == 'tip_tekme':
-            z = '(tip_tekme, datum)'
-        y = z + ' DESC'
-
-    print(y)
-
-    cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY " + y.replace('-', ' '),
+    raz = int(request.forms.razvrscanje)
+    cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY " + moznosti_tekme[raz][1],
                 [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
     tekme = cur.fetchall()
 
-    return template('tekme_sezona.html', moznosti=moznosti, razvrscanje=raz, sezone=sezone(),
+    return template('tekme_sezona.html', moznosti=moznosti_tekme, razvrscanje=raz, sezone=sezone(),
                     napakaO=None, x=x, tekme=tekme, username=username, admin=admin)
 
 @get('/tekma/:x/')
