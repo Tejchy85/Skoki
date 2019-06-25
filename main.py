@@ -142,8 +142,14 @@ moznosti_tekme = [('ID - padajoče', 'id DESC'),
                   ('Tip tekme - ekipne tekme prej', 'tip_tekme ASC'),
                   ('Tip tekme - posamične tekme prej', 'tip_tekme DESC')]
 
-
-
+moznosti_tekmovalec = [('Datum - starejši prej', 't.datum ASC'),
+                       ('Datum - novejši prej', 't.datum DESC'),
+                       ('Kraj - od A do Ž', 't.kraj ASC'),
+                       ('Kraj - od Ž do A', 't.kraj DESC'),
+                       ('Tip tekme - ekipne tekme prej', 't.tip_tekme ASC'),
+                       ('Tip tekme - posamične tekme prej', 't.tip_tekme DESC'),
+                       ('Rank - padajoče', 'r.ranki DESC'),
+                       ('Rank - naraščajoče', 'r.ranki ASC')]
 # Pomožne funkcije
 ######################################################################
 
@@ -331,16 +337,13 @@ def tekmovalec(x):
 
     cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t.datum DESC", [int(x)])
     tekme = cur.fetchall()
-    moznosti = ['Datum - padajoče', 'Datum - naraščajoče', 'Kraj - od A do Ž', 'Kraj - od Ž do A',
-                'Tip tekme - ekipne tekme prej', 'Tip tekme - posamične tekme prej', 'Rank - padajoče', 'Rank - naraščajoče']
-
     cur.execute("SELECT * FROM najljubsi WHERE fis_code = %s", [int(x)])
     najljubsi = cur.fetchall()
     if najljubsi == []:
         najljubsi = False
     else:
         najljubsi = True
-    return template('tekmovalec.html', x=x, razvrscanje='Datum - padajoče', moznosti=moznosti, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(), najljubsi=najljubsi, napakaO=None, napaka=None, username=username, admin=admin)
+    return template('tekmovalec.html', x=x, razvrscanje=1, moznosti=moznosti_tekmovalec, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(), najljubsi=najljubsi, napakaO=None, napaka=None, username=username, admin=admin)
 
 
 @post('/tekmovalec/:x/')
@@ -355,41 +358,21 @@ def tekmovalec_post(x):
         datum = datum.year
         tekmovalec[5] = datum
 
-    raz = request.forms.razvrscanje
-
-    moznosti = ['Datum - padajoče', 'Datum - naraščajoče', 'Kraj - od A do Ž', 'Kraj - od Ž do A',
-                'Tip tekme - ekipne tekme prej', 'Tip tekme - posamične tekme prej', 'Rank - padajoče', 'Rank - naraščajoče']
-
-    sezR = raz.split('-')
-    asc = ['naraščajoče', 'od A do Ž', 'ekipne tekme prej']
-
-    slovar = {'rank': 'ranki'}
-
-    if sezR == ['']:
-        y = 'datum DESC'
-    elif sezR[1].strip() in asc:
-        z = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
-        if z in slovar:
-            z = slovar.get(z)
-        y = z + ' ASC'
+    cur.execute("SELECT * FROM najljubsi WHERE fis_code = %s", [int(x)])
+    najljubsi = cur.fetchall()
+    if najljubsi == []:
+        najljubsi = False
     else:
-        z = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
-        if z in slovar:
-            z = slovar.get(z)
-        y = z + ' DESC'
+        najljubsi = True
+
+    raz = int(request.forms.razvrscanje)
 
     if search == "":
-        if 'ranki' in y:
-            cur.execute(
-                "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY r." + y.replace(
-                    '-', ' '), [int(x)])
-        else:
-            cur.execute(
-                "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t." + y.replace(
-                    '-', ' '), [int(x)])
+        cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code "
+                    "JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY " + moznosti_tekmovalec[raz][1], [int(x)])
         tekme = cur.fetchall()
-        return template('tekmovalec.html', x=x, razvrscanje=raz, moznosti=moznosti, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(),
-                        najljubsi=najljubsi(username), napakaO=None, napaka=None, username=username, admin=admin)
+        return template('tekmovalec.html', x=x, razvrscanje=raz, moznosti=moznosti_tekmovalec, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(),
+                        najljubsi=najljubsi, napakaO=None, napaka=None, username=username, admin=admin)
 
     napaka = None
     head_list = ['datum', 'kraj', 'drzava', 'tip_tekme', 'ranki']
@@ -402,23 +385,19 @@ def tekmovalec_post(x):
         search = sez[1].strip()
         if sez[0].replace(' ', '') == 'tiptekme':
             cur.execute(
-                "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(t.tip_tekme AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + " ORDER BY " + y.replace(
-                    '-', ' '), [int(x), '%' + search + '%'])
+                "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(t.tip_tekme AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + " ORDER BY " + moznosti_tekmovalec[raz][1], [int(x), '%' + search + '%'])
         elif sez[0].lower() == 'ranki':
             cur.execute(
-                "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(r.ranki AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + " ORDER BY " + y.replace(
-                    '-', ' '), [int(x), '%' + search + '%'])
+                "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(r.ranki AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + " ORDER BY " + moznosti_tekmovalec[raz][1], [int(x), '%' + search + '%'])
         elif sez[0] in ['kraj', 'drzava']:
             cur.execute(
                 "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND LOWER(t." +
-                sez[0] + ") LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + " ORDER BY " + y.replace('-',
-                                                                                                                  ' '),
+                sez[0] + ") LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + " ORDER BY " + moznosti_tekmovalec[raz][1],
                 [int(x), '%' + search + '%'])
         elif sez[0] in head_list:
             cur.execute(
                 "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s AND CAST(t." +
-                sez[0] + " AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + " ORDER BY " + y.replace('-',
-                                                                                                                  ' '),
+                sez[0] + " AS varchar(10)) LIKE %s GROUP BY t.id, r.fis_code, r.ranki" + " ORDER BY " + moznosti_tekmovalec[raz][1],
                 [int(x), '%' + search + '%'])
         else:
             napaka = "Neveljavno iskanje."
@@ -429,18 +408,12 @@ def tekmovalec_post(x):
             "OR LOWER(kraj) LIKE %s"
             "OR LOWER(t.drzava) LIKE %s"
             "OR CAST(ranki AS varchar(10)) LIKE %s)"
-            "GROUP BY t.id, r.fis_code, r.ranki" + " ORDER BY " + y.replace('-', ' '),
+            "GROUP BY t.id, r.fis_code, r.ranki" + " ORDER BY " + moznosti_tekmovalec[raz][1],
             [int(x), '%' + search + '%', '%' + search + '%', '%' + search + '%', '%' + search + '%',
              '%' + search + '%'])
     tekme = cur.fetchall()
-    cur.execute("SELECT * FROM najljubsi WHERE fis_code = %s", [int(x)])
 
-    najljubsi = cur.fetchall()
-    if najljubsi == []:
-        najljubsi = False
-    else:
-        najljubsi = True
-    return template('tekmovalec.html', x=x, razvrscanje=raz, moznosti=moznosti, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(),
+    return template('tekmovalec.html', x=x, razvrscanje=raz, moznosti=moznosti_tekmovalec, tekmovalec=tekmovalec, tekme=tekme, sezone=sezone(),
                     najljubsi=najljubsi, napakaO=None, napaka=napaka, username=username, admin=admin)
 
 

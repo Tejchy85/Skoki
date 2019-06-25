@@ -71,11 +71,12 @@
     <div class="dropdown">
         <div class="form-group form-group-sm mr-3 w-35">
             <select type="text" name="razvrscanje" value="" class="form-control" required="true">
-                <option>{{razvrscanje}}</option>
-                %for (raz) in moznosti:
-                    % if raz != razvrscanje:
-                        <option>{{raz}}</option>
-                    % end
+                %for i, (raz, sql) in enumerate(moznosti):
+                    <option value="{{i}}"
+                    %if i == razvrscanje:
+                    selected
+                    %end
+                    >{{raz}}</option>
                 %end
             </select>
         </div>
