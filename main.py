@@ -328,8 +328,19 @@ def tekmovalci_post():
     search = request.forms.search.lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
     username = get_user()
     admin = is_admin(username)
-    raz = int(request.forms.razvrscanje)
+    raz = request.forms.razvrscanje
+    if raz not in ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15']:
+        cur.execute("SELECT * FROM tekmovalec ORDER BY priimek,ime ASC")
+        tekmovalci = cur.fetchall()
+        for tekmovalec in tekmovalci:
+            if tekmovalec[-1] == 'NE':
+                datum = tekmovalec[5]
+                datum = datum.year
+                tekmovalec[5] = datum
+        napaka = 'Nepravilno razvrščanje'
+        return template('tekmovalci.html', tekmovalci=tekmovalci, razvrscanje=7, moznosti=moznosti_tekmovalci, sezone=sezone(), napakaO=None, napaka=napaka, username=username, admin=admin)
 
+    raz = int(raz)
     if search == "":
         cur.execute("SELECT * FROM tekmovalec ORDER BY " + moznosti_tekmovalci[raz][1])
         tekmovalci = cur.fetchall()
@@ -414,7 +425,18 @@ def tekmovalec_post(x):
     else:
         najljubsi = True
 
-    raz = int(request.forms.razvrscanje)
+    raz = request.forms.razvrscanje
+    if raz not in ['0','1','2','3','4','5','6','7']:
+        cur.execute(
+            "SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code JOIN tekma t ON r.id = t.id WHERE r.fis_code = %s GROUP BY t.id, r.fis_code, r.ranki ORDER BY t.datum DESC",
+            [int(x)])
+        tekme = cur.fetchall()
+        napaka = 'Napravilno razvrščanje'
+        return template('tekmovalec.html', x=x, razvrscanje=1, moznosti=moznosti_tekmovalec, tekmovalec=tekmovalec,
+                        tekme=tekme, sezone=sezone(), najljubsi=najljubsi, napakaO=None, napaka=napaka, username=username,
+                        admin=admin)
+
+    raz = int(raz)
 
     if search == "":
         cur.execute("SELECT t.datum, t.kraj, t.drzava, t.tip_tekme, r.ranki FROM rezultat r JOIN tekmovalec ON r.fis_code = tekmovalec.fis_code "
@@ -480,7 +502,17 @@ def tekme_post(x):
     username = get_user()
     admin = is_admin(username)
 
-    raz = int(request.forms.razvrscanje)
+    raz = request.forms.razvrscanje
+    if raz not in ['0','1','2','3','4','5','6','7','8','9']:
+        cur.execute(
+            "SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY datum DESC",
+            [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
+        tekme = cur.fetchall()
+        napaka = 'Nepravilno razvrščanje'
+        return template('tekme_sezona.html', moznosti=moznosti_tekme, razvrscanje=5, sezone=sezone(), napakaO=napaka, x=x,
+                        tekme=tekme, username=username, admin=admin)
+
+    raz = int(raz)
     cur.execute("SELECT id,kraj,datum,drzava,tip_tekme FROM tekma WHERE datum BETWEEN %s AND %s ORDER BY " + moznosti_tekme[raz][1],
                 [datetime.date(int(x) - 1, 11, 1), datetime.date(int(x), 3, 31)])
     tekme = cur.fetchall()
@@ -538,8 +570,6 @@ def tekma_post(x):
     admin = is_admin(username)
     napaka = None
 
-    raz = int(request.forms.razvrscanje)
-
     cur.execute("SELECT kraj, datum FROM tekma WHERE id = %s", [int(x)])
     kraj_datum = cur.fetchone()
     datumi = str(kraj_datum[1]).split('-')
@@ -580,6 +610,34 @@ def tekma_post(x):
         else:
             moznosti = moznosti_tekma_posamicna[:-2]
 
+    seznam_moznih = []
+    for i in range(0,len(moznosti)):
+        seznam_moznih.append(str(i))
+    raz = request.forms.razvrscanje
+    if raz not in seznam_moznih:
+        if serija is None:
+            velikost = False
+            serija_bool = True
+            tekma = []
+        else:
+            velikost = True
+            if serija[0] == 2:
+                cur.execute(
+                    "SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,skoki1,tocke1,skoki2,tocke2,tocke,mesto_v_ekipi FROM dve_seriji WHERE id = %s ORDER BY ranki ASC",
+                    [int(x)])
+                serija_bool = True
+            else:
+                cur.execute(
+                    "SELECT ranki,startna_stevilka,fis_code,ime,priimek,drzava,tocke,mesto_v_ekipi FROM ena_serija WHERE id=%s ORDER BY ranki ASC",
+                    [int(x)])
+                serija_bool = False
+            tekma = cur.fetchall()
+            napaka = 'Nepravilno razvrščanje'
+        return template('tekma.html', napakaO=None, razvrscanje=1, moznosti=moznosti, sezone=sezone(), x=x, tekma=tekma,
+                        velikost=velikost, kraj=kraj_datum[0], datum=datum, username=username, admin=admin,
+                        ekipna=ekipna, serija=serija_bool, napaka=napaka)
+
+    raz = int(raz)
     text_list = ['ime', 'priimek', 'drzava']
     sez = search.split(':')
     sez[0] = sez[0].replace('č', 'c').replace('š', 's').replace('ž', 'z')
