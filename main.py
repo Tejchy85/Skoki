@@ -150,6 +150,55 @@ moznosti_tekmovalec = [('Datum - starejši prej', 't.datum ASC'),
                        ('Tip tekme - posamične tekme prej', 't.tip_tekme DESC'),
                        ('Rank - padajoče', 'r.ranki DESC'),
                        ('Rank - naraščajoče', 'r.ranki ASC')]
+
+moznosti_tekma_ekipna = [('Rank - padajoče', 'ranki DESC'),
+                         ('Rank - naraščajoče', 'ranki ASC'),
+                         ('Mesto v ekipi - padajoče', 'mesto_v_ekipi DESC'),
+                         ('Mesto v ekipi - naraščajoče', 'mesto_v_ekipi ASC'),
+                         ('FIS code - padajoče', 'fis_code DESC'),
+                         ('FIS code - naraščajoče', 'fis_code ASC'),
+                         ('Ime - od A do Ž', 'ime ASC'),
+                         ('Ime - od Ž do A', 'ime DESC'),
+                         ('Priimek - od A do Ž', 'priimek ASC'),
+                         ('Priimek - od Ž do A', 'priimek DESC'),
+                         ('Država - od A do Ž', 'drzava ASC'),
+                         ('Država - od Ž do A', 'drzava DESC'),
+                         ('1. skok - padajoče','skoki1 DESC'),
+                         ('1. skok - naraščajoče','skoki1 ASC'),
+                         ('1. točke - padajoče','tocke1 DESC'),
+                         ('1. točke - naraščajoče','tocke1 ASC'),
+                         ('2. skok - padajoče','skoki2 DESC'),
+                         ('2. skok - naraščajoče','skoki2 ASC'),
+                         ('2. točke - padajoče','tocke2 DESC'),
+                         ('2. točke - naraščajoče','tocke2 ASC'),
+                         ('Točke - padajoče','tocke DESC'),
+                         ('Točke - naraščajoče','tocke ASC')]
+
+moznosti_tekma_posamicna = [('Rank - padajoče','ranki DESC'),
+                            ('Rank - naraščajoče','ranki ASC'),
+                            ('Startna številka - padajoče','startna_stevilka DESC'),
+                            ('Startna številka - naraščajoče','startna_stevilka ASC'),
+                            ('FIS code - padajoče', 'fis_code DESC'),
+                            ('FIS code - naraščajoče', 'fis_code ASC'),
+                            ('Ime - od A do Ž', 'ime ASC'),
+                            ('Ime - od Ž do A', 'ime DESC'),
+                            ('Priimek - od A do Ž', 'priimek ASC'),
+                            ('Priimek - od Ž do A', 'priimek DESC'),
+                            ('Država - od A do Ž', 'drzava ASC'),
+                            ('Država - od Ž do A', 'drzava DESC'),
+                            ('1. skok - padajoče', 'skoki1 DESC'),
+                            ('1. skok - naraščajoče', 'skoki1 ASC'),
+                            ('1. točke - padajoče', 'tocke1 DESC'),
+                            ('1. točke - naraščajoče', 'tocke1 ASC'),
+                            ('2. skok - padajoče', 'skoki2 DESC'),
+                            ('2. skok - naraščajoče', 'skoki2 ASC'),
+                            ('2. točke - padajoče', 'tocke2 DESC'),
+                            ('2. točke - naraščajoče', 'tocke2 ASC'),
+                            ('Skupne točke - padajoče','tocke DESC'),
+                            ('Skupne točke - naraščajoče', 'tocke ASC'),
+                            ('Točke - padajoče','tocke DESC'),
+                            ('Točke - naraščajoče','tocke ASC')]
+
 # Pomožne funkcije
 ######################################################################
 
@@ -468,20 +517,18 @@ def tekma(x):
             serija_bool = False
         tekma = cur.fetchall()
 
-    moznosti = ['Rank - padajoče', 'Rank - naraščajoče']
-    if ekipna:
-        moznosti += ['Mesto v ekipi - padajoče', 'Mesto v ekipi - naraščajoče']
+    if not serija_bool: #samo ena serija
+        if ekipna:
+            moznosti = moznosti_tekma_ekipna[:12] + moznosti_tekma_ekipna[-2:]
+        else:
+            moznosti = moznosti_tekma_posamicna[:12] + moznosti_tekma_posamicna[-2:]
     else:
-        moznosti += ['Startna številka - padajoče', 'Startna številka - naraščajoče']
-    moznosti += ['FIS code - padajoče', 'FIS code - naraščajoče', 'Ime - od A do Ž', 'Ime - od Ž do A', 'Priimek - od A do Ž', 'Priimek - od Ž do A', 'Država - od A do Ž', 'Država - od Ž do A']
-    if serija_bool:
-        moznosti += ['1. skok - padajoče', '1. skok - naraščajoče', '1. točke - padajoče', '1. točke - naraščajoče', '2. skok - padajoče', '2. skok - naraščajoče', '2. točke - padajoče', '2. točke - naraščajoče']
-        if not ekipna:
-            moznosti += ['Skupne točke - padajoče', 'Skupne točke - naraščajoče']
-    else:
-        moznosti += ['Točke - padajoče', 'Točke - naraščajoče']
+        if ekipna:
+            moznosti = moznosti_tekma_ekipna[:-2]
+        else:
+            moznosti = moznosti_tekma_posamicna[:-2]
 
-    return template('tekma.html', napakaO=None, razvrscanje='Ranki - naraščajoče', moznosti=moznosti, sezone=sezone(), x = x, tekma = tekma, velikost=velikost, kraj=kraj_datum[0], datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija_bool, napaka=None)
+    return template('tekma.html', napakaO=None, razvrscanje=1, moznosti=moznosti, sezone=sezone(), x = x, tekma = tekma, velikost=velikost, kraj=kraj_datum[0], datum=datum, username = username, admin=admin, ekipna=ekipna, serija=serija_bool, napaka=None)
 
 
 @post('/tekma/:x/')
@@ -491,26 +538,7 @@ def tekma_post(x):
     admin = is_admin(username)
     napaka = None
 
-    raz = request.forms.razvrscanje
-
-    sezR = raz.split('-')
-    asc = ['naraščajoče', 'od A do Ž']
-
-    if len(sezR) < 2:
-        sezR = ['rank', 'naraščajoče']
-
-    slovar = {'1._skok': 'skoki1', '2._skok': 'skoki2', '1._tocke': 'tocke1', '2._tocke': 'tocke2', 'rank': 'ranki'}
-
-    if sezR[1].strip() in asc:
-        z = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
-        if z in slovar:
-            z = slovar.get(z)
-        y = z + ' ASC'
-    else:
-        z = sezR[0].strip().replace(' ', '_').lower().replace('č', 'c').replace('š', 's').replace('ž', 'z')
-        if z in slovar:
-            z = slovar.get(z)
-        y = z + ' DESC'
+    raz = int(request.forms.razvrscanje)
 
     cur.execute("SELECT kraj, datum FROM tekma WHERE id = %s", [int(x)])
     kraj_datum = cur.fetchone()
@@ -540,20 +568,17 @@ def tekma_post(x):
             head_list = ['ranki', 'startna_stevilka', 'fis_code', 'tocke', 'mesto_v_ekipi']
             string = 'ena_serija'
 
-    moznosti = ['Rank - padajoče', 'Rank - naraščajoče']
-    if ekipna:
-        moznosti += ['Mesto v ekipi - padajoče', 'Mesto v ekipi - naraščajoče']
+
+    if not serija_bool: #samo ena serija
+        if ekipna:
+            moznosti = moznosti_tekma_ekipna[:12] + moznosti_tekma_ekipna[-2:]
+        else:
+            moznosti = moznosti_tekma_posamicna[:12] + moznosti_tekma_posamicna[-2:]
     else:
-        moznosti += ['Startna številka - padajoče', 'Startna številka - naraščajoče']
-    moznosti += ['Fis code - padajoče', 'Fis code - naraščajoče', 'Ime - od A do Ž', 'Ime - od Ž do A',
-                 'Priimek - od A do Ž', 'Priimek - od Ž do A', 'Država - od A do Ž', 'Država - od Ž do A']
-    if serija_bool:
-        moznosti += ['1. skok - padajoče', '1. skok - naraščajoče', '1. točke - padajoče', '1. točke - naraščajoče',
-                     '2. skok - padajoče', '2. skok - naraščajoče', '2. točke - padajoče', '2. točke - naraščajoče']
-        if not ekipna:
-            moznosti += ['Skupne točke - padajoče', 'Skupne točke - naraščajoče']
-    else:
-        moznosti += ['Točke - padajoče', 'Točke - naraščajoče']
+        if ekipna:
+            moznosti = moznosti_tekma_ekipna[:-2]
+        else:
+            moznosti = moznosti_tekma_posamicna[:-2]
 
     text_list = ['ime', 'priimek', 'drzava']
     sez = search.split(':')
@@ -561,20 +586,32 @@ def tekma_post(x):
     sez[0] = sez[0].strip().replace(' ', '_')
     if sez[0] == 'rank':
         sez[0] = 'ranki'
+    elif sez[0] == '1.skok':
+        sez[0] = 'skoki1'
+    elif sez[0] == '2.skok':
+        sez[0] = 'skoki2'
+    elif sez[0] == '1.tocke':
+        sez[0] = 'tocke1'
+    elif sez[0] == '2.tocke':
+        sez[0] = 'tocke2'
+    elif sez[0] == 'skupne_tocke':
+        sez[0] = 'tocke'
+
+    urejanje = moznosti[raz][1]
 
     if len(sez) > 1:
         if sez[0] in head_list:
-            cur.execute("SELECT " + ','.join(head_list[:3]) + ',' + ','.join(text_list) + ',' + ','.join(head_list[3:]) + ' FROM ' + string + " WHERE id = %s AND CAST(" + sez[0] + " AS varchar(10)) LIKE %s" + "ORDER BY " + y.replace('-', ' '),
+            cur.execute("SELECT " + ','.join(head_list[:3]) + ',' + ','.join(text_list) + ',' + ','.join(head_list[3:]) + ' FROM ' + string + " WHERE id = %s AND CAST(" + sez[0] + " AS varchar(10)) LIKE %s" + "ORDER BY " + urejanje,
             [int(x)] + ['%' + sez[1].strip() + '%'])
         elif sez[0] in text_list:
-            cur.execute("SELECT " + ','.join(head_list[:3]) + ',' + ','.join(text_list) + ',' + ','.join(head_list[3:]) + ' FROM ' + string + " WHERE id = %s AND LOWER(" + sez[0] + ") LIKE %s" + "ORDER BY " + y.replace('-', ' '),
+            cur.execute("SELECT " + ','.join(head_list[:3]) + ',' + ','.join(text_list) + ',' + ','.join(head_list[3:]) + ' FROM ' + string + " WHERE id = %s AND LOWER(" + sez[0] + ") LIKE %s" + "ORDER BY " + urejanje,
             [int(x)] + ['%' + sez[1].strip() + '%'])
         else:
             napaka = "Neveljavno iskanje."
     else:
         cur.execute("SELECT " + ','.join(head_list[:3]) + ',' + ','.join(text_list) + ',' + ','.join(head_list[3:]) + ' FROM ' + string + " WHERE id = %s AND (CAST("
                     + ' AS varchar(10)) LIKE %s OR CAST('.join(head_list) + " AS varchar(10)) LIKE %s"
-                    + " OR LOWER(" + ') LIKE %s OR LOWER('.join(text_list) + ") LIKE %s)" + "ORDER BY " + y.replace('-', ' '),
+                    + " OR LOWER(" + ') LIKE %s OR LOWER('.join(text_list) + ") LIKE %s)" + "ORDER BY " + urejanje,
                     [int(x)] + (len(head_list) + len(text_list)) * ['%' + search + '%'])
     tekma = cur.fetchall()
     return template('tekma.html', razvrscanje=raz, moznosti=moznosti, velikost=velikost, napakaO=None, x=x, tekma=tekma, kraj=kraj_datum[0], datum=datum, username=username,
